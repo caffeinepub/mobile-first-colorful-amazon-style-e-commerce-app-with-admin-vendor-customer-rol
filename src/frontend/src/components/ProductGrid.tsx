@@ -8,6 +8,7 @@ import type { Product } from '../backend';
 import { useAddToCart, useAddToWishlist, useGetWishlist } from '../hooks/useQueries';
 import { toast } from 'sonner';
 import PrimaryCtaButton from './buttons/PrimaryCtaButton';
+import { getAvailabilityStatus } from '../utils/statusStyles';
 
 interface ProductGridProps {
   products: Product[];
@@ -57,7 +58,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-16">
+      <div className="empty-state-container">
         <p className="text-muted-foreground text-lg">No products found</p>
       </div>
     );
@@ -71,40 +72,48 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
         const price = Number(product.price);
         const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
         const isInWishlist = wishlist.includes(product.id);
+        const availabilityStatus = getAvailabilityStatus(Number(product.stock));
 
         return (
           <Link key={product.id} to="/product/$productId" params={{ productId: product.id }}>
-            <Card className="group hover:shadow-soft-lg transition-shadow h-full flex flex-col">
+            <Card className="group hover:shadow-soft-lg transition-all h-full flex flex-col border-2 hover:border-primary/30 hover-tint-primary">
               <div className="relative aspect-square overflow-hidden rounded-t-lg">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
                     <span className="text-muted-foreground">No image</span>
                   </div>
                 )}
                 {discount > 0 && (
-                  <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground">
+                  <Badge className="absolute top-2 left-2 bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground shadow-lg border-2 border-card">
                     -{discount}%
+                  </Badge>
+                )}
+                {Number(product.stock) < 10 && (
+                  <Badge className={`absolute top-2 right-2 ${availabilityStatus.className} shadow-lg border-2 border-card text-xs`}>
+                    {availabilityStatus.text}
                   </Badge>
                 )}
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute top-2 right-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className={`absolute ${discount > 0 || Number(product.stock) < 10 ? 'top-12' : 'top-2'} right-2 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110 border-2 border-card ${
+                    isInWishlist ? 'bg-accent text-accent-foreground' : ''
+                  }`}
                   onClick={(e) => handleAddToWishlist(e, product.id)}
                 >
                   <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} />
                 </Button>
               </div>
               <CardContent className="p-3 flex-1">
-                <h3 className="font-semibold text-sm line-clamp-2 mb-1">{product.name}</h3>
+                <h3 className="font-semibold text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-primary">${finalPrice.toFixed(2)}</span>
+                  <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">${finalPrice.toFixed(2)}</span>
                   {discount > 0 && (
                     <span className="text-sm text-muted-foreground line-through">${price.toFixed(2)}</span>
                   )}
@@ -113,7 +122,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
               <CardFooter className="p-3 pt-0">
                 <PrimaryCtaButton
                   size="sm"
-                  className="w-full gap-2"
+                  className="w-full gap-2 shadow-md hover:shadow-lg"
                   onClick={(e) => handleAddToCart(e, product.id)}
                   disabled={Number(product.stock) === 0}
                 >

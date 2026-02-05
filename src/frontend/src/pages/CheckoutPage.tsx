@@ -72,10 +72,10 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <h1 className="text-3xl font-bold mb-6">Checkout</h1>
+      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Checkout</h1>
 
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-6 border-2 border-secondary/20 shadow-soft-lg">
+        <CardHeader className="surface-secondary-tint rounded-t-xl">
           <CardTitle>Order Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -86,7 +86,7 @@ export default function CheckoutPage() {
             const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
 
             return (
-              <div key={item.productId} className="flex justify-between">
+              <div key={item.productId} className="flex justify-between hover:bg-muted/30 p-2 rounded-lg transition-colors">
                 <div>
                   <p className="font-medium">{item.product.name}</p>
                   <p className="text-sm text-muted-foreground">Qty: {item.quantity.toString()}</p>
@@ -95,15 +95,15 @@ export default function CheckoutPage() {
               </div>
             );
           })}
-          <div className="border-t pt-4 flex justify-between text-lg font-bold">
+          <div className="border-t pt-4 flex justify-between text-lg font-bold surface-primary-tint rounded-lg p-3">
             <span>Total</span>
-            <span className="text-primary">${total.toFixed(2)}</span>
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">${total.toFixed(2)}</span>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-6 border-2 border-accent/20">
+        <CardHeader className="surface-accent-tint rounded-t-xl">
           <CardTitle>Payment Information</CardTitle>
         </CardHeader>
         <CardContent>
@@ -113,7 +113,7 @@ export default function CheckoutPage() {
         </CardContent>
       </Card>
 
-      <PrimaryCtaButton size="lg" className="w-full" onClick={handlePlaceOrder} disabled={isProcessing}>
+      <PrimaryCtaButton size="lg" className="w-full shadow-lg hover:shadow-xl" onClick={handlePlaceOrder} disabled={isProcessing}>
         {isProcessing ? 'Processing...' : 'Place Order'}
       </PrimaryCtaButton>
     </div>

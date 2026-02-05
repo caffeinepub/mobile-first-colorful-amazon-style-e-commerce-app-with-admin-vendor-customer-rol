@@ -37,6 +37,12 @@
         /* Success uses green accent */
         --success: 0.65 0.18 145;
         --success-foreground: 1 0 0;
+        /* Warning */
+        --warning: 0.70 0.18 70;
+        --warning-foreground: 0.1 0 0;
+        /* Info */
+        --info: 0.60 0.18 240;
+        --info-foreground: 1 0 0;
     }
 
     .dark {
@@ -66,6 +72,10 @@
         --chart-5: 0.66 0.15 280;
         --success: 0.68 0.18 145;
         --success-foreground: 0.1 0 0;
+        --warning: 0.74 0.18 70;
+        --warning-foreground: 0.1 0 0;
+        --info: 0.65 0.18 240;
+        --info-foreground: 0.1 0 0;
     }
 
     * {
@@ -110,5 +120,105 @@
     .gradient-primary-cta:focus-visible {
         outline: 2px solid oklch(var(--ring));
         outline-offset: 2px;
+    }
+
+    /* Tinted surface utilities */
+    .surface-primary-tint {
+        background: oklch(var(--primary) / 0.08);
+        border: 1px solid oklch(var(--primary) / 0.2);
+    }
+
+    .dark .surface-primary-tint {
+        background: oklch(var(--primary) / 0.12);
+        border: 1px solid oklch(var(--primary) / 0.25);
+    }
+
+    .surface-secondary-tint {
+        background: oklch(var(--secondary) / 0.08);
+        border: 1px solid oklch(var(--secondary) / 0.2);
+    }
+
+    .dark .surface-secondary-tint {
+        background: oklch(var(--secondary) / 0.12);
+        border: 1px solid oklch(var(--secondary) / 0.25);
+    }
+
+    .surface-accent-tint {
+        background: oklch(var(--accent) / 0.08);
+        border: 1px solid oklch(var(--accent) / 0.2);
+    }
+
+    .dark .surface-accent-tint {
+        background: oklch(var(--accent) / 0.12);
+        border: 1px solid oklch(var(--accent) / 0.25);
+    }
+
+    /* Section header accents */
+    .section-header-accent {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        background: oklch(var(--primary) / 0.12);
+        color: oklch(var(--primary));
+        border: 1px solid oklch(var(--primary) / 0.3);
+    }
+
+    .dark .section-header-accent {
+        background: oklch(var(--primary) / 0.15);
+        border: 1px solid oklch(var(--primary) / 0.35);
+    }
+
+    /* Gradient overlays for hero/banners */
+    .gradient-overlay-dark {
+        background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .gradient-overlay-colorful {
+        background: linear-gradient(135deg, oklch(var(--primary) / 0.15) 0%, oklch(var(--secondary) / 0.15) 100%);
+    }
+
+    /* Enhanced focus states */
+    .focus-ring-primary {
+        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+    }
+
+    .focus-ring-secondary {
+        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2;
+    }
+
+    .focus-ring-accent {
+        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2;
+    }
+
+    /* Hover tint for cards */
+    .hover-tint-primary {
+        transition: all 0.2s ease;
+    }
+
+    .hover-tint-primary:hover {
+        background: oklch(var(--primary) / 0.05);
+        border-color: oklch(var(--primary) / 0.3);
+    }
+
+    .dark .hover-tint-primary:hover {
+        background: oklch(var(--primary) / 0.08);
+        border-color: oklch(var(--primary) / 0.35);
+    }
+
+    /* Empty state styling */
+    .empty-state-container {
+        padding: 4rem 2rem;
+        text-align: center;
+        border-radius: var(--radius);
+        background: oklch(var(--muted) / 0.5);
+        border: 2px dashed oklch(var(--border));
+    }
+
+    .dark .empty-state-container {
+        background: oklch(var(--muted) / 0.3);
     }
 }

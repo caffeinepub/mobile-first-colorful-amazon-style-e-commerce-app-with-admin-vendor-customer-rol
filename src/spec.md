@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Refresh the app UI to a light theme using an orange/yellow primary palette with blue secondary, green accent, and consistent orange→yellow gradient primary CTA buttons across all roles and pages.
+**Goal:** Make the UI more colorful and visually rich across the storefront and customer/vendor/admin portals using the existing theme palette, while preserving readability in light and dark modes.
 
 **Planned changes:**
-- Update Tailwind/shadcn global theme CSS variables (e.g., background/foreground, primary/secondary/accent and corresponding *-foreground tokens) to match: Primary = orange/yellow, Secondary = blue, Accent = green, Background = light grey/white, ensuring readable contrast across major surfaces.
-- Apply the updated secondary (blue) and accent (green) tokens to relevant UI elements throughout the app so existing secondary/accent usages reflect the new palette.
-- Implement and roll out a reusable primary CTA button style with a left-to-right orange→yellow gradient, including hover/active/focus states, without editing any files under `frontend/src/components/ui`, and ensure destructive actions keep destructive styling.
-- Ensure any user-facing button text touched during this work remains in English.
+- Apply more intentional palette usage (primary orange/yellow, secondary blue, accent green) across key UI surfaces: headers/nav, section headers, cards, chips/badges, focus states, and empty states (beyond just primary CTA buttons).
+- Add subtle gradients and tinted backgrounds (using existing Tailwind theme tokens) to hero/banner overlays, category tiles, and key callout cards; make hover/active/focus states more vibrant while keeping the UI clean and not visually noisy.
+- Standardize status/badge styling (order statuses, stock/availability, success/error/info) so the same status value renders with consistent, readable, palette-aligned colors across customer, vendor, and admin pages.
+- Ensure contrast/readability remains strong in both light and dark modes and avoid modifying immutable shadcn/ui component source files.
 
-**User-visible outcome:** The app displays a light grey/white theme with orange/yellow primary styling, blue secondary elements, green accents, and consistent orange→yellow gradient primary CTA buttons (with accessible text and focus states) across storefront, customer, vendor, and admin areas.
+**User-visible outcome:** Storefront pages (Home, Categories, Product, Cart, Checkout) and Admin/Vendor dashboards look more colorful and polished, with clearer interactive states and consistent, easy-to-read status indicators throughout.

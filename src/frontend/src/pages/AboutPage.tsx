@@ -6,13 +6,13 @@ export default function AboutPage() {
     <div className="container mx-auto px-4 py-6">
       <div className="max-w-4xl mx-auto space-y-12">
         <section className="text-center">
-          <h1 className="text-4xl font-bold mb-4">About ShopHub</h1>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">About ShopHub</h1>
           <p className="text-lg text-muted-foreground">
             Your trusted online marketplace for quality products at great prices
           </p>
         </section>
 
-        <section>
+        <section className="surface-primary-tint rounded-2xl p-6">
           <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
           <p className="text-muted-foreground leading-relaxed">
             At ShopHub, we're committed to providing a seamless shopping experience that connects customers with
@@ -25,10 +25,10 @@ export default function AboutPage() {
         <section>
           <h2 className="text-2xl font-bold mb-6">Why Choose Us</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="hover:shadow-soft-lg transition-all border-2 hover:border-primary/30">
               <CardContent className="p-6 flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border-2 border-primary/30">
                     <Shield className="h-6 w-6 text-primary" />
                   </div>
                 </div>
@@ -41,10 +41,10 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-soft-lg transition-all border-2 hover:border-secondary/30">
               <CardContent className="p-6 flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center border-2 border-secondary/30">
                     <Award className="h-6 w-6 text-secondary" />
                   </div>
                 </div>
@@ -57,11 +57,11 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-soft-lg transition-all border-2 hover:border-accent/30">
               <CardContent className="p-6 flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-                    <Truck className="h-6 w-6 text-success" />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center border-2 border-accent/30">
+                    <Truck className="h-6 w-6 text-accent" />
                   </div>
                 </div>
                 <div>
@@ -73,10 +73,10 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="hover:shadow-soft-lg transition-all border-2 hover:border-chart-3/30">
               <CardContent className="p-6 flex gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-chart-3/10 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-chart-3/20 to-chart-3/10 flex items-center justify-center border-2 border-chart-3/30">
                     <HeadphonesIcon className="h-6 w-6 text-chart-3" />
                   </div>
                 </div>
@@ -91,9 +91,9 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="text-center">
+        <section className="text-center surface-accent-tint rounded-2xl p-8">
           <img
-            src="/assets/generated/trust-badges-set.dim_1024x256.png"
+            src="/assets/generated/trust-badges-set-colorful.dim_1024x256.png"
             alt="Trust badges"
             className="mx-auto max-w-full h-auto"
           />

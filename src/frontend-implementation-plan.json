@@ -1,104 +1,157 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Orange/Yellow primary theme + Blue secondary + Green accent + Gradient primary CTA buttons",
+  "title": "Colorful palette-forward UI refresh (storefront + portals)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Update global Tailwind/shadcn theme tokens to the requested orange/yellow primary, blue secondary, green accent, and light background with readable foregrounds.",
+      "summary": "Increase overall UI colorfulness across storefront and customer/vendor/admin portals using the existing palette on key surfaces while maintaining strong contrast in light/dark modes and not editing immutable shadcn/ui sources.",
       "acceptanceCriteria": [
-        "Global theme variables used by Tailwind/shadcn (e.g., --background/--foreground/--primary/--secondary/--accent and their *-foreground counterparts) reflect the requested palette in the active (light) theme.",
-        "All major surfaces (page background, cards/popovers, nav bars) render on a light grey/white background without low-contrast text.",
-        "Secondary UI elements that previously used the old secondary color now render as blue (e.g., secondary badges/buttons/links where applicable).",
-        "Accent UI elements that previously used the old accent color now render as green (e.g., highlights/success-like accents where applicable)."
+        "Across Home, Categories, Product, Cart, Checkout, and the Admin/Vendor dashboards, visible accent color usage is increased beyond just the primary CTA buttons (e.g., colored section headers, chips, badges, and subtle tinted card backgrounds).",
+        "Text remains readable: no primary/secondary/accent-colored backgrounds have low-contrast foreground text in either light or dark mode.",
+        "No shadcn/ui immutable component source files are modified."
       ],
       "file_operations": [
         {
           "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Update the light theme CSS variables for --background/--foreground/--card/--popover plus --primary/--secondary/--accent (and their *-foreground counterparts) to match: Primary=orange/yellow, Secondary=blue, Accent=green, Background=light grey/white. Ensure the chosen *-foreground values maintain readable contrast on each surface; keep ring/border/muted tokens coherent with the new palette. (Do not edit any files under frontend/src/components/ui.)"
+          "description": "Add a small set of reusable, palette-aligned utility classes for: (1) tinted surfaces for cards/sections in light+dark modes, (2) section header accents, (3) stronger focus-visible rings using existing --ring/primary/secondary/accent tokens, and (4) empty-state container styling with subtle tint + border for better visual richness without sacrificing readability."
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/TopNav.tsx",
           "operation": "modify",
-          "description": "Adjust supporting tokens that surface the palette in common UI (e.g., --ring, --success, and chart tokens if used for admin analytics) so they align with the updated primary/secondary/accent colors while preserving legibility on the light background."
+          "description": "Increase colorful palette usage in the header/nav: introduce subtle tinted/gradient header surface treatment, improve nav link hover/focus states, and make the cart count badge styling more intentional and readable in both modes (without changing any files under frontend/src/components/ui)."
+        },
+        {
+          "path": "frontend/src/components/BottomNav.tsx",
+          "operation": "modify",
+          "description": "Enhance active/hover/focus states for bottom navigation using palette accents (primary/secondary/accent), adding clearer visual hierarchy (e.g., active indicator, tinted background on active) while keeping contrast strong."
+        },
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Apply a subtle palette-tinted global app background treatment (light/dark safe) behind main content so storefront and portal pages feel more colorful without creating noise."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Increase use of palette accents on section headers and key callout surfaces (e.g., 'Shop by Category', 'Hot Deals', 'Featured Products') via tinted header chips/accents and lightly tinted cards while preserving spacing and readability. Keep any user-facing text changes in English."
+        },
+        {
+          "path": "frontend/src/pages/CategoriesPage.tsx",
+          "operation": "modify",
+          "description": "Make category tiles more colorful via subtle tinted overlays/borders and improved hover/focus styling; ensure category name text remains readable over images in both light and dark modes."
+        },
+        {
+          "path": "frontend/src/pages/ProductPage.tsx",
+          "operation": "modify",
+          "description": "Add palette accents to key product surfaces (image carousel container, pricing highlight, review section header, stock info) using subtle tints/borders and strong focus states for interactive elements; do not modify shadcn/ui component source files."
+        },
+        {
+          "path": "frontend/src/pages/CartPage.tsx",
+          "operation": "modify",
+          "description": "Improve colorful accents in cart list and order summary (tinted summary card, clearer hover/focus states on product links and quantity controls, more vibrant empty/auth-required states) while maintaining contrast in both modes."
+        },
+        {
+          "path": "frontend/src/pages/CheckoutPage.tsx",
+          "operation": "modify",
+          "description": "Add subtle tinted backgrounds and palette-accent headers for summary/payment cards, and strengthen focus/hover states for the primary checkout action without reducing usability."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Make admin dashboard stat cards more visually distinct and palette-aligned (tinted icon containers, subtle card tints) and ensure chart styling remains readable in light/dark modes."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Increase palette accents in vendor dashboard (tinted quick actions card, more vibrant secondary action styling, and clearer visual hierarchy) while preserving layout consistency."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Create and apply a consistent orange→yellow gradient primary CTA button style across the app via wrappers/composition (without modifying shadcn/ui sources).",
+      "summary": "Add subtle gradients and tinted backgrounds using existing Tailwind theme tokens, and make hover/active/focus states more vibrant and usable without creating visual noise.",
       "acceptanceCriteria": [
-        "Primary CTA buttons render with a visible orange→yellow gradient and appropriate hover/active/focus states.",
-        "Gradient CTA buttons have readable text (e.g., white or high-contrast foreground) and a clear focus ring consistent with the updated theme.",
-        "No direct edits are made inside the immutable UI component directory (frontend/src/components/ui); gradient styling is applied via composition, utility classes, or wrapper components and then used throughout the app.",
-        "Buttons that represent destructive actions (delete/remove/cancel) do not use the orange→yellow gradient and continue to use a destructive styling."
+        "Hero/banner areas and category cards show subtle, tasteful color treatment (tints/gradients) that is consistent with the existing palette.",
+        "Interactive elements (nav links, cards, product tiles, buttons) have clearer, more colorful hover/focus states than before.",
+        "The UI does not become visually noisy: spacing and hierarchy remain clear and consistent."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/HeroBannerSlider.tsx",
           "operation": "modify",
-          "description": "Add a reusable gradient CTA utility (e.g., a class in an appropriate Tailwind layer) that applies an orange→yellow left-to-right gradient, readable foreground text, and consistent hover/active/focus-visible ring styles aligned with the updated theme. (Do not edit any files under frontend/src/components/ui.)"
+          "description": "Update hero slider to use the more vibrant generated banners and add a subtle palette-aligned gradient/tint overlay plus more vibrant but accessible controls/indicators. Replace banner image references to: frontend/public/assets/generated/hero-banner-1-colorful.dim_1600x600.png, frontend/public/assets/generated/hero-banner-2-colorful.dim_1600x600.png, frontend/public/assets/generated/hero-banner-3-colorful.dim_1600x600.png."
         },
         {
-          "path": "frontend/src/components/buttons/PrimaryCtaButton.tsx",
-          "operation": "create",
-          "description": "Create a small wrapper component around the existing shadcn Button that composes the gradient CTA utility class for primary call-to-action usage while still allowing standard props/className overrides. This must not modify frontend/src/components/ui sources."
+          "path": "frontend/src/pages/AboutPage.tsx",
+          "operation": "modify",
+          "description": "Swap trust badges asset to the more vibrant version and ensure it sits on a tasteful tinted surface for visual richness. Update image reference to: frontend/public/assets/generated/trust-badges-set-colorful.dim_1024x256.png."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Add subtle palette gradients/tints to key callouts (hero adjacency and category area) and enrich hover states on category tiles/cards while keeping layout and hierarchy clear."
         },
         {
           "path": "frontend/src/components/ProductGrid.tsx",
           "operation": "modify",
-          "description": "Replace primary CTA usage for product actions (e.g., the 'Add to Cart' button) to use the new PrimaryCtaButton wrapper so CTAs render with the orange→yellow gradient. Keep non-primary actions (e.g., wishlist icon, destructive states) using their existing variants."
+          "description": "Enhance product tile vibrancy: add subtle tinted card backgrounds/borders on hover, improve wishlist button visibility states, and strengthen focus-visible styling for tile interactions while keeping text readable."
         },
         {
-          "path": "frontend/src/pages/CartPage.tsx",
+          "path": "frontend/src/pages/CategoriesPage.tsx",
           "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the main cart CTA (e.g., 'Proceed to Checkout') and any other primary navigation CTAs on this page, while leaving destructive actions (e.g., remove item) on destructive/ghost styling."
+          "description": "Introduce subtle tinted overlays/gradients for category cards and improve hover/active feedback for image tiles and titles using existing palette tokens."
         },
         {
-          "path": "frontend/src/pages/CheckoutPage.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the main checkout CTA (e.g., 'Place Order'), ensuring loading/disabled states preserve readability and the focus ring remains visible."
+          "description": "Add a small set of gradient/tint helper utilities (using existing OKLCH theme tokens and alpha) for hero overlays, callout cards, and hover/active states, ensuring consistent behavior in light and dark modes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Apply consistent, palette-aligned styling to badges and status indicators (order status, stock/availability, success/error/info) across customer/vendor/admin pages so the same status renders identically everywhere.",
+      "acceptanceCriteria": [
+        "Order status badges/pills use distinct, consistent colors aligned to the theme (e.g., accent/success green, secondary blue, destructive, muted) and are readable.",
+        "The same status value appears with the same styling anywhere it is rendered (customer orders, vendor orders, admin orders)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/statusStyles.ts",
+          "operation": "create",
+          "description": "Create a shared, palette-aligned status styling utility that maps known order statuses and common UI states (success/error/info/warning/muted) to consistent classNames that are readable in light and dark modes."
+        },
+        {
+          "path": "frontend/src/components/status/OrderStatusBadge.tsx",
+          "operation": "create",
+          "description": "Add a small reusable component that renders an order status pill/badge using the shared statusStyles mapping to guarantee consistent visuals anywhere order status is shown."
+        },
+        {
+          "path": "frontend/src/pages/customer/OrdersPage.tsx",
+          "operation": "modify",
+          "description": "Replace the local getStatusColor/getStatusText logic with the shared OrderStatusBadge and shared status text mapping so order status styling matches vendor/admin pages exactly."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorOrdersPage.tsx",
+          "operation": "modify",
+          "description": "Replace the local getStatusColor/getStatusText logic with the shared OrderStatusBadge to ensure consistent status presentation across portals."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
+          "operation": "modify",
+          "description": "Replace the local getStatusColor/getStatusText logic with the shared OrderStatusBadge so status pills are consistent with customer/vendor pages; ensure the status update control remains usable and visually consistent."
+        },
+        {
+          "path": "frontend/src/components/ProductGrid.tsx",
+          "operation": "modify",
+          "description": "Add consistent availability/status indicators (e.g., 'Out of stock', discount) using the shared status styling conventions so badges/pills are informative and palette-aligned."
         },
         {
           "path": "frontend/src/pages/ProductPage.tsx",
           "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the page’s main purchase CTA (e.g., 'Add to Cart') and to other primary submission actions if applicable (e.g., 'Submit Review' if treated as a primary CTA), while keeping secondary/outline buttons (e.g., carousel controls, wishlist) non-gradient."
-        },
-        {
-          "path": "frontend/src/components/auth/ProfileSetupModal.tsx",
-          "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the profile setup submission CTA (e.g., 'Create Profile') to ensure consistent gradient styling for primary actions. Ensure all user-facing text remains English."
-        },
-        {
-          "path": "frontend/src/pages/customer/CustomerProfilePage.tsx",
-          "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the profile save CTA (e.g., 'Save Changes') to ensure consistent gradient styling for primary actions. Ensure all user-facing text remains English."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminProductsPage.tsx",
-          "operation": "modify",
-          "description": "Apply PrimaryCtaButton to admin product primary CTAs (e.g., 'Add Product', 'Update Product' submit button), while ensuring destructive actions (e.g., 'Delete') remain destructive and non-gradient. Ensure all user-facing text remains English."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorProductsPage.tsx",
-          "operation": "modify",
-          "description": "Apply PrimaryCtaButton to vendor product primary CTAs (e.g., 'Add Product', 'Update Product' submit button), while ensuring destructive actions remain destructive and non-gradient. Ensure all user-facing text remains English."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminVendorsPage.tsx",
-          "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the admin 'Add Vendor' submission CTA while keeping 'Remove Vendor' destructive styling unchanged and non-gradient. Ensure all user-facing text remains English."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Apply PrimaryCtaButton to the vendor dashboard’s primary navigation CTA (e.g., 'Manage Products') while leaving secondary actions (e.g., outline 'View Orders') as non-gradient."
-        },
-        {
-          "path": "frontend/src/components/auth/LoginButton.tsx",
-          "operation": "modify",
-          "description": "Ensure login/logout button styling remains appropriate under the new theme. If the unauthenticated state is treated as a primary CTA in this app, switch it to PrimaryCtaButton; otherwise keep it as a standard shadcn Button variant while maintaining English-only text."
+          "description": "Apply shared status styling conventions to stock/availability messaging and promotional badges to keep status semantics consistent and readable across the app."
         }
       ]
     }

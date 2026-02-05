@@ -59,12 +59,14 @@ export default function CartPage() {
 
   if (!identity) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-        <h1 className="text-2xl font-bold mb-4">Please sign in to view your cart</h1>
-        <Link to="/">
-          <PrimaryCtaButton>Continue Shopping</PrimaryCtaButton>
-        </Link>
+      <div className="container mx-auto px-4 py-16">
+        <div className="empty-state-container max-w-md mx-auto">
+          <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-primary" />
+          <h1 className="text-2xl font-bold mb-4">Please sign in to view your cart</h1>
+          <Link to="/">
+            <PrimaryCtaButton>Continue Shopping</PrimaryCtaButton>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -80,19 +82,21 @@ export default function CartPage() {
 
   if (cartWithProducts.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-        <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-        <Link to="/">
-          <PrimaryCtaButton>Start Shopping</PrimaryCtaButton>
-        </Link>
+      <div className="container mx-auto px-4 py-16">
+        <div className="empty-state-container max-w-md mx-auto">
+          <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-primary" />
+          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+          <Link to="/">
+            <PrimaryCtaButton>Start Shopping</PrimaryCtaButton>
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">Shopping Cart</h1>
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           {cartWithProducts.map((item) => {
@@ -103,32 +107,32 @@ export default function CartPage() {
             const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
 
             return (
-              <Card key={item.productId}>
+              <Card key={item.productId} className="hover:shadow-soft-lg transition-all border-2 hover:border-primary/20">
                 <CardContent className="p-4">
                   <div className="flex gap-4">
                     <Link
                       to="/product/$productId"
                       params={{ productId: item.product.id }}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 focus-ring-primary rounded-lg"
                     >
-                      <div className="w-24 h-24 rounded-lg overflow-hidden">
+                      <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-primary/10">
                         {imageUrl ? (
-                          <img src={imageUrl} alt={item.product.name} className="w-full h-full object-cover" />
+                          <img src={imageUrl} alt={item.product.name} className="w-full h-full object-cover hover:scale-110 transition-transform" />
                         ) : (
-                          <div className="w-full h-full bg-muted" />
+                          <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50" />
                         )}
                       </div>
                     </Link>
                     <div className="flex-1 min-w-0">
-                      <Link to="/product/$productId" params={{ productId: item.product.id }}>
-                        <h3 className="font-semibold mb-1 hover:text-primary">{item.product.name}</h3>
+                      <Link to="/product/$productId" params={{ productId: item.product.id }} className="focus-ring-primary rounded">
+                        <h3 className="font-semibold mb-1 hover:text-primary transition-colors">{item.product.name}</h3>
                       </Link>
-                      <p className="text-lg font-bold text-primary mb-2">${finalPrice.toFixed(2)}</p>
+                      <p className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">${finalPrice.toFixed(2)}</p>
                       <div className="flex items-center gap-2">
                         <Button
                           size="icon"
                           variant="outline"
-                          className="h-8 w-8"
+                          className="h-8 w-8 hover:bg-primary/10 hover:border-primary focus-ring-primary"
                           onClick={() => handleUpdateQuantity(item.productId, Number(item.quantity) - 1)}
                           disabled={Number(item.quantity) <= 1}
                         >
@@ -138,7 +142,7 @@ export default function CartPage() {
                         <Button
                           size="icon"
                           variant="outline"
-                          className="h-8 w-8"
+                          className="h-8 w-8 hover:bg-primary/10 hover:border-primary focus-ring-primary"
                           onClick={() => handleUpdateQuantity(item.productId, Number(item.quantity) + 1)}
                         >
                           <Plus className="h-4 w-4" />
@@ -146,7 +150,7 @@ export default function CartPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 ml-auto text-destructive"
+                          className="h-8 w-8 ml-auto text-destructive hover:bg-destructive/10"
                           onClick={() => handleRemove(item.productId)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -161,8 +165,8 @@ export default function CartPage() {
         </div>
 
         <div>
-          <Card className="sticky top-20">
-            <CardHeader>
+          <Card className="sticky top-20 border-2 border-accent/20 shadow-soft-lg">
+            <CardHeader className="surface-accent-tint rounded-t-xl">
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -173,11 +177,11 @@ export default function CartPage() {
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span className="text-primary">${subtotal.toFixed(2)}</span>
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">${subtotal.toFixed(2)}</span>
               </div>
             </CardContent>
             <CardFooter>
-              <PrimaryCtaButton size="lg" className="w-full" onClick={handleCheckout}>
+              <PrimaryCtaButton size="lg" className="w-full shadow-lg hover:shadow-xl" onClick={handleCheckout}>
                 Proceed to Checkout
               </PrimaryCtaButton>
             </CardFooter>

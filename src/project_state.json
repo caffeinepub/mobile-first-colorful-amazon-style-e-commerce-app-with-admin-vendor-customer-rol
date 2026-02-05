@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
+  "projectStateVersion": 11,
   "summary": "ICP canister-based e-commerce starter app with Motoko backend (authorization + blob storage) and a React/Vite frontend featuring role-based access (admin/vendor/customer), Internet Identity login, and core storefront/admin/vendor/customer pages with a shadcn/ui component set and generated marketing assets.",
   "existing_features": [
     {
@@ -134,18 +134,26 @@
       "version": 1
     },
     {
-      "id": "feature-update-the-app-s-global-theme-tokens-to-match-the-provided-palette-across-all-pages-and-roles-storefront-customer-vendor-admin-by-setting-tailwind-shadcn-css-variables-for-primary-orange-yellow-secondary-blue-accent-green-background-light-grey-white-ensure-text-foreground-colors-remain-readable-with-sufficient-contrast-on-the-new-background-and-on-primary-secondary-accent-surfaces",
-      "title": "Update the app’s global theme tokens to match the provided palette across all pages and roles (storefront, customer, vendor, admin) by setting Tailwind/shadcn CSS variables for: Primary = orange/yellow, Secondary = blue, Accent = green, Background = light grey/white. Ensure text/foreground colors remain readable with sufficient contrast on the new background and on primary/secondary/accent surfaces.",
+      "id": "feature-increase-overall-ui-colorfulness-across-the-app-storefront-customer-vendor-admin-by-applying-more-intentional-use-of-the-existing-theme-palette-primary-orange-yellow-secondary-blue-accent-green-in-key-surfaces-and-highlights-headers-nav-section-headers-cards-chips-badges-focus-states-and-empty-states-while-keeping-readability-and-contrast-strong-in-both-light-and-dark-modes",
+      "title": "Increase overall UI colorfulness across the app (storefront, customer, vendor, admin) by applying more intentional use of the existing theme palette (primary orange/yellow, secondary blue, accent green) in key surfaces and highlights (headers/nav, section headers, cards, chips/badges, focus states, and empty states) while keeping readability and contrast strong in both light and dark modes.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-a-consistent-primary-call-to-action-button-style-that-uses-an-orange-yellow-gradient-left-to-right-and-apply-it-to-primary-cta-actions-across-the-app-e-g-add-to-cart-checkout-place-order-save-create-update-actions-in-admin-vendor-dialogs-without-editing-any-files-under-the-immutable-shadcn-ui-component-sources-use-only-english-for-any-user-facing-button-text-that-is-updated-during-this-work",
-      "title": "Implement a consistent primary call-to-action button style that uses an orange→yellow gradient (left-to-right) and apply it to primary CTA actions across the app (e.g., Add to Cart, Checkout, Place Order, Save, Create/Update actions in admin/vendor dialogs) without editing any files under the immutable shadcn/ui component sources. Use only English for any user-facing button text that is updated during this work.",
+      "id": "feature-enhance-visual-richness-by-adding-subtle-color-gradients-and-tinted-backgrounds-using-existing-tailwind-theme-tokens-e-g-soft-primary-secondary-accent-tints-on-hero-overlays-category-tiles-and-key-callout-cards-and-update-hover-active-states-to-feel-more-vibrant-without-reducing-usability",
+      "title": "Enhance visual richness by adding subtle color gradients and tinted backgrounds using existing Tailwind theme tokens (e.g., soft primary/secondary/accent tints on hero overlays, category tiles, and key callout cards) and update hover/active states to feel more vibrant without reducing usability.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-data-status-elements-more-colorful-and-informative-by-applying-consistent-palette-aligned-styling-to-badges-and-status-indicators-e-g-order-status-pills-stock-availability-success-error-info-states-across-customer-vendor-admin-pages",
+      "title": "Make data/status elements more colorful and informative by applying consistent, palette-aligned styling to badges and status indicators (e.g., order status pills, stock/availability, success/error/info states) across customer/vendor/admin pages.",
+      "reqIds": [
+        "REQ-3"
       ],
       "version": 1
     }
@@ -153,7 +161,7 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Apply specified UI color palette/theme (primary orange/yellow, secondary blue, accent green, light grey/white background, orange→yellow gradient buttons) across the app",
+      "summary": "Further enhance the UI to be more colorful while staying within the defined palette (orange/yellow primary with gradient buttons, blue secondary, green accent, light grey/white background).",
       "reqIds": [],
       "status": "pending"
     }
@@ -164,43 +172,46 @@
     "Authorization is enforced via Motoko RBAC (access-control + authorization mixin) and mirrored in frontend via RequireRole/AccessDenied patterns.",
     "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
     "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
-    "Introduce theme/design tokens for the specified color palette (primary orange/yellow, secondary blue, accent green, light grey/white background) and gradient button styling to ensure consistent UI across pages/components."
+    "Authorization and blob-storage Motoko components updated to v4.0.0 (componentized modules used by backend/main.mo).",
+    "Build template expanded/updated to include a full React/Vite + shadcn/ui frontend template and ICP canister YAMLs under build-template/src."
   ],
   "known_issues": [],
   "isFixRequest": false,
+  "imageRequirements": "## Edit Images\n- Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-1.dim_1600x600.png > hero-banner-1-colorful.dim_1600x600.png)\n- Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-2.dim_1600x600.png > hero-banner-2-colorful.dim_1600x600.png)\n- Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-3.dim_1600x600.png > hero-banner-3-colorful.dim_1600x600.png)\n- Make icon colors more varied and vibrant while keeping clean flat-illustration readability (frontend/public/assets/generated/category-icons-sprite.dim_1024x1024.png > category-icons-sprite-colorful.dim_1024x1024.png)\n- Increase color vibrancy and clarity for each badge while keeping consistent style and high contrast (frontend/public/assets/generated/trust-badges-set.dim_1024x256.png > trust-badges-set-colorful.dim_1024x256.png)",
   "generatedImages": [
     {
-      "filename": "frontend/public/assets/generated/category-icons-sprite.dim_1024x1024.png",
-      "description": "Generated category icons sprite sheet for storefront UI.",
+      "filename": "hero-banner-1-colorful.dim_1600x600.png",
+      "description": "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette",
+      "targetWidth": 1600,
+      "targetHeight": 600
+    },
+    {
+      "filename": "hero-banner-2-colorful.dim_1600x600.png",
+      "description": "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette",
+      "targetWidth": 1600,
+      "targetHeight": 600
+    },
+    {
+      "filename": "hero-banner-3-colorful.dim_1600x600.png",
+      "description": "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette",
+      "targetWidth": 1600,
+      "targetHeight": 600
+    },
+    {
+      "filename": "category-icons-sprite-colorful.dim_1024x1024.png",
+      "description": "Make icon colors more varied and vibrant while keeping clean flat-illustration readability",
       "targetWidth": 1024,
       "targetHeight": 1024
     },
     {
-      "filename": "frontend/public/assets/generated/hero-banner-1.dim_1600x600.png",
-      "description": "Generated hero banner image variant 1 for homepage slider.",
-      "targetWidth": 1600,
-      "targetHeight": 600
-    },
-    {
-      "filename": "frontend/public/assets/generated/hero-banner-2.dim_1600x600.png",
-      "description": "Generated hero banner image variant 2 for homepage slider.",
-      "targetWidth": 1600,
-      "targetHeight": 600
-    },
-    {
-      "filename": "frontend/public/assets/generated/hero-banner-3.dim_1600x600.png",
-      "description": "Generated hero banner image variant 3 for homepage slider.",
-      "targetWidth": 1600,
-      "targetHeight": 600
-    },
-    {
-      "filename": "frontend/public/assets/generated/trust-badges-set.dim_1024x256.png",
-      "description": "Generated trust badges set for marketing/checkout UI.",
+      "filename": "trust-badges-set-colorful.dim_1024x256.png",
+      "description": "Increase color vibrancy and clarity for each badge while keeping consistent style and high contrast",
       "targetWidth": 1024,
       "targetHeight": 256
     }
   ],
-  "projectName": "Apply orange/yellow primary theme with blue secondary, green accent, light background, and orange→yellow gradient buttons",
+  "gameProjectType": "none",
+  "projectName": "Make the UI more colorful across the storefront and portals",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

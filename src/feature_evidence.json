@@ -2,10 +2,20 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-app-s-global-theme-tokens-to-match-the-provided-palette-across-all-pages-and-roles-storefront-customer-vendor-admin-by-setting-tailwind-shadcn-css-variables-for-primary-orange-yellow-secondary-blue-accent-green-background-light-grey-white-ensure-text-foreground-colors-remain-readable-with-sufficient-contrast-on-the-new-background-and-on-primary-secondary-accent-surfaces",
-      "featureTitle": "Update the app’s global theme tokens to match the provided palette across all pages and roles (storefront, customer, vendor, admin) by setting Tailwind/shadcn CSS variables for: Primary = orange/yellow, Secondary = blue, Accent = green, Background = light grey/white. Ensure text/foreground colors remain readable with sufficient contrast on the new background and on primary/secondary/accent surfaces.",
+      "featureId": "feature-increase-overall-ui-colorfulness-across-the-app-storefront-customer-vendor-admin-by-applying-more-intentional-use-of-the-existing-theme-palette-primary-orange-yellow-secondary-blue-accent-green-in-key-surfaces-and-highlights-headers-nav-section-headers-cards-chips-badges-focus-states-and-empty-states-while-keeping-readability-and-contrast-strong-in-both-light-and-dark-modes",
+      "featureTitle": "Increase overall UI colorfulness across the app (storefront, customer, vendor, admin) by applying more intentional use of the existing theme palette (primary orange/yellow, secondary blue, accent green) in key surfaces and highlights (headers/nav, section headers, cards, chips/badges, focus states, and empty states) while keeping readability and contrast strong in both light and dark modes.",
       "files": [
-        "frontend/src/index.css"
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/components/BottomNav.tsx",
+        "frontend/src/components/TopNav.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/CartPage.tsx",
+        "frontend/src/pages/CategoriesPage.tsx",
+        "frontend/src/pages/CheckoutPage.tsx",
+        "frontend/src/pages/HomePage.tsx",
+        "frontend/src/pages/ProductPage.tsx",
+        "frontend/src/pages/admin/AdminDashboardPage.tsx",
+        "frontend/src/pages/vendor/VendorDashboardPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -22,21 +32,15 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-a-consistent-primary-call-to-action-button-style-that-uses-an-orange-yellow-gradient-left-to-right-and-apply-it-to-primary-cta-actions-across-the-app-e-g-add-to-cart-checkout-place-order-save-create-update-actions-in-admin-vendor-dialogs-without-editing-any-files-under-the-immutable-shadcn-ui-component-sources-use-only-english-for-any-user-facing-button-text-that-is-updated-during-this-work",
-      "featureTitle": "Implement a consistent primary call-to-action button style that uses an orange→yellow gradient (left-to-right) and apply it to primary CTA actions across the app (e.g., Add to Cart, Checkout, Place Order, Save, Create/Update actions in admin/vendor dialogs) without editing any files under the immutable shadcn/ui component sources. Use only English for any user-facing button text that is updated during this work.",
+      "featureId": "feature-enhance-visual-richness-by-adding-subtle-color-gradients-and-tinted-backgrounds-using-existing-tailwind-theme-tokens-e-g-soft-primary-secondary-accent-tints-on-hero-overlays-category-tiles-and-key-callout-cards-and-update-hover-active-states-to-feel-more-vibrant-without-reducing-usability",
+      "featureTitle": "Enhance visual richness by adding subtle color gradients and tinted backgrounds using existing Tailwind theme tokens (e.g., soft primary/secondary/accent tints on hero overlays, category tiles, and key callout cards) and update hover/active states to feel more vibrant without reducing usability.",
       "files": [
+        "frontend/src/components/HeroBannerSlider.tsx",
         "frontend/src/components/ProductGrid.tsx",
-        "frontend/src/components/auth/ProfileSetupModal.tsx",
-        "frontend/src/components/buttons/PrimaryCtaButton.tsx",
         "frontend/src/index.css",
-        "frontend/src/pages/CartPage.tsx",
-        "frontend/src/pages/CheckoutPage.tsx",
-        "frontend/src/pages/ProductPage.tsx",
-        "frontend/src/pages/admin/AdminProductsPage.tsx",
-        "frontend/src/pages/admin/AdminVendorsPage.tsx",
-        "frontend/src/pages/customer/CustomerProfilePage.tsx",
-        "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-        "frontend/src/pages/vendor/VendorProductsPage.tsx"
+        "frontend/src/pages/AboutPage.tsx",
+        "frontend/src/pages/CategoriesPage.tsx",
+        "frontend/src/pages/HomePage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -49,6 +53,32 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-data-status-elements-more-colorful-and-informative-by-applying-consistent-palette-aligned-styling-to-badges-and-status-indicators-e-g-order-status-pills-stock-availability-success-error-info-states-across-customer-vendor-admin-pages",
+      "featureTitle": "Make data/status elements more colorful and informative by applying consistent, palette-aligned styling to badges and status indicators (e.g., order status pills, stock/availability, success/error/info states) across customer/vendor/admin pages.",
+      "files": [
+        "frontend/src/components/ProductGrid.tsx",
+        "frontend/src/components/status/OrderStatusBadge.tsx",
+        "frontend/src/pages/ProductPage.tsx",
+        "frontend/src/pages/admin/AdminOrdersPage.tsx",
+        "frontend/src/pages/customer/OrdersPage.tsx",
+        "frontend/src/pages/vendor/VendorOrdersPage.tsx",
+        "frontend/src/utils/statusStyles.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

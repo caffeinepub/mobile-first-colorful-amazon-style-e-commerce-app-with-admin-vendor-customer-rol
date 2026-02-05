@@ -12,6 +12,7 @@ import { useGetProduct, useAddToCart, useAddToWishlist, useAddReview } from '../
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { toast } from 'sonner';
 import PrimaryCtaButton from '../components/buttons/PrimaryCtaButton';
+import { getAvailabilityStatus } from '../utils/statusStyles';
 
 export default function ProductPage() {
   const { productId } = useParams({ from: '/product/$productId' });
@@ -55,6 +56,7 @@ export default function ProductPage() {
     product.ratings.length > 0
       ? product.ratings.reduce((sum, r) => sum + Number(r.rating), 0) / product.ratings.length
       : 0;
+  const availabilityStatus = getAvailabilityStatus(Number(product.stock));
 
   const handleAddToCart = async () => {
     try {
@@ -102,7 +104,7 @@ export default function ProductPage() {
       <div className="grid md:grid-cols-2 gap-8 mb-8">
         {/* Image Carousel */}
         <div>
-          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft-lg mb-4">
+          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-soft-lg mb-4 border-2 border-primary/10">
             {images.length > 0 ? (
               <>
                 <img
@@ -115,7 +117,7 @@ export default function ProductPage() {
                     <Button
                       variant="secondary"
                       size="icon"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full shadow-lg hover:scale-110 transition-transform bg-card/90 backdrop-blur-sm border-2 border-primary/20"
                       onClick={() =>
                         setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
                       }
@@ -125,7 +127,7 @@ export default function ProductPage() {
                     <Button
                       variant="secondary"
                       size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full shadow-lg hover:scale-110 transition-transform bg-card/90 backdrop-blur-sm border-2 border-primary/20"
                       onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
                     >
                       <ChevronRight className="h-5 w-5" />
@@ -134,7 +136,7 @@ export default function ProductPage() {
                 )}
               </>
             ) : (
-              <div className="w-full h-full bg-muted flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
                 <span className="text-muted-foreground">No image available</span>
               </div>
             )}
@@ -145,8 +147,8 @@ export default function ProductPage() {
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                    idx === currentImageIndex ? 'border-primary' : 'border-transparent'
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                    idx === currentImageIndex ? 'border-primary shadow-md' : 'border-transparent hover:border-primary/30'
                   }`}
                 >
                   <img src={img.getDirectURL()} alt="" className="w-full h-full object-cover" />
@@ -160,30 +162,35 @@ export default function ProductPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-4 mb-4 flex-wrap">
+              <div className="flex items-center gap-1 surface-primary-tint px-3 py-1 rounded-full">
                 <Star className="h-5 w-5 fill-primary text-primary" />
                 <span className="font-semibold">{averageRating.toFixed(1)}</span>
-                <span className="text-muted-foreground">({product.ratings.length} reviews)</span>
+                <span className="text-muted-foreground text-sm">({product.ratings.length})</span>
               </div>
               {discount > 0 && (
-                <Badge variant="destructive" className="text-base px-3 py-1">
+                <Badge variant="destructive" className="text-base px-3 py-1 shadow-md">
                   {discount}% OFF
                 </Badge>
+              )}
+              <Badge className={`${availabilityStatus.className} shadow-md`}>
+                {availabilityStatus.text}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="surface-primary-tint rounded-xl p-4">
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">${finalPrice.toFixed(2)}</span>
+              {discount > 0 && (
+                <span className="text-xl text-muted-foreground line-through">${price.toFixed(2)}</span>
               )}
             </div>
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span className="text-4xl font-bold text-primary">${finalPrice.toFixed(2)}</span>
-            {discount > 0 && (
-              <span className="text-xl text-muted-foreground line-through">${price.toFixed(2)}</span>
-            )}
-          </div>
+          <p className="text-muted-foreground leading-relaxed">{product.description}</p>
 
-          <p className="text-muted-foreground">{product.description}</p>
-
-          <div className="space-y-2">
+          <div className="space-y-2 surface-secondary-tint rounded-xl p-4">
             <p className="text-sm">
               <span className="font-semibold">Stock:</span>{' '}
               {Number(product.stock) > 0 ? `${product.stock} available` : 'Out of stock'}
@@ -197,7 +204,7 @@ export default function ProductPage() {
             <div className="flex items-center gap-2">
               <Label>Quantity:</Label>
               <Select value={quantity.toString()} onValueChange={(v) => setQuantity(Number(v))}>
-                <SelectTrigger className="w-20">
+                <SelectTrigger className="w-20 focus:ring-2 focus:ring-primary/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -214,14 +221,14 @@ export default function ProductPage() {
           <div className="flex gap-3">
             <PrimaryCtaButton
               size="lg"
-              className="flex-1 gap-2"
+              className="flex-1 gap-2 shadow-lg hover:shadow-xl"
               onClick={handleAddToCart}
               disabled={Number(product.stock) === 0 || addToCart.isPending}
             >
               <ShoppingCart className="h-5 w-5" />
               {Number(product.stock) === 0 ? 'Out of Stock' : 'Add to Cart'}
             </PrimaryCtaButton>
-            <Button size="lg" variant="outline" onClick={handleAddToWishlist}>
+            <Button size="lg" variant="outline" onClick={handleAddToWishlist} className="hover:bg-accent/10 hover:text-accent hover:border-accent focus-ring-accent">
               <Heart className="h-5 w-5" />
             </Button>
           </div>
@@ -229,17 +236,22 @@ export default function ProductPage() {
       </div>
 
       {/* Reviews Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer Reviews</CardTitle>
+      <Card className="border-2 border-accent/20">
+        <CardHeader className="surface-accent-tint rounded-t-xl">
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-accent" />
+            Customer Reviews
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {product.ratings.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No reviews yet. Be the first to review!</p>
+            <div className="empty-state-container">
+              <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
+            </div>
           ) : (
             <div className="space-y-4">
               {product.ratings.map((review, idx) => (
-                <div key={idx} className="border-b pb-4 last:border-0">
+                <div key={idx} className="border-b pb-4 last:border-0 hover:bg-muted/30 p-3 rounded-lg transition-colors">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -262,12 +274,12 @@ export default function ProductPage() {
           )}
 
           {identity && (
-            <form onSubmit={handleSubmitReview} className="space-y-4 pt-4 border-t">
+            <form onSubmit={handleSubmitReview} className="space-y-4 pt-4 border-t surface-primary-tint rounded-xl p-4">
               <h3 className="font-semibold">Write a Review</h3>
               <div className="space-y-2">
                 <Label>Rating</Label>
                 <Select value={reviewRating} onValueChange={setReviewRating}>
-                  <SelectTrigger>
+                  <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -286,6 +298,7 @@ export default function ProductPage() {
                   onChange={(e) => setReviewComment(e.target.value)}
                   placeholder="Share your experience..."
                   required
+                  className="focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <PrimaryCtaButton type="submit" disabled={addReview.isPending}>
