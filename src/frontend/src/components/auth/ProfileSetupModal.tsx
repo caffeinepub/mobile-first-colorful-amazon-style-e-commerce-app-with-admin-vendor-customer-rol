@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useGetCallerUserProfile, useSaveCallerUserProfile } from '../../hooks/useQueries';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import PrimaryCtaButton from '../buttons/PrimaryCtaButton';
+import FloatingLabelInput from '../forms/FloatingLabelInput';
 
 export default function ProfileSetupModal() {
   const { identity } = useInternetIdentity();
@@ -43,52 +42,40 @@ export default function ProfileSetupModal() {
 
   return (
     <Dialog open={showProfileSetup}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-md rounded-2xl" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Welcome! Set up your profile</DialogTitle>
+          <DialogTitle className="text-2xl">Welcome! Set up your profile</DialogTitle>
           <DialogDescription>Please provide your information to continue</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1234567890"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Your address"
-            />
-          </div>
-          <PrimaryCtaButton type="submit" className="w-full" disabled={saveProfile.isPending}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <FloatingLabelInput
+            id="name"
+            label="Name *"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <FloatingLabelInput
+            id="email"
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <FloatingLabelInput
+            id="phone"
+            label="Phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+          <FloatingLabelInput
+            id="address"
+            label="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <PrimaryCtaButton type="submit" className="w-full h-12" disabled={saveProfile.isPending}>
             {saveProfile.isPending ? 'Creating...' : 'Create Profile'}
           </PrimaryCtaButton>
         </form>

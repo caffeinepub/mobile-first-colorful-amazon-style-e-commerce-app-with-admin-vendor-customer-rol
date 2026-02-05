@@ -1,163 +1,98 @@
 {
   "kind": "build_request",
-  "title": "Mobile-friendly colorful onboarding flow for Customer/Vendor with vendor list and simple vendor dashboard",
+  "title": "Rename branding to QuickBazar and generate/replace app logo",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-11",
-      "text": "Replace the current Home page content with a mobile-first landing screen that shows two large primary actions: \"Customer Login\" and \"Vendor Login\" as big rounded cards/buttons optimized for touch (large tap targets, clear spacing).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Home screen should show two big buttons:\nCustomer Login\nVendor Login"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On mobile widths, the two actions are prominently visible without relying on the existing marketplace sections",
-        "Both actions navigate to their respective flows (Customer Login and Vendor Login) using the app router"
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "text": "Implement the Customer Login Form screen with the following fields and validation: Name (required), Mobile number (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Vendor List page and carry the selected city forward.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Customer Login Form:\n- Name\n- Mobile\n- City dropdown (Kanpur, Unnao)\n- Area\n- Pin code\n\nAfter submit show a vendor list page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
-        "Submitting the form without required fields shows clear English validation feedback",
-        "Successful submit navigates to the Vendor List page and preserves the selected city for filtering"
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "text": "Implement the Vendor List page that renders vendor cards filtered by the city selected in the Customer Login Form. Each vendor card must show: Shop name, Area, Mobile number, and a \"View Shop\" button.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "After submit show a vendor list page with vendor cards:\n- Shop name\n- Area\n- Mobile number\n- View Shop button"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The page displays only vendors matching the selected city",
-        "Each vendor is rendered as a rounded card with the required fields and a visible \"View Shop\" button",
-        "If no city is present (e.g., direct navigation), the page shows an English prompt to select a city and a way to navigate back to the Customer Login Form"
-      ]
-    },
-    {
       "id": "REQ-14",
-      "text": "Define the \"View Shop\" button behavior for the Vendor List page: when pressed, navigate to a vendor shop route/screen (even if minimal for now) that clearly identifies which shop was selected (at minimum show the selected Shop name and city/area).",
+      "text": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages-7",
+          "recent-messages-9",
+          "recent-messages-11"
         ],
         "quotes": [
-          "View Shop button"
+          "is app ka naam Quick bazar rakh dijiye",
+          "is app ka rename  karna hai shophub ko change karke QuickBazar kar dijiye logo hata kar koi achha sa logo laga dijiye",
+          "aap apne according logo bana dijiye"
         ]
       },
       "acceptanceCriteria": [
-        "Tapping \"View Shop\" navigates to a dedicated screen/route and does not do nothing",
-        "The destination screen shows the selected shop identity in English (at minimum the shop name)"
+        "Top navigation brand text shows “QuickBazar” instead of “ShopHub”.",
+        "frontend/index.html <title> and apple-mobile-web-app-title use “QuickBazar”.",
+        "frontend/public/manifest.webmanifest uses “QuickBazar” for name/short_name (and does not mention “ShopHub” or “Marketplace”).",
+        "A case-insensitive search in the frontend codebase shows no remaining user-facing “ShopHub” branding."
       ]
     },
     {
       "id": "REQ-15",
-      "text": "Implement the Vendor Login Form screen with the following fields and validation: Name (required), Mobile (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Outlet Details form page and carry the entered vendor login info forward.",
+      "text": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages-9",
+          "recent-messages-11"
         ],
         "quotes": [
-          "Vendor Login Form:\n- Name\n- Mobile\n- City dropdown (Kanpur, Unnao)\n- Area\n- Pin code\n\nAfter submit open outlet details form"
+          "...logo hata kar koi achha sa logo laga dijiye",
+          "aap apne according logo bana dijiye"
         ]
       },
       "acceptanceCriteria": [
-        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
-        "Submitting the form without required fields shows clear English validation feedback",
-        "Successful submit navigates to the Outlet Details form page and preserves prior inputs for the flow"
+        "TopNav no longer references /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg.",
+        "TopNav renders the newly generated logo image from /assets/generated/ and the image alt text is updated to “QuickBazar logo”.",
+        "Logo renders crisply on mobile and desktop without layout shift (no stretched or pixelated appearance)."
       ]
     },
     {
       "id": "REQ-16",
-      "text": "Implement the Outlet Details form page with the following fields and validation: Outlet name (required), Outlet photo upload (required UI control; accept images), Outlet mobile (required), Aadhar number (required), GST (optional). On submit, navigate to a simple Vendor Dashboard page and show submitted outlet details there (at minimum: Outlet name).",
+      "text": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages-9",
+          "recent-messages-11"
         ],
         "quotes": [
-          "After submit open outlet details form:\n- Outlet name\n- Outlet photo upload\n- Outlet mobile\n- Aadhar number\n- GST optional\n\nAfter submit open a simple vendor dashboard page."
+          "...logo hata kar koi achha sa logo laga dijiye",
+          "aap apne according logo bana dijiye"
         ]
       },
       "acceptanceCriteria": [
-        "The form includes an image file input for Outlet photo upload and shows a preview or filename after selection",
-        "GST is optional and does not block submission when empty",
-        "On successful submit, the app navigates to the Vendor Dashboard page and displays the outlet name in English"
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "text": "Create a simple Vendor Dashboard page (not the existing vendor portal dashboard) that is reachable after the Outlet Details submit and presents a clean mobile-first summary card layout (at minimum showing Outlet name; optionally show other submitted fields).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "After submit open a simple vendor dashboard page."
-        ]
-      },
-      "acceptanceCriteria": [
-        "The dashboard is a distinct screen/route reachable via the Vendor onboarding flow",
-        "The dashboard renders correctly on mobile with large readable typography and rounded cards"
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "text": "Apply a consistent modern colorful visual theme across the new Home/Login/List/Outlet/Dashboard screens using rounded cards, large buttons, and soft shadows. Use a coherent non-blue/non-purple palette (e.g., coral/teal/lime or similar) and ensure all user-facing text is in English.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Create a mobile friendly colorful app.",
-          "Use modern colorful UI with rounded cards and large buttons."
-        ]
-      },
-      "acceptanceCriteria": [
-        "All new screens share the same design language (spacing, radii, shadows, button styles)",
-        "Buttons meet mobile touch target expectations (visibly large and easy to tap)",
-        "All labels, placeholders, helper text, and messages on the new flow screens are in English"
+        "The following existing files are replaced with newly generated QuickBazar-branded icons while keeping the same filenames and dimensions: pwa-icon.dim_192x192.png, pwa-icon.dim_512x512.png, pwa-maskable.dim_512x512.png, apple-touch-icon.dim_180x180.png.",
+        "frontend/public/manifest.webmanifest continues to reference the same icon paths under /assets/generated/ and installs successfully as a PWA.",
+        "On iOS/Android “Add to Home Screen”, the installed icon shows the updated QuickBazar design (not the old icon)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files in frontend.immutablePaths (must compose existing UI components rather than modifying read-only sources).",
-    "Keep the backend architecture as a single Motoko actor (no additional backend canisters/services).",
-    "Use English for all user-facing text added or modified by this build request."
+    "Frontend files under frontend/src/components/ui must not be edited; compose them instead.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, or frontend/src/main.tsx."
   ],
   "nonGoals": [
-    "Do not implement wallet/commission rules, vendor outlet enable/disable logic, or admin oversight features in this build request.",
-    "Do not require Internet Identity authentication for the new Customer/Vendor onboarding flow unless explicitly necessary for navigation; keep this flow form-based as requested.",
-    "Do not redesign or remove existing storefront/cart/checkout functionality beyond replacing the Home page content as requested."
+    "No changes to backend canister logic, data models, or authorization.",
+    "No changes to routing structure or role-based access behavior beyond branding text/icon updates."
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Distinct, modern marketplace logo mark with bold typography and vibrant colors on transparent background (quickbazar-logo.dim_512x512.png)",
+      "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_512x512.png)",
+      "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_192x192.png)",
+      "Maskable app icon, centered symbol with safe padding and solid/vibrant background matching the logo identity (pwa-maskable.dim_512x512.png)",
+      "Apple touch icon, rounded-square symbol matching the logo identity (apple-touch-icon.dim_180x180.png)"
+    ],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

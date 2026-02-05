@@ -14,18 +14,24 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
-export interface Category {
-    id: string;
-    name: string;
-    image: ExternalBlob;
-}
 export interface UserProfile {
     name: string;
     email: string;
     address: string;
     phone: string;
 }
+export interface VendorDashboardStats {
+    totalSalesAmount: bigint;
+    outletStatus: OutletStatus;
+    outletName: string;
+    walletDue: bigint;
+}
 export type Time = bigint;
+export interface Category {
+    id: string;
+    name: string;
+    image: ExternalBlob;
+}
 export interface OrderItem {
     productId: string;
     quantity: bigint;
@@ -47,7 +53,10 @@ export interface CartItem {
 export interface Vendor {
     principal: Principal;
     verified: boolean;
+    outletStatus: OutletStatus;
     name: string;
+    outletName: string;
+    walletDue: bigint;
 }
 export interface Review {
     comment: string;
@@ -73,6 +82,10 @@ export enum OrderStatus {
     pending = "pending",
     delivered = "delivered",
     processing = "processing"
+}
+export enum OutletStatus {
+    disabled = "disabled",
+    enabled = "enabled"
 }
 export enum UserRole {
     admin = "admin",
@@ -109,6 +122,7 @@ export interface backendInterface {
     getProducts(sortBy: string): Promise<Array<Product>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVendor(vendorPrincipal: Principal): Promise<Vendor | null>;
+    getVendorDashboardStats(): Promise<VendorDashboardStats>;
     getVendorOrders(): Promise<Array<Order>>;
     getVendorProducts(): Promise<Array<Product>>;
     getVendors(): Promise<Array<Vendor>>;
@@ -116,6 +130,7 @@ export interface backendInterface {
     isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isVendor(): Promise<boolean>;
+    payCompany(): Promise<void>;
     removeCartItem(productId: string): Promise<void>;
     removeFromWishlist(productId: string): Promise<void>;
     removeVendor(vendorPrincipal: Principal): Promise<void>;

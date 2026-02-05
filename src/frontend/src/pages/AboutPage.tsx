@@ -6,7 +6,7 @@ export default function AboutPage() {
     <div className="container mx-auto px-4 py-6">
       <div className="max-w-4xl mx-auto space-y-12">
         <section className="text-center">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">About ShopHub</h1>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">About QuickBazar</h1>
           <p className="text-lg text-muted-foreground">
             Your trusted online marketplace for quality products at great prices
           </p>
@@ -15,7 +15,7 @@ export default function AboutPage() {
         <section className="surface-primary-tint rounded-2xl p-6">
           <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
           <p className="text-muted-foreground leading-relaxed">
-            At ShopHub, we're committed to providing a seamless shopping experience that connects customers with
+            At QuickBazar, we're committed to providing a seamless shopping experience that connects customers with
             quality products from trusted vendors. We believe in transparency, reliability, and customer
             satisfaction above all else. Our platform empowers both buyers and sellers to thrive in a secure and
             user-friendly environment.

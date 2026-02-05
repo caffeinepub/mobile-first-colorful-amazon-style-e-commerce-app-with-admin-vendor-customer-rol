@@ -95,8 +95,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-bold mb-1">Email</h3>
-                  <a href="mailto:support@shophub.com" className="text-muted-foreground hover:text-primary">
-                    support@shophub.com
+                  <a href="mailto:support@quickbazar.com" className="text-muted-foreground hover:text-primary">
+                    support@quickbazar.com
                   </a>
                 </div>
               </CardContent>

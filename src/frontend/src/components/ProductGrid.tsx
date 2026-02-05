@@ -1,11 +1,10 @@
 import { Link } from '@tanstack/react-router';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Product } from '../backend';
-import { useAddToCart, useAddToWishlist, useGetWishlist } from '../hooks/useQueries';
+import { useAddToCart } from '../hooks/useQueries';
 import { toast } from 'sonner';
 import PrimaryCtaButton from './buttons/PrimaryCtaButton';
 import { getAvailabilityStatus } from '../utils/statusStyles';
@@ -17,8 +16,6 @@ interface ProductGridProps {
 
 export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   const addToCart = useAddToCart();
-  const addToWishlist = useAddToWishlist();
-  const { data: wishlist = [] } = useGetWishlist();
 
   const handleAddToCart = async (e: React.MouseEvent, productId: string) => {
     e.preventDefault();
@@ -30,22 +27,12 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
     }
   };
 
-  const handleAddToWishlist = async (e: React.MouseEvent, productId: string) => {
-    e.preventDefault();
-    try {
-      await addToWishlist.mutateAsync(productId);
-      toast.success('Added to wishlist!');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to add to wishlist');
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <Card key={i}>
-            <Skeleton className="aspect-square w-full" />
+          <Card key={i} className="rounded-2xl">
+            <Skeleton className="aspect-square w-full rounded-t-2xl" />
             <CardContent className="p-4">
               <Skeleton className="h-4 w-3/4 mb-2" />
               <Skeleton className="h-4 w-1/2" />
@@ -71,13 +58,12 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
         const discount = product.discount ? Number(product.discount) : 0;
         const price = Number(product.price);
         const finalPrice = discount > 0 ? price - (price * discount) / 100 : price;
-        const isInWishlist = wishlist.includes(product.id);
         const availabilityStatus = getAvailabilityStatus(Number(product.stock));
 
         return (
           <Link key={product.id} to="/product/$productId" params={{ productId: product.id }}>
-            <Card className="group hover:shadow-soft-lg transition-all h-full flex flex-col border-2 hover:border-primary/30 hover-tint-primary">
-              <div className="relative aspect-square overflow-hidden rounded-t-lg">
+            <Card className="group card-lift h-full flex flex-col border-2 rounded-2xl shadow-soft hover:shadow-soft-xl bg-card">
+              <div className="relative aspect-square overflow-hidden rounded-t-2xl">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
@@ -90,39 +76,29 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
                   </div>
                 )}
                 {discount > 0 && (
-                  <Badge className="absolute top-2 left-2 bg-gradient-to-r from-destructive to-destructive/80 text-destructive-foreground shadow-lg border-2 border-card">
+                  <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground shadow-lg border-2 border-card font-bold text-xs px-2 py-1">
                     -{discount}%
                   </Badge>
                 )}
                 {Number(product.stock) < 10 && (
-                  <Badge className={`absolute top-2 right-2 ${availabilityStatus.className} shadow-lg border-2 border-card text-xs`}>
+                  <Badge className={`absolute top-2 right-2 ${availabilityStatus.className} shadow-lg border-2 border-card text-xs font-semibold`}>
                     {availabilityStatus.text}
                   </Badge>
                 )}
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className={`absolute ${discount > 0 || Number(product.stock) < 10 ? 'top-12' : 'top-2'} right-2 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110 border-2 border-card ${
-                    isInWishlist ? 'bg-accent text-accent-foreground' : ''
-                  }`}
-                  onClick={(e) => handleAddToWishlist(e, product.id)}
-                >
-                  <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} />
-                </Button>
               </div>
               <CardContent className="p-3 flex-1">
                 <h3 className="font-semibold text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">${finalPrice.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-primary">₹{finalPrice.toFixed(2)}</span>
                   {discount > 0 && (
-                    <span className="text-sm text-muted-foreground line-through">${price.toFixed(2)}</span>
+                    <span className="text-sm text-muted-foreground line-through">₹{price.toFixed(2)}</span>
                   )}
                 </div>
               </CardContent>
               <CardFooter className="p-3 pt-0">
                 <PrimaryCtaButton
                   size="sm"
-                  className="w-full gap-2 shadow-md hover:shadow-lg"
+                  className="w-full gap-2 shadow-md hover:shadow-lg rounded-xl h-10"
                   onClick={(e) => handleAddToCart(e, product.id)}
                   disabled={Number(product.stock) === 0}
                 >

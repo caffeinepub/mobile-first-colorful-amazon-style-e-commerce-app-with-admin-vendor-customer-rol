@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 25,
-  "summary": "Shift toward a mobile-first colorful Amazon-like marketplace app flow: home login choice (Customer/Vendor), form-based onboarding, city-based vendor discovery, vendor outlet onboarding/dashboard, and admin vendor/wallet oversight, built atop existing ICP canister (Motoko) + React/Vite/shadcn UI foundation.",
+  "projectStateVersion": 67,
+  "summary": "Mobile-first colorful Amazon-like marketplace app with strict role-based capabilities: customers can only shop (no data editing), vendors can only create/manage their own outlet and products (including photo upload), and admins can change/manage everything; built on ICP (Motoko) + React/Vite/shadcn with existing RBAC + RequireRole patterns.",
   "existing_features": [
     {
       "id": "IF-1",
@@ -134,66 +134,175 @@
       "version": 1
     },
     {
-      "id": "feature-replace-the-current-home-page-content-with-a-mobile-first-landing-screen-that-shows-two-large-primary-actions-customer-login-and-vendor-login-as-big-rounded-cards-buttons-optimized-for-touch-large-tap-targets-clear-spacing",
-      "title": "Replace the current Home page content with a mobile-first landing screen that shows two large primary actions: \"Customer Login\" and \"Vendor Login\" as big rounded cards/buttons optimized for touch (large tap targets, clear spacing).",
+      "id": "IF-13",
+      "title": "Mobile-first landing screen with Customer/Vendor login CTAs",
+      "synonyms": [
+        "landing page login choice",
+        "customer vs vendor entry"
+      ],
+      "description": "Replaced/updated the home landing experience to provide two prominent primary actions (“Customer Login” and “Vendor Login”) using the existing mobile navigation shell.",
       "reqIds": [
-        "REQ-11"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-customer-login-form-screen-with-the-following-fields-and-validation-name-required-mobile-number-required-city-dropdown-required-options-kanpur-unnao-area-required-pin-code-required-on-submit-navigate-to-the-vendor-list-page-and-carry-the-selected-city-forward",
-      "title": "Implement the Customer Login Form screen with the following fields and validation: Name (required), Mobile number (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Vendor List page and carry the selected city forward.",
+      "id": "IF-14",
+      "title": "Customer onboarding form and city-filtered vendor discovery list",
+      "synonyms": [
+        "customer login form",
+        "vendor list by city"
+      ],
+      "description": "Customer onboarding/login screen (Name, Mobile, City (Kanpur/Unnao), Area, Pin code) with post-submit navigation to a vendor list screen filtered by selected city and vendor cards (Outlet name, Area, Mobile, View Shop).",
       "reqIds": [
-        "REQ-12"
+        "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-vendor-list-page-that-renders-vendor-cards-filtered-by-the-city-selected-in-the-customer-login-form-each-vendor-card-must-show-shop-name-area-mobile-number-and-a-view-shop-button",
-      "title": "Implement the Vendor List page that renders vendor cards filtered by the city selected in the Customer Login Form. Each vendor card must show: Shop name, Area, Mobile number, and a \"View Shop\" button.",
+      "id": "IF-15",
+      "title": "Vendor shop page filtered to selected vendor products",
+      "synonyms": [
+        "view shop",
+        "vendor-scoped product listing"
+      ],
+      "description": "Customer “View Shop” experience that opens a vendor shop page and lists only products for the selected vendor (reusing existing product grid/card patterns).",
       "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Vendor onboarding flow: vendor login form + outlet details screen",
+      "synonyms": [
+        "vendor login",
+        "outlet onboarding"
+      ],
+      "description": "Vendor onboarding/login screen (Name, Mobile, City (Kanpur/Unnao), Area, Pin code) followed by an Outlet Details screen capturing outlet information (including picture upload field and IDs) and then routing into a vendor dashboard entry page.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Backend vendor outlet profile data model + migration (city/area/pin/outlet fields, IDs, picture, status)",
+      "synonyms": [
+        "vendor outlet fields",
+        "outlet profile backend",
+        "vendor discovery backend"
+      ],
+      "description": "Motoko backend extended to store and serve outlet-specific vendor fields (city, area, pin code, outlet name/mobile, outlet picture via blob storage, Aadhar, optional GST) plus outlet status (Enabled/Disabled), with migration support and APIs consumable by customers (discovery), vendors (create/update), and admins (management).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-18",
+      "title": "Backend vendor wallet commission rules + outlet auto-disable/enable",
+      "synonyms": [
+        "vendor wallet due",
+        "10% commission",
+        "wallet limit 1000"
+      ],
+      "description": "Motoko backend implements vendor wallet business rules: add 10% commission per order to wallet due; enforce 1000 INR wallet limit; auto-disable outlet when due >= 1000; provide backend action to reset wallet due to 0 and re-enable outlet.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-19",
+      "title": "Vendor Dashboard wallet/status UI with “Pay Company” action",
+      "synonyms": [
+        "vendor dashboard wallet card",
+        "pay company button"
+      ],
+      "description": "Vendor dashboard updated to show outlet name, status (Enabled/Disabled), total sales, and wallet due (INR formatting) in a mobile-first card layout, including a “Pay Company” button that calls the backend reset/pay action and refreshes UI state.",
+      "reqIds": [
+        "REQ-6",
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "Admin vendor management: outlet enable/disable, wallet dues, and orders overview",
+      "synonyms": [
+        "admin vendors page",
+        "admin wallet oversight"
+      ],
+      "description": "Admin console extended to manage vendors with outlet details, view wallet due amounts, enable/disable vendor outlets, and view total orders/overview using existing admin orders data where available.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-21",
+      "title": "Bright, colorful, mobile-first theme applied to onboarding/vendor flow screens",
+      "synonyms": [
+        "Amazon-like theme",
+        "rounded cards",
+        "large CTAs"
+      ],
+      "description": "UI styling updated for the new Customer/Vendor flow screens to consistently use bright colors, rounded cards, soft shadows, large buttons, and mobile-friendly spacing with English labels.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-22",
+      "title": "Strict role capability enforcement across UI + backend APIs (customer/vendor/admin)",
+      "synonyms": [
+        "capability restrictions",
+        "role-scoped mutations",
+        "management screen access control"
+      ],
+      "description": "End-to-end enforcement of strict role capabilities: customers are limited to shopping-only flows; vendors are limited to creating/managing their own outlet profile plus CRUD on their own products and photo uploads; all admin management screens and backend mutation APIs are restricted to admins. Frontend routes/navigation use RequireRole/AccessDenied patterns and backend Motoko authorization guards enforce the same constraints.",
+      "reqIds": [
+        "REQ-11",
+        "REQ-12",
         "REQ-13"
       ],
       "version": 1
     },
     {
-      "id": "feature-define-the-view-shop-button-behavior-for-the-vendor-list-page-when-pressed-navigate-to-a-vendor-shop-route-screen-even-if-minimal-for-now-that-clearly-identifies-which-shop-was-selected-at-minimum-show-the-selected-shop-name-and-city-area",
-      "title": "Define the \"View Shop\" button behavior for the Vendor List page: when pressed, navigate to a vendor shop route/screen (even if minimal for now) that clearly identifies which shop was selected (at minimum show the selected Shop name and city/area).",
+      "id": "IF-23",
+      "title": "PWA offline-ready assets (manifest, service worker, offline fallback, icons)",
+      "synonyms": [
+        "PWA support",
+        "offline page",
+        "service worker"
+      ],
+      "description": "Frontend now includes Progressive Web App assets: web manifest, service worker registration/logic, an offline fallback page, and generated app icons (including maskable) to support installable, offline-tolerant behavior.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-rename-the-app-branding-from-shophub-to-quickbazar-across-all-visible-ui-and-app-metadata-including-the-top-navigation-brand-text-html-title-pwa-manifest-name-short-name-and-apple-web-app-title-meta-tag-use-quickbazar-no-space-consistently",
+      "title": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
       "reqIds": [
         "REQ-14"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-vendor-login-form-screen-with-the-following-fields-and-validation-name-required-mobile-required-city-dropdown-required-options-kanpur-unnao-area-required-pin-code-required-on-submit-navigate-to-the-outlet-details-form-page-and-carry-the-entered-vendor-login-info-forward",
-      "title": "Implement the Vendor Login Form screen with the following fields and validation: Name (required), Mobile (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Outlet Details form page and carry the entered vendor login info forward.",
+      "id": "feature-remove-the-existing-header-logo-image-reference-currently-assets-colorful-illustrative-online-shop-logo-jpg-jpeg-and-replace-it-with-a-newly-generated-quickbazar-logo-asset-stored-under-frontend-public-assets-generated",
+      "title": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
       "reqIds": [
         "REQ-15"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-outlet-details-form-page-with-the-following-fields-and-validation-outlet-name-required-outlet-photo-upload-required-ui-control-accept-images-outlet-mobile-required-aadhar-number-required-gst-optional-on-submit-navigate-to-a-simple-vendor-dashboard-page-and-show-submitted-outlet-details-there-at-minimum-outlet-name",
-      "title": "Implement the Outlet Details form page with the following fields and validation: Outlet name (required), Outlet photo upload (required UI control; accept images), Outlet mobile (required), Aadhar number (required), GST (optional). On submit, navigate to a simple Vendor Dashboard page and show submitted outlet details there (at minimum: Outlet name).",
+      "id": "feature-update-pwa-icon-assets-to-match-the-new-quickbazar-branding-by-regenerating-the-existing-icon-files-referenced-by-the-manifest-keep-the-same-filenames-paths-so-the-manifest-references-remain-valid",
+      "title": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
       "reqIds": [
         "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-simple-vendor-dashboard-page-not-the-existing-vendor-portal-dashboard-that-is-reachable-after-the-outlet-details-submit-and-presents-a-clean-mobile-first-summary-card-layout-at-minimum-showing-outlet-name-optionally-show-other-submitted-fields",
-      "title": "Create a simple Vendor Dashboard page (not the existing vendor portal dashboard) that is reachable after the Outlet Details submit and presents a clean mobile-first summary card layout (at minimum showing Outlet name; optionally show other submitted fields).",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-consistent-modern-colorful-visual-theme-across-the-new-home-login-list-outlet-dashboard-screens-using-rounded-cards-large-buttons-and-soft-shadows-use-a-coherent-non-blue-non-purple-palette-e-g-coral-teal-lime-or-similar-and-ensure-all-user-facing-text-is-in-english",
-      "title": "Apply a consistent modern colorful visual theme across the new Home/Login/List/Outlet/Dashboard screens using rounded cards, large buttons, and soft shadows. Use a coherent non-blue/non-purple palette (e.g., coral/teal/lime or similar) and ensure all user-facing text is in English.",
-      "reqIds": [
-        "REQ-18"
       ],
       "version": 1
     }
@@ -201,112 +310,14 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Home screen with two prominent actions: Customer Login and Vendor Login (mobile-first, colorful rounded UI, bottom nav).",
+      "summary": "Rename app/project from ShopHub to QuickBazar (\"Quick bazar\") across the UI/branding.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Customer onboarding/login form (Name, Mobile, City dropdown: Kanpur/Unnao, Area, Pin code) and post-submit vendor list filtered by selected city with vendor cards (Outlet name, Area, Mobile, View Shop).",
+      "summary": "Replace/remove existing logo and add a new good-looking logo (designer choice) for QuickBazar.",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Vendor onboarding/login form (Name, Mobile, City: Kanpur/Unnao, Area, Pin code) then outlet details page (Outlet name, outlet picture upload, outlet mobile, Aadhar number, GST optional) leading to Vendor Dashboard creation.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Vendor Dashboard with outlet status (Enabled/Disabled), total sales, wallet due amount; wallet rules: add 10% commission per order, wallet limit 1000 INR triggers auto-disable, 'Pay Company' resets wallet to 0 and re-enables outlet.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Admin features for marketplace: view all vendors, enable/disable vendor outlets, view vendor wallet dues, view total orders.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Replace the current home screen experience with a mobile-first landing screen that shows two large primary actions: “Customer Login” and “Vendor Login”, using a bright, colorful, Amazon-like visual style (rounded cards, soft shadows, large tap targets) and keeping the existing mobile bottom navigation pattern.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Implement the Customer flow screens: a Customer Login form with fields Name, Mobile number, City dropdown (Kanpur, Unnao), Area, Pin code; after successful submit, navigate to a vendor list screen filtered by the selected city and render vendor cards showing Outlet name, Area, Mobile number, and a “View Shop” button.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Add a “View Shop” customer experience for a selected vendor: when the customer taps “View Shop” on a vendor card, open a vendor shop page that lists products belonging to that vendor (using existing product card/grid patterns) and does not show products from other vendors.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Implement the Vendor flow screens: a Vendor Login form with fields Name, Mobile, City (Kanpur, Unnao), Area, Pin code; after submit, navigate to an Outlet Details page with fields Outlet name, Outlet picture upload, Outlet mobile number, Aadhar number, and GST number (optional); after successful submit, navigate into the Vendor Dashboard.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Extend backend vendor data to support outlet-specific fields required by the Vendor flow: city, area, pin code, outlet name, outlet mobile number, outlet picture (stored using the existing blob storage module), Aadhar number, optional GST number, and an outlet status (Enabled/Disabled). Ensure this data can be created/updated by the vendor and read by customers (for vendor discovery) and admins (for management).",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Update the Vendor Dashboard to show: Outlet name, Status (Enabled/Disabled), Total sales, and Wallet due amount, using English labels and a mobile-first card layout consistent with the bright, rounded UI style.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Implement vendor wallet business rules in the backend: automatically add a 10% commission of each order’s sale amount to the vendor’s wallet due; enforce a wallet limit of 1000 INR; when wallet due reaches or exceeds 1000, automatically set the vendor outlet status to Disabled; provide a “Pay Company” action that resets wallet due to 0 and re-enables the outlet.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Implement the “Pay Company” button on the Vendor Dashboard that calls the backend pay/reset action and updates the UI state to reflect wallet due reset to 0 and status set back to Enabled.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Extend Admin vendor management features so admins can: view all vendors with outlet details, see each vendor’s wallet due, enable/disable vendor outlets, and see total orders (reusing the existing admin orders data where available).",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Apply a consistent bright, colorful, Amazon-like theme across the new Customer/Vendor flow screens: rounded cards, soft shadows, large buttons, and mobile-friendly spacing, while keeping all user-facing text in English.",
-      "reqIds": [
-        "REQ-10"
-      ],
       "status": "pending"
     }
   ],
@@ -317,28 +328,48 @@
     "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
     "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
     "Authorization and blob-storage Motoko components updated to v4.0.0 (componentized modules used by backend/main.mo).",
-    "Build template expanded/updated to include a full React/Vite + shadcn/ui frontend template and ICP canister YAMLs under build-template/src.",
     "Core infrastructure component updated to v1.0.2 alongside authorization/blob-storage v4.0.0 integrations in backend/main.mo.",
     "Build template now includes image asset maintenance scripts (resize-images.js, prune-unused-images.js) for generated frontend assets.",
-    "Generated marketing assets now include additional \"colorful\" and \"realistic\" category-tile variants alongside the original sprite/hero/trust-badge images."
+    "Build-template React frontend now vendors full shadcn/ui component sources plus custom ESLint rules (require Internet Identity provider; prevent BigInt in query keys) for consistent ICP/II-ready apps.",
+    "Frontend now includes PWA assets (manifest.webmanifest, sw.js, offline.html, generated icons) to support installable and offline-tolerant behavior."
   ],
   "known_issues": [],
   "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Distinct, modern marketplace logo mark with bold typography and vibrant colors on transparent background (quickbazar-logo.dim_512x512.png)\n- App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_512x512.png)\n- App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_192x192.png)\n- Maskable app icon, centered symbol with safe padding and solid/vibrant background matching the logo identity (pwa-maskable.dim_512x512.png)\n- Apple touch icon, rounded-square symbol matching the logo identity (apple-touch-icon.dim_180x180.png)",
   "generatedImages": [
     {
-      "filename": "frontend/public/assets/generated/clothing-tile-realistic.dim_800x500.png",
-      "description": "Generated realistic clothing category tile illustration for storefront/category UI.",
-      "targetWidth": 800,
-      "targetHeight": 500
+      "filename": "quickbazar-logo.dim_512x512.png",
+      "description": "Distinct, modern marketplace logo mark with bold typography and vibrant colors on transparent background",
+      "targetWidth": 512,
+      "targetHeight": 512
     },
     {
-      "filename": "frontend/public/assets/generated/cosmetics-tile-realistic.dim_800x500.png",
-      "description": "Generated realistic cosmetics category tile illustration for storefront/category UI.",
-      "targetWidth": 800,
-      "targetHeight": 500
+      "filename": "pwa-icon.dim_512x512.png",
+      "description": "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "pwa-icon.dim_192x192.png",
+      "description": "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "pwa-maskable.dim_512x512.png",
+      "description": "Maskable app icon, centered symbol with safe padding and solid/vibrant background matching the logo identity",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "apple-touch-icon.dim_180x180.png",
+      "description": "Apple touch icon, rounded-square symbol matching the logo identity",
+      "targetWidth": 180,
+      "targetHeight": 180
     }
   ],
-  "projectName": "Mobile-first marketplace landing + customer/vendor onboarding, outlet wallet rules, and admin vendor controls",
+  "gameProjectType": "none",
+  "projectName": "QuickBazar",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

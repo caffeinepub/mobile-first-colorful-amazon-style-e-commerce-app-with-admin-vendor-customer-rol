@@ -1,33 +1,14 @@
-import { useState } from 'react';
 import { User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useGetCallerUserProfile, useSaveCallerUserProfile, useGetCallerUserRole } from '../../hooks/useQueries';
+import { useGetCallerUserProfile, useGetCallerUserRole } from '../../hooks/useQueries';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import { toast } from 'sonner';
-import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
 
 export default function CustomerProfilePage() {
   const { identity } = useInternetIdentity();
   const { data: profile } = useGetCallerUserProfile();
   const { data: role } = useGetCallerUserRole();
-  const saveProfile = useSaveCallerUserProfile();
-
-  const [name, setName] = useState(profile?.name || '');
-  const [email, setEmail] = useState(profile?.email || '');
-  const [phone, setPhone] = useState(profile?.phone || '');
-  const [address, setAddress] = useState(profile?.address || '');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await saveProfile.mutateAsync({ name, email, phone, address });
-      toast.success('Profile updated successfully!');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -46,7 +27,7 @@ export default function CustomerProfilePage() {
           <CardTitle>Profile Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="principal">Principal ID</Label>
               <Input
@@ -57,13 +38,12 @@ export default function CustomerProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                required
+                value={profile?.name || ''}
+                disabled
+                placeholder="Not set"
               />
             </div>
             <div className="space-y-2">
@@ -71,9 +51,9 @@ export default function CustomerProfilePage() {
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                value={profile?.email || ''}
+                disabled
+                placeholder="Not set"
               />
             </div>
             <div className="space-y-2">
@@ -81,24 +61,21 @@ export default function CustomerProfilePage() {
               <Input
                 id="phone"
                 type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1234567890"
+                value={profile?.phone || ''}
+                disabled
+                placeholder="Not set"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
               <Input
                 id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Your address"
+                value={profile?.address || ''}
+                disabled
+                placeholder="Not set"
               />
             </div>
-            <PrimaryCtaButton type="submit" className="w-full" disabled={saveProfile.isPending}>
-              {saveProfile.isPending ? 'Saving...' : 'Save Changes'}
-            </PrimaryCtaButton>
-          </form>
+          </div>
         </CardContent>
       </Card>
     </div>

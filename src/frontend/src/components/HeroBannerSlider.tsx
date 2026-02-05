@@ -27,7 +27,7 @@ export default function HeroBannerSlider() {
   };
 
   return (
-    <div className="relative w-full aspect-[16/6] md:aspect-[16/5] overflow-hidden rounded-2xl shadow-soft-lg border-2 border-primary/10">
+    <div className="relative w-full aspect-[16/6] md:aspect-[16/5] overflow-hidden rounded-3xl shadow-soft-xl border-2 border-primary/10">
       <div className="absolute inset-0 gradient-overlay-colorful pointer-events-none z-10" />
       <div
         className="flex transition-transform duration-500 ease-out h-full"
@@ -46,7 +46,7 @@ export default function HeroBannerSlider() {
       <Button
         variant="secondary"
         size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg z-20 hover:scale-110 transition-transform bg-card/90 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/40"
+        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg z-20 hover:scale-110 transition-transform bg-card/95 backdrop-blur-sm border-2 border-primary/30 hover:border-primary/50"
         onClick={goToPrevious}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -55,7 +55,7 @@ export default function HeroBannerSlider() {
       <Button
         variant="secondary"
         size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg z-20 hover:scale-110 transition-transform bg-card/90 backdrop-blur-sm border-2 border-primary/20 hover:border-primary/40"
+        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg z-20 hover:scale-110 transition-transform bg-card/95 backdrop-blur-sm border-2 border-primary/30 hover:border-primary/50"
         onClick={goToNext}
       >
         <ChevronRight className="h-5 w-5" />

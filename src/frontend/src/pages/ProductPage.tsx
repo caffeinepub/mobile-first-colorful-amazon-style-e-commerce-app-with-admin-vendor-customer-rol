@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from '@tanstack/react-router';
-import { ShoppingCart, Heart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetProduct, useAddToCart, useAddToWishlist, useAddReview } from '../hooks/useQueries';
+import { useGetProduct, useAddToCart, useAddReview } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { toast } from 'sonner';
 import PrimaryCtaButton from '../components/buttons/PrimaryCtaButton';
@@ -19,7 +19,6 @@ export default function ProductPage() {
   const { data: product, isLoading } = useGetProduct(productId);
   const { identity } = useInternetIdentity();
   const addToCart = useAddToCart();
-  const addToWishlist = useAddToWishlist();
   const addReview = useAddReview();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -64,15 +63,6 @@ export default function ProductPage() {
       toast.success('Added to cart!');
     } catch (error: any) {
       toast.error(error.message || 'Failed to add to cart');
-    }
-  };
-
-  const handleAddToWishlist = async () => {
-    try {
-      await addToWishlist.mutateAsync(product.id);
-      toast.success('Added to wishlist!');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to add to wishlist');
     }
   };
 
@@ -228,9 +218,6 @@ export default function ProductPage() {
               <ShoppingCart className="h-5 w-5" />
               {Number(product.stock) === 0 ? 'Out of Stock' : 'Add to Cart'}
             </PrimaryCtaButton>
-            <Button size="lg" variant="outline" onClick={handleAddToWishlist} className="hover:bg-accent/10 hover:text-accent hover:border-accent focus-ring-accent">
-              <Heart className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </div>

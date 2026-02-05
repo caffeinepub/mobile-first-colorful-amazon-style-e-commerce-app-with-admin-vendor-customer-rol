@@ -36,6 +36,8 @@ export type OrderStatus = { 'shipped' : null } |
   { 'pending' : null } |
   { 'delivered' : null } |
   { 'processing' : null };
+export type OutletStatus = { 'disabled' : null } |
+  { 'enabled' : null };
 export interface Product {
   'id' : string,
   'active' : boolean,
@@ -67,7 +69,16 @@ export type UserRole = { 'admin' : null } |
 export interface Vendor {
   'principal' : Principal,
   'verified' : boolean,
+  'outletStatus' : OutletStatus,
   'name' : string,
+  'outletName' : string,
+  'walletDue' : bigint,
+}
+export interface VendorDashboardStats {
+  'totalSalesAmount' : bigint,
+  'outletStatus' : OutletStatus,
+  'outletName' : string,
+  'walletDue' : bigint,
 }
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
@@ -129,6 +140,7 @@ export interface _SERVICE {
   'getProducts' : ActorMethod<[string], Array<Product>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getVendor' : ActorMethod<[Principal], [] | [Vendor]>,
+  'getVendorDashboardStats' : ActorMethod<[], VendorDashboardStats>,
   'getVendorOrders' : ActorMethod<[], Array<Order>>,
   'getVendorProducts' : ActorMethod<[], Array<Product>>,
   'getVendors' : ActorMethod<[], Array<Vendor>>,
@@ -136,6 +148,7 @@ export interface _SERVICE {
   'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isVendor' : ActorMethod<[], boolean>,
+  'payCompany' : ActorMethod<[], undefined>,
   'removeCartItem' : ActorMethod<[string], undefined>,
   'removeFromWishlist' : ActorMethod<[string], undefined>,
   'removeVendor' : ActorMethod<[Principal], undefined>,

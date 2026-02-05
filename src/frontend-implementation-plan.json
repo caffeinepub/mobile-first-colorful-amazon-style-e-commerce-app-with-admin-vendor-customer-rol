@@ -1,215 +1,104 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Mobile-first customer/vendor onboarding flow with vendor list and simple vendor dashboard",
+  "title": "Rename branding to QuickBazar and update logo/PWA icons",
   "requirements": [
     {
-      "id": "REQ-11",
-      "summary": "Replace Home page with a mobile-first landing that shows two large primary actions (Customer Login, Vendor Login) and routes into each flow.",
-      "acceptanceCriteria": [
-        "On mobile widths, the two actions are prominently visible without relying on the existing marketplace sections",
-        "Both actions navigate to their respective flows (Customer Login and Vendor Login) using the app router"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Replace existing marketplace-focused homepage content with a landing screen that uses large rounded touch-friendly action cards/buttons for \"Customer Login\" and \"Vendor Login\" and routes via the TanStack router. Use shadcn-ui components (e.g., Card, Button) and/or the existing PrimaryCtaButton to ensure consistent large tap targets. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register and wire new onboarding routes so the Home page actions can navigate to the Customer Login and Vendor Login screens via the app router."
-        }
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "summary": "Create Customer Login Form with required validation and pass selected city into the Vendor List screen on submit.",
-      "acceptanceCriteria": [
-        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
-        "Submitting the form without required fields shows clear English validation feedback",
-        "Successful submit navigates to the Vendor List page and preserves the selected city for filtering"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-          "operation": "create",
-          "description": "Implement the Customer Login form UI (Name, Mobile number, City dropdown, Area, Pin code) with required-field validation and clear English error messages. Use shadcn-ui form inputs (e.g., Input, Label, Select, Card, Button) for consistent styling and mobile-friendly spacing. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add a route for the Customer Login screen and wire navigation to the Vendor List route on successful submit while carrying the selected city forward via router search params."
-        }
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "summary": "Create Vendor List page that filters vendor cards by selected city and handles missing-city navigation gracefully.",
-      "acceptanceCriteria": [
-        "The page displays only vendors matching the selected city",
-        "Each vendor is rendered as a rounded card with the required fields and a visible \"View Shop\" button",
-        "If no city is present (e.g., direct navigation), the page shows an English prompt to select a city and a way to navigate back to the Customer Login Form"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "operation": "create",
-          "description": "Implement a Vendor List screen that reads the selected city from router search params, filters a vendor dataset accordingly, and renders rounded vendor cards with Shop name, Area, Mobile number, and a \"View Shop\" button. Include a missing-city empty state with an English prompt and a navigation control back to the Customer Login screen. Use shadcn-ui Card/Button components for consistent mobile-first UI. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/data/vendors.ts",
-          "operation": "create",
-          "description": "Add a small static vendor dataset containing city, shop name, area, and mobile number to support city filtering and vendor card rendering for the onboarding Vendor List UI."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add and wire the Vendor List route so Customer Login can navigate to it and direct navigation is supported."
-        }
-      ]
-    },
-    {
       "id": "REQ-14",
-      "summary": "Implement View Shop navigation from vendor cards to a dedicated vendor shop screen that identifies the selected shop.",
+      "summary": "Rename all visible “ShopHub” branding to “QuickBazar” across UI and app metadata (HTML + PWA manifest + Apple web app title), ensuring no remaining user-facing ShopHub/Marketplace naming.",
       "acceptanceCriteria": [
-        "Tapping \"View Shop\" navigates to a dedicated screen/route and does not do nothing",
-        "The destination screen shows the selected shop identity in English (at minimum the shop name)"
+        "Top navigation brand text shows “QuickBazar” instead of “ShopHub”.",
+        "frontend/index.html <title> and apple-mobile-web-app-title use “QuickBazar”.",
+        "frontend/public/manifest.webmanifest uses “QuickBazar” for name/short_name (and does not mention “ShopHub” or “Marketplace”).",
+        "A case-insensitive search in the frontend codebase shows no remaining user-facing “ShopHub” branding."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/onboarding/VendorShopPage.tsx",
-          "operation": "create",
-          "description": "Create a minimal vendor shop screen/route that identifies the selected vendor (at minimum shop name; also show city/area when available) based on the vendor id route param and/or search params. Use shadcn-ui Card/Typography for a clear mobile-first layout. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/TopNav.tsx",
+          "operation": "modify",
+          "description": "Update the top navigation brand text from “ShopHub” to “QuickBazar” (consistent casing, no space), and align any related accessibility labels/alt text that are part of the brand presentation."
         },
         {
-          "path": "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Wire each vendor card's \"View Shop\" button to navigate to the Vendor Shop route, passing a stable vendor identifier via route params and carrying city/area context as needed via search params."
+          "description": "Set the document <title> to “QuickBazar” and update the apple-mobile-web-app-title meta tag to “QuickBazar” to match the new branding."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/public/manifest.webmanifest",
           "operation": "modify",
-          "description": "Register the Vendor Shop route (with a vendor id param) in the router so navigation from Vendor List works."
+          "description": "Update PWA manifest name/short_name to “QuickBazar” and ensure no occurrence of “ShopHub” or “Marketplace” remains in manifest user-visible fields (including description if needed). Keep existing icon src paths unchanged."
+        },
+        {
+          "path": "frontend/public/offline.html",
+          "operation": "modify",
+          "description": "Update offline page metadata/title to reflect “QuickBazar” (e.g., document title), ensuring the offline experience does not display legacy “Marketplace” branding."
+        },
+        {
+          "path": "frontend/src/pages/AboutPage.tsx",
+          "operation": "modify",
+          "description": "Replace user-facing “ShopHub” mentions with “QuickBazar” in About page headings/body copy."
+        },
+        {
+          "path": "frontend/src/pages/ContactPage.tsx",
+          "operation": "modify",
+          "description": "Replace user-facing “shophub” branding in contact details (e.g., support email text/link) with “QuickBazar”-appropriate branding so users do not see “ShopHub”."
+        },
+        {
+          "path": "frontend/public/sw.js",
+          "operation": "modify",
+          "description": "Update service worker cache naming/versioning to reflect “QuickBazar” branding (to avoid keeping old branded cache names) while preserving existing offline and precache behavior."
         }
       ]
     },
     {
       "id": "REQ-15",
-      "summary": "Create Vendor Login Form with required validation and carry submitted vendor login info into Outlet Details.",
+      "summary": "Replace the existing header logo reference with a newly generated QuickBazar logo stored under frontend/public/assets/generated and render it crisply without layout shift.",
       "acceptanceCriteria": [
-        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
-        "Submitting the form without required fields shows clear English validation feedback",
-        "Successful submit navigates to the Outlet Details form page and preserves prior inputs for the flow"
+        "TopNav no longer references /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg.",
+        "TopNav renders the newly generated logo image from /assets/generated/ and the image alt text is updated to “QuickBazar logo”.",
+        "Logo renders crisply on mobile and desktop without layout shift (no stretched or pixelated appearance)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+          "path": "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
           "operation": "create",
-          "description": "Implement Vendor Login form UI (Name, Mobile, City dropdown, Area, Pin code) with required-field validation and English error messages. Use shadcn-ui inputs/selects/cards for mobile-first layout consistency. Verify the component's usage instructions before implementing."
+          "description": "Add the newly generated QuickBazar logo asset at frontend/public/assets/generated/quickbazar-logo.dim_512x512.png (transparent background), matching the provided image requirement."
         },
         {
-          "path": "frontend/src/utils/onboardingStorage.ts",
-          "operation": "create",
-          "description": "Add a small utility for storing and retrieving vendor onboarding draft data in sessionStorage (e.g., vendor login info) so the flow can carry inputs forward without exposing personal data in the URL."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/TopNav.tsx",
           "operation": "modify",
-          "description": "Add a route for Vendor Login and wire successful submit navigation to the Outlet Details route, persisting the vendor login info for the next step."
+          "description": "Remove the legacy header logo reference (/assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and render the new generated logo from frontend/public/assets/generated/quickbazar-logo.dim_512x512.png. Update alt text to “QuickBazar logo”, and adjust sizing/rendering (e.g., explicit dimensions and appropriate object-fit) to ensure crisp display and prevent layout shift."
         }
       ]
     },
     {
       "id": "REQ-16",
-      "summary": "Create Outlet Details form with required validation including image upload UI and navigate to a simple Vendor Dashboard that displays submitted outlet details.",
+      "summary": "Regenerate and replace existing PWA icon assets with QuickBazar-branded icons, keeping the same filenames/paths referenced by the manifest.",
       "acceptanceCriteria": [
-        "The form includes an image file input for Outlet photo upload and shows a preview or filename after selection",
-        "GST is optional and does not block submission when empty",
-        "On successful submit, the app navigates to the Vendor Dashboard page and displays the outlet name in English"
+        "The following existing files are replaced with newly generated QuickBazar-branded icons while keeping the same filenames and dimensions: pwa-icon.dim_192x192.png, pwa-icon.dim_512x512.png, pwa-maskable.dim_512x512.png, apple-touch-icon.dim_180x180.png.",
+        "frontend/public/manifest.webmanifest continues to reference the same icon paths under /assets/generated/ and installs successfully as a PWA.",
+        "On iOS/Android “Add to Home Screen”, the installed icon shows the updated QuickBazar design (not the old icon)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-          "operation": "create",
-          "description": "Implement the Outlet Details form UI (Outlet name, Outlet photo upload control accepting images with preview/filename, Outlet mobile, Aadhar number, GST optional) with required-field validation and English messages. Use shadcn-ui inputs/cards/buttons for consistent styling; ensure the image control is mobile-friendly. Verify the component's usage instructions before implementing."
+          "path": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+          "operation": "modify",
+          "description": "Replace the existing 192x192 PWA icon file contents with the newly generated QuickBazar-branded design, keeping the exact same filename and path."
         },
         {
-          "path": "frontend/src/utils/onboardingStorage.ts",
+          "path": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
           "operation": "modify",
-          "description": "Extend onboarding sessionStorage utilities to persist Outlet Details draft/submitted data (including a safe representation for the selected photo such as a local object URL for preview during the session) to support navigation to the dashboard."
+          "description": "Replace the existing 512x512 PWA icon file contents with the newly generated QuickBazar-branded design, keeping the exact same filename and path."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
           "operation": "modify",
-          "description": "Register and wire the Outlet Details route and ensure submit navigates to the new simple Vendor Dashboard route."
-        }
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "summary": "Create a simple Vendor Dashboard screen (distinct from existing vendor portal dashboard) that is reachable after Outlet Details submit and shows a mobile-first summary card layout.",
-      "acceptanceCriteria": [
-        "The dashboard is a distinct screen/route reachable via the Vendor onboarding flow",
-        "The dashboard renders correctly on mobile with large readable typography and rounded cards"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
-          "operation": "create",
-          "description": "Implement a dedicated onboarding Vendor Dashboard page that reads the submitted outlet details from onboarding storage and displays a clean mobile-first summary card (at minimum: Outlet name, in English). Use shadcn-ui Card components and large readable typography. Verify the component's usage instructions before implementing."
+          "description": "Replace the existing 512x512 maskable icon file contents with the newly generated QuickBazar-branded design (with safe padding), keeping the exact same filename and path."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
           "operation": "modify",
-          "description": "Add and wire a dedicated route for the simple onboarding Vendor Dashboard page (distinct from the existing protected /vendor dashboard)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "summary": "Apply a consistent modern colorful (non-blue/non-purple) theme and shared styling across the new onboarding screens with rounded cards, large buttons, and soft shadows using English text throughout.",
-      "acceptanceCriteria": [
-        "All new screens share the same design language (spacing, radii, shadows, button styles)",
-        "Buttons meet mobile touch target expectations (visibly large and easy to tap)",
-        "All labels, placeholders, helper text, and messages on the new flow screens are in English"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Adjust global design tokens and/or add small reusable utility classes to enforce a consistent modern colorful theme across onboarding screens, ensuring the palette avoids blue/purple (e.g., coral/teal/lime), while keeping soft shadows, rounded cards, and large touch-friendly buttons consistent."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Align the new Home landing styling with the updated colorful theme (rounded cards, soft shadows, large buttons, consistent spacing) and ensure all user-facing text remains English."
-        },
-        {
-          "path": "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-          "operation": "modify",
-          "description": "Apply shared theme styling (rounded cards, soft shadows, large inputs/buttons, consistent spacing) to the Customer Login screen and ensure all text/validation messages are English."
-        },
-        {
-          "path": "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-          "operation": "modify",
-          "description": "Apply shared theme styling (rounded cards, soft shadows, large inputs/buttons, consistent spacing) to the Vendor Login screen and ensure all text/validation messages are English."
-        },
-        {
-          "path": "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "operation": "modify",
-          "description": "Apply shared theme styling to vendor cards and list layout (rounded cards, visible large \"View Shop\" buttons, soft shadows) and ensure all prompts are English."
-        },
-        {
-          "path": "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-          "operation": "modify",
-          "description": "Apply shared theme styling to the Outlet Details form (large touch targets, rounded cards, consistent spacing) and ensure all labels/helper text are English."
-        },
-        {
-          "path": "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Apply shared theme styling to the simple Vendor Dashboard summary card layout (rounded cards, soft shadows, mobile-first typography) and ensure displayed labels are English."
+          "description": "Replace the existing 180x180 Apple touch icon file contents with the newly generated QuickBazar-branded design, keeping the exact same filename and path."
         }
       ]
     }

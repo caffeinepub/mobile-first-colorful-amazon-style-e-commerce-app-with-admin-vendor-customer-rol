@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review } from '../backend';
+import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, VendorDashboardStats } from '../backend';
 
 // User Profile Queries
 export function useGetCallerUserProfile() {
@@ -319,6 +319,7 @@ export function useCreateOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customerOrders'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries({ queryKey: ['vendorDashboardStats'] });
     },
   });
 }
@@ -355,6 +356,38 @@ export function useGetVendorOrders() {
       }
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetVendorDashboardStats() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<VendorDashboardStats | null>({
+    queryKey: ['vendorDashboardStats'],
+    queryFn: async () => {
+      if (!actor) return null;
+      try {
+        return await actor.getVendorDashboardStats();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function usePayCompany() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.payCompany();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendorDashboardStats'] });
+    },
   });
 }
 

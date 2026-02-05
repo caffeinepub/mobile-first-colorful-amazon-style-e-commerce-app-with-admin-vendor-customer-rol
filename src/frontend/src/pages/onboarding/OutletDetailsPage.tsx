@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Store, Upload, X } from 'lucide-react';
 import { saveOutletDetailsData, getVendorLoginData } from '@/utils/onboardingStorage';
+import FloatingLabelInput from '@/components/forms/FloatingLabelInput';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function OutletDetailsPage() {
   const navigate = useNavigate();
@@ -88,14 +89,14 @@ export default function OutletDetailsPage() {
         <Button
           variant="ghost"
           onClick={() => navigate({ to: '/vendor-login' })}
-          className="mb-4 hover:bg-accent/10"
+          className="mb-4 hover:bg-accent/10 rounded-xl"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
 
-        <Card className="shadow-soft-lg border-2">
-          <CardHeader className="surface-accent-tint rounded-t-xl">
+        <Card className="shadow-soft-xl border-2 rounded-2xl">
+          <CardHeader className="surface-accent-tint rounded-t-2xl">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center border-2 border-accent/30">
                 <Store className="h-6 w-6 text-accent" />
@@ -103,16 +104,14 @@ export default function OutletDetailsPage() {
               <CardTitle className="text-2xl">Outlet Details</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-5">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="outletName" className="text-base">Outlet Name</Label>
-                <Input
+                <FloatingLabelInput
                   id="outletName"
-                  placeholder="Enter outlet name"
+                  label="Outlet Name"
                   value={formData.outletName}
                   onChange={(e) => setFormData({ ...formData, outletName: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.outletName && <p className="text-sm text-destructive">{errors.outletName}</p>}
               </div>
@@ -121,7 +120,7 @@ export default function OutletDetailsPage() {
                 <Label htmlFor="photo" className="text-base">Outlet Photo</Label>
                 <div className="space-y-3">
                   {previewUrl ? (
-                    <div className="relative rounded-xl overflow-hidden border-2 border-accent/30">
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-accent/30">
                       <img
                         src={previewUrl}
                         alt="Outlet preview"
@@ -131,7 +130,7 @@ export default function OutletDetailsPage() {
                         type="button"
                         variant="destructive"
                         size="icon"
-                        className="absolute top-2 right-2"
+                        className="absolute top-2 right-2 rounded-full"
                         onClick={clearFile}
                       >
                         <X className="h-4 w-4" />
@@ -140,7 +139,7 @@ export default function OutletDetailsPage() {
                   ) : (
                     <label
                       htmlFor="photo"
-                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-accent/30 rounded-xl cursor-pointer hover:bg-accent/5 transition-colors"
+                      className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-accent/30 rounded-2xl cursor-pointer hover:bg-accent/5 transition-colors"
                     >
                       <Upload className="h-10 w-10 text-accent mb-2" />
                       <span className="text-sm text-muted-foreground">Click to upload photo</span>
@@ -158,44 +157,36 @@ export default function OutletDetailsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="outletMobile" className="text-base">Outlet Mobile Number</Label>
-                <Input
+                <FloatingLabelInput
                   id="outletMobile"
+                  label="Outlet Mobile Number"
                   type="tel"
-                  placeholder="Enter 10-digit mobile number"
                   value={formData.outletMobile}
                   onChange={(e) => setFormData({ ...formData, outletMobile: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.outletMobile && <p className="text-sm text-destructive">{errors.outletMobile}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="aadharNumber" className="text-base">Aadhar Number</Label>
-                <Input
+                <FloatingLabelInput
                   id="aadharNumber"
-                  placeholder="Enter 12-digit Aadhar number"
+                  label="Aadhar Number"
                   value={formData.aadharNumber}
                   onChange={(e) => setFormData({ ...formData, aadharNumber: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.aadharNumber && <p className="text-sm text-destructive">{errors.aadharNumber}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="gst" className="text-base">
-                  GST Number <span className="text-muted-foreground text-sm">(Optional)</span>
-                </Label>
-                <Input
+                <FloatingLabelInput
                   id="gst"
-                  placeholder="Enter GST number"
+                  label="GST Number (Optional)"
                   value={formData.gst}
                   onChange={(e) => setFormData({ ...formData, gst: e.target.value })}
-                  className="h-12 text-base"
                 />
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base gradient-primary-cta">
+              <Button type="submit" className="w-full h-14 text-base gradient-primary-cta rounded-xl">
                 Submit
               </Button>
             </form>

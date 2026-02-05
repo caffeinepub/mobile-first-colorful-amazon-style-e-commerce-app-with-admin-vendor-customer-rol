@@ -1,5 +1,6 @@
 import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
+import { useEffect } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import AppLayout from './components/AppLayout';
 import HomePage from './pages/HomePage';
@@ -250,6 +251,20 @@ const routeTree = rootRoute.addChildren([
 const router = createRouter({ routeTree });
 
 export default function App() {
+  useEffect(() => {
+    // Register service worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered successfully:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+  }, []);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <RouterProvider router={router} />

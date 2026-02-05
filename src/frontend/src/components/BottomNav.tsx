@@ -1,24 +1,70 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Home, Grid3x3, ShoppingCart, User } from 'lucide-react';
+import { Home, Grid3x3, ShoppingCart, User, LayoutDashboard, Package } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useGetCart } from '../hooks/useQueries';
+import { useGetCart, useGetCallerUserRole, useIsVendor } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import type { LucideIcon } from 'lucide-react';
+
+interface NavItem {
+  to: string;
+  icon: LucideIcon;
+  label: string;
+  badge?: number;
+}
 
 export default function BottomNav() {
   const router = useRouterState();
   const currentPath = router.location.pathname;
   const { data: cart } = useGetCart();
+  const { data: role } = useGetCallerUserRole();
+  const { data: isVendor } = useIsVendor();
+  const { identity } = useInternetIdentity();
 
   const cartItemCount = cart?.reduce((sum, item) => sum + Number(item.quantity), 0) || 0;
+  const isAdmin = role === 'admin';
+  const isVendorUser = isVendor === true;
+  const isCustomer = identity && !isAdmin && !isVendorUser;
 
-  const navItems = [
-    { to: '/', icon: Home, label: 'Home', color: 'primary' },
-    { to: '/categories', icon: Grid3x3, label: 'Categories', color: 'secondary' },
-    { to: '/cart', icon: ShoppingCart, label: 'Cart', badge: cartItemCount, color: 'accent' },
-    { to: '/profile', icon: User, label: 'Profile', color: 'primary' },
+  // Customer navigation
+  const customerNavItems: NavItem[] = [
+    { to: '/', icon: Home, label: 'Home' },
+    { to: '/categories', icon: Grid3x3, label: 'Categories' },
+    { to: '/cart', icon: ShoppingCart, label: 'Cart', badge: cartItemCount },
+    { to: '/profile', icon: User, label: 'Profile' },
   ];
 
+  // Vendor navigation
+  const vendorNavItems: NavItem[] = [
+    { to: '/vendor', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/vendor/products', icon: Package, label: 'Products' },
+    { to: '/vendor/orders', icon: ShoppingCart, label: 'Orders' },
+  ];
+
+  // Admin navigation
+  const adminNavItems: NavItem[] = [
+    { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/admin/products', icon: Package, label: 'Products' },
+    { to: '/admin/vendors', icon: User, label: 'Vendors' },
+    { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+  ];
+
+  // Guest navigation
+  const guestNavItems: NavItem[] = [
+    { to: '/', icon: Home, label: 'Home' },
+    { to: '/categories', icon: Grid3x3, label: 'Categories' },
+  ];
+
+  let navItems: NavItem[] = guestNavItems;
+  if (isAdmin) {
+    navItems = adminNavItems;
+  } else if (isVendorUser) {
+    navItems = vendorNavItems;
+  } else if (isCustomer) {
+    navItems = customerNavItems;
+  }
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-sm border-t shadow-soft-lg">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/98 backdrop-blur-sm border-t shadow-soft-xl">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const isActive = currentPath === item.to;
@@ -29,19 +75,19 @@ export default function BottomNav() {
               to={item.to}
               className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all relative ${
                 isActive 
-                  ? `text-${item.color} font-semibold` 
+                  ? 'text-primary font-semibold' 
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {isActive && (
-                <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-${item.color} to-${item.color} rounded-b-full`} />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-b-full" />
               )}
               <div className={`relative transition-all ${isActive ? 'scale-110' : ''}`}>
-                <div className={`${isActive ? `bg-${item.color}/10 p-2 rounded-xl` : ''}`}>
+                <div className={`${isActive ? 'bg-primary/10 p-2 rounded-xl' : ''}`}>
                   <Icon className="h-6 w-6" />
                 </div>
-                {item.badge && item.badge > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-gradient-to-br from-primary to-secondary border-2 border-card">
+                {item.badge !== undefined && item.badge > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive text-destructive-foreground border-2 border-card font-bold">
                     {item.badge}
                   </Badge>
                 )}

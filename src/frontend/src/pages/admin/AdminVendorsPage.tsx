@@ -11,6 +11,7 @@ import { useActor } from '../../hooks/useActor';
 import { toast } from 'sonner';
 import { Principal } from '@dfinity/principal';
 import type { Vendor } from '../../backend';
+import { OutletStatus } from '../../backend';
 import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
 
 export default function AdminVendorsPage() {
@@ -34,6 +35,9 @@ export default function AdminVendorsPage() {
         principal: vendorPrincipal,
         name: formData.name,
         verified: formData.verified,
+        outletName: '',
+        outletStatus: OutletStatus.enabled,
+        walletDue: 0n,
       };
 
       await actor.addVendor(vendorPrincipal, vendorData);

@@ -1,78 +1,54 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T09:01:09.852Z",
-  "summary": "Most onboarding flow pages/routes and vendor discovery are implemented (Home landing, customer/vendor login forms, vendor list filtering by city, view-shop route, outlet details with image preview, and a simple vendor dashboard). However, there is insufficient diff evidence that the City dropdown is restricted to exactly Kanpur/Unnao, and the global theme palette includes blue/purple despite the non-blue/non-purple palette requirement. Additionally, several existing non-Home storefront/admin/vendor pages were restyled beyond the requested scope.",
+  "generatedAt": "2026-02-05T11:57:19.019Z",
+  "summary": "Branding updates to “QuickBazar” were applied in TopNav, index.html metadata, and manifest name/short_name, and the header logo reference was switched to /assets/generated/quickbazar-logo.dim_512x512.png. However, the manifest still contains the word “marketplace” in its description, and the diff does not provide evidence that the required icon PNG files themselves were regenerated/replaced.",
   "missing_requirements": [
     {
-      "id": "REQ-12",
-      "requirement": "Customer Login Form: City dropdown limited to exactly Kanpur, Unnao (and validation).",
-      "reason": "CustomerLoginPage.tsx is truncated before the City <SelectItem> options; the diff summary does not show the dropdown options, so it cannot be verified that the options are exactly Kanpur and Unnao.",
+      "id": "REQ-14",
+      "requirement": "frontend/public/manifest.webmanifest uses “QuickBazar” for name/short_name and does not mention “ShopHub” or “Marketplace”.",
+      "reason": "Although name/short_name are updated to “QuickBazar”, the manifest description still contains the word “marketplace,” which conflicts with the acceptance criterion stating it should not mention “Marketplace”.",
       "evidence": [
-        "frontend/src/pages/onboarding/CustomerLoginPage.tsx (truncated)"
+        "frontend/public/manifest.webmanifest"
       ]
     },
     {
-      "id": "REQ-15",
-      "requirement": "Vendor Login Form: City dropdown limited to exactly Kanpur, Unnao (and validation).",
-      "reason": "VendorLoginPage.tsx is truncated before the City <SelectItem> options; the diff summary does not show the dropdown options, so it cannot be verified that the options are exactly Kanpur and Unnao.",
+      "id": "REQ-16",
+      "requirement": "Replace/regenerate the existing PWA icon image files (pwa-icon.dim_192x192.png, pwa-icon.dim_512x512.png, pwa-maskable.dim_512x512.png, apple-touch-icon.dim_180x180.png) with newly generated QuickBazar-branded icons while keeping the same filenames/paths.",
+      "reason": "The diff shows manifest and service worker referencing these icon paths, but no binary/image file changes are included in the provided diff summary, so replacement of the actual PNG assets is not evidenced.",
       "evidence": [
-        "frontend/src/pages/onboarding/VendorLoginPage.tsx (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "requirement": "Use a coherent non-blue/non-purple palette across the new onboarding flow screens.",
-      "reason": "Global CSS variables explicitly define a blue secondary and include a purple chart color (and related info color). This contradicts the non-blue/non-purple palette constraint.",
-      "evidence": [
-        "frontend/src/index.css"
+        "frontend/public/manifest.webmanifest",
+        "frontend/public/sw.js",
+        "frontend/index.html"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Restyling/redesign of existing admin pages (dashboard/products/vendors/orders) beyond the requested onboarding flow and Home replacement.",
-      "reason": "BuildRequest non-goal says not to redesign/remove existing storefront/cart/checkout functionality beyond replacing the Home page content; diff summaries indicate additional styling/CTA changes across admin pages.",
+      "description": "Service worker caching logic updates including new CACHE_NAME ('quickbazar-v1') and precaching of generated assets.",
+      "reason": "The BuildRequest focuses on renaming branding and generating/replacing logo and PWA icons; it does not request modifying service worker caching behavior or cache naming.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/public/sw.js"
       ]
     },
     {
-      "description": "Restyling of existing storefront/cart/checkout/product pages and shared components beyond replacing the Home page content.",
-      "reason": "Non-goal restricts changes to existing storefront/cart/checkout beyond replacing Home content, but summaries show visual/theme changes to CartPage, CheckoutPage, ProductPage, ProductGrid, etc.",
+      "description": "Offline fallback HTML page branded/styled with “Offline - QuickBazar” and a custom UI.",
+      "reason": "Updating/adding an offline page experience was not requested in the BuildRequest requirements (REQ-14/15/16).",
       "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Added a new shared PrimaryCtaButton component and applied it across existing pages (admin/vendor/customer profile flows).",
-      "reason": "Not requested by any REQ; indicates broader UI refactor beyond onboarding flow.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Added/modified shared status styling utilities (OrderStatusBadge/statusStyles) affecting existing vendor/admin orders pages.",
-      "reason": "Not requested in onboarding requirements; indicates unrelated enhancements.",
-      "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/public/offline.html"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/data/vendors.ts",
-    "frontend/src/index.css",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-    "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-    "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
-    "frontend/src/pages/onboarding/VendorListPage.tsx",
-    "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-    "frontend/src/pages/onboarding/VendorShopPage.tsx",
-    "frontend/src/utils/onboardingStorage.ts",
+    "frontend/index.html",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/offline.html",
+    "frontend/public/sw.js",
+    "frontend/src/components/TopNav.tsx",
+    "frontend/src/pages/AboutPage.tsx",
+    "frontend/src/pages/ContactPage.tsx",
     "project_state.json"
   ]
 }

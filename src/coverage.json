@@ -1,135 +1,66 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T09:01:09.890Z",
+  "generatedAt": "2026-02-05T11:57:19.057Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 8,
-    "implemented": 8,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-11",
-        "summary": "Replace the current Home page content with a mobile-first landing screen that shows two large primary actions: \"Customer Login\" and \"Vendor Login\" as big rounded cards/buttons optimized for touch (large tap targets, clear spacing).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-12",
-        "summary": "Implement the Customer Login Form screen with the following fields and validation: Name (required), Mobile number (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Vendor List page and carry the selected city forward.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-13",
-        "summary": "Implement the Vendor List page that renders vendor cards filtered by the city selected in the Customer Login Form. Each vendor card must show: Shop name, Area, Mobile number, and a \"View Shop\" button.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "frontend/src/data/vendors.ts",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "frontend/src/data/vendors.ts",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
         "id": "REQ-14",
-        "summary": "Define the \"View Shop\" button behavior for the Vendor List page: when pressed, navigate to a vendor shop route/screen (even if minimal for now) that clearly identifies which shop was selected (at minimum show the selected Shop name and city/area).",
+        "summary": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/onboarding/VendorShopPage.tsx",
-          "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/TopNav.tsx",
+          "frontend/index.html",
+          "frontend/public/manifest.webmanifest",
+          "frontend/public/offline.html",
+          "frontend/src/pages/AboutPage.tsx",
+          "frontend/src/pages/ContactPage.tsx",
+          "frontend/public/sw.js"
         ],
         "matchedFiles": [
-          "frontend/src/pages/onboarding/VendorShopPage.tsx",
-          "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/TopNav.tsx",
+          "frontend/index.html",
+          "frontend/public/manifest.webmanifest",
+          "frontend/public/offline.html",
+          "frontend/src/pages/AboutPage.tsx",
+          "frontend/src/pages/ContactPage.tsx",
+          "frontend/public/sw.js"
         ]
       },
       {
         "id": "REQ-15",
-        "summary": "Implement the Vendor Login Form screen with the following fields and validation: Name (required), Mobile (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Outlet Details form page and carry the entered vendor login info forward.",
+        "summary": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-          "frontend/src/utils/onboardingStorage.ts",
-          "frontend/src/App.tsx"
+          "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
+          "frontend/src/components/TopNav.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-          "frontend/src/utils/onboardingStorage.ts",
-          "frontend/src/App.tsx"
+          "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
+          "frontend/src/components/TopNav.tsx"
         ]
       },
       {
         "id": "REQ-16",
-        "summary": "Implement the Outlet Details form page with the following fields and validation: Outlet name (required), Outlet photo upload (required UI control; accept images), Outlet mobile (required), Aadhar number (required), GST (optional). On submit, navigate to a simple Vendor Dashboard page and show submitted outlet details there (at minimum: Outlet name).",
+        "summary": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-          "frontend/src/utils/onboardingStorage.ts",
-          "frontend/src/App.tsx"
+          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+          "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
+          "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png"
         ],
         "matchedFiles": [
-          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-          "frontend/src/utils/onboardingStorage.ts",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-17",
-        "summary": "Create a simple Vendor Dashboard page (not the existing vendor portal dashboard) that is reachable after the Outlet Details submit and presents a clean mobile-first summary card layout (at minimum showing Outlet name; optionally show other submitted fields).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-18",
-        "summary": "Apply a consistent modern colorful visual theme across the new Home/Login/List/Outlet/Dashboard screens using rounded cards, large buttons, and soft shadows. Use a coherent non-blue/non-purple palette (e.g., coral/teal/lime or similar) and ensure all user-facing text is in English.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-          "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-          "frontend/src/pages/onboarding/VendorListPage.tsx",
-          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx"
+          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+          "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
+          "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png"
         ]
       }
     ]
@@ -139,17 +70,18 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/data/vendors.ts",
-    "frontend/src/index.css",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
-    "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
-    "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
-    "frontend/src/pages/onboarding/VendorListPage.tsx",
-    "frontend/src/pages/onboarding/VendorLoginPage.tsx",
-    "frontend/src/pages/onboarding/VendorShopPage.tsx",
-    "frontend/src/utils/onboardingStorage.ts",
+    "frontend/index.html",
+    "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
+    "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+    "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+    "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
+    "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/offline.html",
+    "frontend/public/sw.js",
+    "frontend/src/components/TopNav.tsx",
+    "frontend/src/pages/AboutPage.tsx",
+    "frontend/src/pages/ContactPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

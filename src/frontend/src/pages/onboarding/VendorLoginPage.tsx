@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Store } from 'lucide-react';
 import { saveVendorLoginData } from '@/utils/onboardingStorage';
+import FloatingLabelInput from '@/components/forms/FloatingLabelInput';
 
 export default function VendorLoginPage() {
   const navigate = useNavigate();
@@ -60,14 +60,14 @@ export default function VendorLoginPage() {
         <Button
           variant="ghost"
           onClick={() => navigate({ to: '/' })}
-          className="mb-4 hover:bg-accent/10"
+          className="mb-4 hover:bg-accent/10 rounded-xl"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
 
-        <Card className="shadow-soft-lg border-2">
-          <CardHeader className="surface-accent-tint rounded-t-xl">
+        <Card className="shadow-soft-xl border-2 rounded-2xl">
+          <CardHeader className="surface-accent-tint rounded-t-2xl">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center border-2 border-accent/30">
                 <Store className="h-6 w-6 text-accent" />
@@ -75,29 +75,25 @@ export default function VendorLoginPage() {
               <CardTitle className="text-2xl">Vendor Login</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-5">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-base">Name</Label>
-                <Input
+                <FloatingLabelInput
                   id="name"
-                  placeholder="Enter your name"
+                  label="Name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="mobile" className="text-base">Mobile Number</Label>
-                <Input
+                <FloatingLabelInput
                   id="mobile"
+                  label="Mobile Number"
                   type="tel"
-                  placeholder="Enter 10-digit mobile number"
                   value={formData.mobile}
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.mobile && <p className="text-sm text-destructive">{errors.mobile}</p>}
               </div>
@@ -105,7 +101,7 @@ export default function VendorLoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="city" className="text-base">City</Label>
                 <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
-                  <SelectTrigger id="city" className="h-12 text-base">
+                  <SelectTrigger id="city" className="h-14 text-base rounded-xl border-2 focus:border-secondary focus:ring-2 focus:ring-secondary/20">
                     <SelectValue placeholder="Select city" />
                   </SelectTrigger>
                   <SelectContent>
@@ -117,30 +113,26 @@ export default function VendorLoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="area" className="text-base">Area</Label>
-                <Input
+                <FloatingLabelInput
                   id="area"
-                  placeholder="Enter your area"
+                  label="Area"
                   value={formData.area}
                   onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.area && <p className="text-sm text-destructive">{errors.area}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pinCode" className="text-base">Pin Code</Label>
-                <Input
+                <FloatingLabelInput
                   id="pinCode"
-                  placeholder="Enter 6-digit pin code"
+                  label="Pin Code"
                   value={formData.pinCode}
                   onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
-                  className="h-12 text-base"
                 />
                 {errors.pinCode && <p className="text-sm text-destructive">{errors.pinCode}</p>}
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base gradient-primary-cta">
+              <Button type="submit" className="w-full h-14 text-base gradient-primary-cta rounded-xl">
                 Continue
               </Button>
             </form>
