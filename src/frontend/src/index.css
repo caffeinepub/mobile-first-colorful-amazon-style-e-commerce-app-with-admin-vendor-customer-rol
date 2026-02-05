@@ -97,6 +97,10 @@
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
+    .shadow-soft-xl {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
     .gradient-primary-cta {
         background: linear-gradient(135deg, oklch(0.68 0.20 40) 0%, oklch(0.75 0.18 80) 100%);
         color: white;
@@ -207,6 +211,20 @@
     .dark .hover-tint-primary:hover {
         background: oklch(var(--primary) / 0.08);
         border-color: oklch(var(--primary) / 0.35);
+    }
+
+    .hover-tint-accent {
+        transition: all 0.2s ease;
+    }
+
+    .hover-tint-accent:hover {
+        background: oklch(var(--accent) / 0.05);
+        border-color: oklch(var(--accent) / 0.3);
+    }
+
+    .dark .hover-tint-accent:hover {
+        background: oklch(var(--accent) / 0.08);
+        border-color: oklch(var(--accent) / 0.35);
     }
 
     /* Empty state styling */

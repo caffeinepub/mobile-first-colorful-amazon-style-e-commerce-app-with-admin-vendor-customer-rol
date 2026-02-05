@@ -1,79 +1,163 @@
 {
   "kind": "build_request",
-  "title": "Make the UI more colorful across the storefront and portals",
+  "title": "Mobile-friendly colorful onboarding flow for Customer/Vendor with vendor list and simple vendor dashboard",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Increase overall UI colorfulness across the app (storefront, customer, vendor, admin) by applying more intentional use of the existing theme palette (primary orange/yellow, secondary blue, accent green) in key surfaces and highlights (headers/nav, section headers, cards, chips/badges, focus states, and empty states) while keeping readability and contrast strong in both light and dark modes.",
+      "id": "REQ-11",
+      "text": "Replace the current Home page content with a mobile-first landing screen that shows two large primary actions: \"Customer Login\" and \"Vendor Login\" as big rounded cards/buttons optimized for touch (large tap targets, clear spacing).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "ise aur colourful bana dijiye"
+          "Home screen should show two big buttons:\nCustomer Login\nVendor Login"
         ]
       },
       "acceptanceCriteria": [
-        "Across Home, Categories, Product, Cart, Checkout, and the Admin/Vendor dashboards, visible accent color usage is increased beyond just the primary CTA buttons (e.g., colored section headers, chips, badges, and subtle tinted card backgrounds).",
-        "Text remains readable: no primary/secondary/accent-colored backgrounds have low-contrast foreground text in either light or dark mode.",
-        "No shadcn/ui immutable component source files are modified."
+        "On mobile widths, the two actions are prominently visible without relying on the existing marketplace sections",
+        "Both actions navigate to their respective flows (Customer Login and Vendor Login) using the app router"
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Enhance visual richness by adding subtle color gradients and tinted backgrounds using existing Tailwind theme tokens (e.g., soft primary/secondary/accent tints on hero overlays, category tiles, and key callout cards) and update hover/active states to feel more vibrant without reducing usability.",
+      "id": "REQ-12",
+      "text": "Implement the Customer Login Form screen with the following fields and validation: Name (required), Mobile number (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Vendor List page and carry the selected city forward.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "ise aur colourful bana dijiye"
+          "Customer Login Form:\n- Name\n- Mobile\n- City dropdown (Kanpur, Unnao)\n- Area\n- Pin code\n\nAfter submit show a vendor list page"
         ]
       },
       "acceptanceCriteria": [
-        "Hero/banner areas and category cards show subtle, tasteful color treatment (tints/gradients) that is consistent with the existing palette.",
-        "Interactive elements (nav links, cards, product tiles, buttons) have clearer, more colorful hover/focus states than before.",
-        "The UI does not become visually noisy: spacing and hierarchy remain clear and consistent."
+        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
+        "Submitting the form without required fields shows clear English validation feedback",
+        "Successful submit navigates to the Vendor List page and preserves the selected city for filtering"
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Make data/status elements more colorful and informative by applying consistent, palette-aligned styling to badges and status indicators (e.g., order status pills, stock/availability, success/error/info states) across customer/vendor/admin pages.",
+      "id": "REQ-13",
+      "text": "Implement the Vendor List page that renders vendor cards filtered by the city selected in the Customer Login Form. Each vendor card must show: Shop name, Area, Mobile number, and a \"View Shop\" button.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "ise aur colourful bana dijiye"
+          "After submit show a vendor list page with vendor cards:\n- Shop name\n- Area\n- Mobile number\n- View Shop button"
         ]
       },
       "acceptanceCriteria": [
-        "Order status badges/pills use distinct, consistent colors aligned to the theme (e.g., accent/success green, secondary blue, destructive, muted) and are readable.",
-        "The same status value appears with the same styling anywhere it is rendered (customer orders, vendor orders, admin orders)."
+        "The page displays only vendors matching the selected city",
+        "Each vendor is rendered as a rounded card with the required fields and a visible \"View Shop\" button",
+        "If no city is present (e.g., direct navigation), the page shows an English prompt to select a city and a way to navigate back to the Customer Login Form"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Define the \"View Shop\" button behavior for the Vendor List page: when pressed, navigate to a vendor shop route/screen (even if minimal for now) that clearly identifies which shop was selected (at minimum show the selected Shop name and city/area).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "View Shop button"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Tapping \"View Shop\" navigates to a dedicated screen/route and does not do nothing",
+        "The destination screen shows the selected shop identity in English (at minimum the shop name)"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Implement the Vendor Login Form screen with the following fields and validation: Name (required), Mobile (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Outlet Details form page and carry the entered vendor login info forward.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Vendor Login Form:\n- Name\n- Mobile\n- City dropdown (Kanpur, Unnao)\n- Area\n- Pin code\n\nAfter submit open outlet details form"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
+        "Submitting the form without required fields shows clear English validation feedback",
+        "Successful submit navigates to the Outlet Details form page and preserves prior inputs for the flow"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Implement the Outlet Details form page with the following fields and validation: Outlet name (required), Outlet photo upload (required UI control; accept images), Outlet mobile (required), Aadhar number (required), GST (optional). On submit, navigate to a simple Vendor Dashboard page and show submitted outlet details there (at minimum: Outlet name).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "After submit open outlet details form:\n- Outlet name\n- Outlet photo upload\n- Outlet mobile\n- Aadhar number\n- GST optional\n\nAfter submit open a simple vendor dashboard page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The form includes an image file input for Outlet photo upload and shows a preview or filename after selection",
+        "GST is optional and does not block submission when empty",
+        "On successful submit, the app navigates to the Vendor Dashboard page and displays the outlet name in English"
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Create a simple Vendor Dashboard page (not the existing vendor portal dashboard) that is reachable after the Outlet Details submit and presents a clean mobile-first summary card layout (at minimum showing Outlet name; optionally show other submitted fields).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "After submit open a simple vendor dashboard page."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The dashboard is a distinct screen/route reachable via the Vendor onboarding flow",
+        "The dashboard renders correctly on mobile with large readable typography and rounded cards"
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "text": "Apply a consistent modern colorful visual theme across the new Home/Login/List/Outlet/Dashboard screens using rounded cards, large buttons, and soft shadows. Use a coherent non-blue/non-purple palette (e.g., coral/teal/lime or similar) and ensure all user-facing text is in English.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Create a mobile friendly colorful app.",
+          "Use modern colorful UI with rounded cards and large buttons."
+        ]
+      },
+      "acceptanceCriteria": [
+        "All new screens share the same design language (spacing, radii, shadows, button styles)",
+        "Buttons meet mobile touch target expectations (visibly large and easy to tap)",
+        "All labels, placeholders, helper text, and messages on the new flow screens are in English"
       ]
     }
   ],
   "constraints": [
-    "Use English for any user-facing text that changes as part of this work.",
-    "Do not edit any files under the immutable shadcn/ui component sources (frontend/src/components/ui).",
-    "Stay within the already-defined palette (primary orange/yellow, secondary blue, accent green) and keep strong contrast in light and dark modes."
+    "Do not edit files in frontend.immutablePaths (must compose existing UI components rather than modifying read-only sources).",
+    "Keep the backend architecture as a single Motoko actor (no additional backend canisters/services).",
+    "Use English for all user-facing text added or modified by this build request."
   ],
   "nonGoals": [
-    "No backend schema or Motoko logic changes.",
-    "No new pages or new product features beyond visual/theme enhancements."
+    "Do not implement wallet/commission rules, vendor outlet enable/disable logic, or admin oversight features in this build request.",
+    "Do not require Internet Identity authentication for the new Customer/Vendor onboarding flow unless explicitly necessary for navigation; keep this flow form-based as requested.",
+    "Do not redesign or remove existing storefront/cart/checkout functionality beyond replacing the Home page content as requested."
   ],
   "imageRequirements": {
     "required": [],
-    "edits": [
-      "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-1.dim_1600x600.png > hero-banner-1-colorful.dim_1600x600.png)",
-      "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-2.dim_1600x600.png > hero-banner-2-colorful.dim_1600x600.png)",
-      "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-3.dim_1600x600.png > hero-banner-3-colorful.dim_1600x600.png)",
-      "Make icon colors more varied and vibrant while keeping clean flat-illustration readability (frontend/public/assets/generated/category-icons-sprite.dim_1024x1024.png > category-icons-sprite-colorful.dim_1024x1024.png)",
-      "Increase color vibrancy and clarity for each badge while keeping consistent style and high contrast (frontend/public/assets/generated/trust-badges-set.dim_1024x256.png > trust-badges-set-colorful.dim_1024x256.png)"
-    ]
+    "edits": []
   }
 }

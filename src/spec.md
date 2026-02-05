@@ -1,12 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Make the UI more colorful and visually rich across the storefront and customer/vendor/admin portals using the existing theme palette, while preserving readability in light and dark modes.
+**Goal:** Add a mobile-first, colorful onboarding flow for Customers and Vendors, including customer vendor discovery and a simple vendor onboarding dashboard.
 
 **Planned changes:**
-- Apply more intentional palette usage (primary orange/yellow, secondary blue, accent green) across key UI surfaces: headers/nav, section headers, cards, chips/badges, focus states, and empty states (beyond just primary CTA buttons).
-- Add subtle gradients and tinted backgrounds (using existing Tailwind theme tokens) to hero/banner overlays, category tiles, and key callout cards; make hover/active/focus states more vibrant while keeping the UI clean and not visually noisy.
-- Standardize status/badge styling (order statuses, stock/availability, success/error/info) so the same status value renders with consistent, readable, palette-aligned colors across customer, vendor, and admin pages.
-- Ensure contrast/readability remains strong in both light and dark modes and avoid modifying immutable shadcn/ui component source files.
+- Replace the current Home page content with a mobile-first landing screen featuring two large rounded primary actions: “Customer Login” and “Vendor Login”, each navigating to its respective flow.
+- Add a Customer Login Form with required fields (Name, Mobile number, City dropdown: Kanpur/Unnao, Area, Pin code), validation messaging in English, and navigation to the Vendor List while preserving the selected city.
+- Add a Vendor List page that filters vendors by the selected city and displays rounded vendor cards with Shop name, Area, Mobile number, and a “View Shop” button; handle missing city with an English prompt and a way to return to Customer Login.
+- Add a minimal Vendor Shop screen/route that opens from “View Shop” and clearly shows which shop was selected (at least shop name, plus city/area).
+- Add a Vendor Login Form with required fields (Name, Mobile, City dropdown: Kanpur/Unnao, Area, Pin code), validation in English, and navigation to the Outlet Details form while preserving entered info.
+- Add an Outlet Details form with required fields (Outlet name, Outlet photo upload with preview/filename, Outlet mobile, Aadhar number) and optional GST; on submit, navigate to a simple Vendor Dashboard and display submitted outlet details (at least Outlet name).
+- Add a simple Vendor Dashboard page/route with a clean mobile-first summary card layout.
+- Apply a consistent modern colorful theme across all new screens using rounded cards, large touch-friendly buttons, soft shadows, and a coherent non-blue/non-purple palette; ensure all user-facing text is in English.
 
-**User-visible outcome:** Storefront pages (Home, Categories, Product, Cart, Checkout) and Admin/Vendor dashboards look more colorful and polished, with clearer interactive states and consistent, easy-to-read status indicators throughout.
+**User-visible outcome:** Users land on a two-choice login screen, can complete a Customer form to see a city-filtered vendor list and open a selected shop screen, or complete a Vendor login + outlet details flow to reach a simple vendor dashboard showing their submitted outlet info.

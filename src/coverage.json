@@ -1,88 +1,135 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T08:08:13.880Z",
+  "generatedAt": "2026-02-05T09:01:09.890Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 8,
+    "implemented": 8,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Increase overall UI colorfulness across the app (storefront, customer, vendor, admin) by applying more intentional use of the existing theme palette (primary orange/yellow, secondary blue, accent green) in key surfaces and highlights (headers/nav, section headers, cards, chips/badges, focus states, and empty states) while keeping readability and contrast strong in both light and dark modes.",
+        "id": "REQ-11",
+        "summary": "Replace the current Home page content with a mobile-first landing screen that shows two large primary actions: \"Customer Login\" and \"Vendor Login\" as big rounded cards/buttons optimized for touch (large tap targets, clear spacing).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/TopNav.tsx",
-          "frontend/src/components/BottomNav.tsx",
-          "frontend/src/components/AppLayout.tsx",
           "frontend/src/pages/HomePage.tsx",
-          "frontend/src/pages/CategoriesPage.tsx",
-          "frontend/src/pages/ProductPage.tsx",
-          "frontend/src/pages/CartPage.tsx",
-          "frontend/src/pages/CheckoutPage.tsx",
-          "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "frontend/src/pages/vendor/VendorDashboardPage.tsx"
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/src/components/TopNav.tsx",
-          "frontend/src/components/BottomNav.tsx",
-          "frontend/src/components/AppLayout.tsx",
           "frontend/src/pages/HomePage.tsx",
-          "frontend/src/pages/CategoriesPage.tsx",
-          "frontend/src/pages/ProductPage.tsx",
-          "frontend/src/pages/CartPage.tsx",
-          "frontend/src/pages/CheckoutPage.tsx",
-          "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "frontend/src/pages/vendor/VendorDashboardPage.tsx"
+          "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-2",
-        "summary": "Enhance visual richness by adding subtle color gradients and tinted backgrounds using existing Tailwind theme tokens (e.g., soft primary/secondary/accent tints on hero overlays, category tiles, and key callout cards) and update hover/active states to feel more vibrant without reducing usability.",
+        "id": "REQ-12",
+        "summary": "Implement the Customer Login Form screen with the following fields and validation: Name (required), Mobile number (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Vendor List page and carry the selected city forward.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/HeroBannerSlider.tsx",
-          "frontend/src/pages/AboutPage.tsx",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/ProductGrid.tsx",
-          "frontend/src/pages/CategoriesPage.tsx",
-          "frontend/src/index.css"
+          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/HeroBannerSlider.tsx",
-          "frontend/src/pages/AboutPage.tsx",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/ProductGrid.tsx",
-          "frontend/src/pages/CategoriesPage.tsx",
-          "frontend/src/index.css"
+          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
+          "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-3",
-        "summary": "Make data/status elements more colorful and informative by applying consistent, palette-aligned styling to badges and status indicators (e.g., order status pills, stock/availability, success/error/info states) across customer/vendor/admin pages.",
+        "id": "REQ-13",
+        "summary": "Implement the Vendor List page that renders vendor cards filtered by the city selected in the Customer Login Form. Each vendor card must show: Shop name, Area, Mobile number, and a \"View Shop\" button.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/statusStyles.ts",
-          "frontend/src/components/status/OrderStatusBadge.tsx",
-          "frontend/src/pages/customer/OrdersPage.tsx",
-          "frontend/src/pages/vendor/VendorOrdersPage.tsx",
-          "frontend/src/pages/admin/AdminOrdersPage.tsx",
-          "frontend/src/components/ProductGrid.tsx",
-          "frontend/src/pages/ProductPage.tsx"
+          "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "frontend/src/data/vendors.ts",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/statusStyles.ts",
-          "frontend/src/components/status/OrderStatusBadge.tsx",
-          "frontend/src/pages/customer/OrdersPage.tsx",
-          "frontend/src/pages/vendor/VendorOrdersPage.tsx",
-          "frontend/src/pages/admin/AdminOrdersPage.tsx",
-          "frontend/src/components/ProductGrid.tsx",
-          "frontend/src/pages/ProductPage.tsx"
+          "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "frontend/src/data/vendors.ts",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-14",
+        "summary": "Define the \"View Shop\" button behavior for the Vendor List page: when pressed, navigate to a vendor shop route/screen (even if minimal for now) that clearly identifies which shop was selected (at minimum show the selected Shop name and city/area).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/onboarding/VendorShopPage.tsx",
+          "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/onboarding/VendorShopPage.tsx",
+          "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-15",
+        "summary": "Implement the Vendor Login Form screen with the following fields and validation: Name (required), Mobile (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Outlet Details form page and carry the entered vendor login info forward.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+          "frontend/src/utils/onboardingStorage.ts",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+          "frontend/src/utils/onboardingStorage.ts",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-16",
+        "summary": "Implement the Outlet Details form page with the following fields and validation: Outlet name (required), Outlet photo upload (required UI control; accept images), Outlet mobile (required), Aadhar number (required), GST (optional). On submit, navigate to a simple Vendor Dashboard page and show submitted outlet details there (at minimum: Outlet name).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
+          "frontend/src/utils/onboardingStorage.ts",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
+          "frontend/src/utils/onboardingStorage.ts",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-17",
+        "summary": "Create a simple Vendor Dashboard page (not the existing vendor portal dashboard) that is reachable after the Outlet Details submit and presents a clean mobile-first summary card layout (at minimum showing Outlet name; optionally show other submitted fields).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-18",
+        "summary": "Apply a consistent modern colorful visual theme across the new Home/Login/List/Outlet/Dashboard screens using rounded cards, large buttons, and soft shadows. Use a coherent non-blue/non-purple palette (e.g., coral/teal/lime or similar) and ensure all user-facing text is in English.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
+          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+          "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
+          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
+          "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+          "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
+          "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx"
         ]
       }
     ]
@@ -92,30 +139,17 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/assets/generated/category-icons-sprite-colorful.dim_1024x1024.png",
-    "frontend/public/assets/generated/hero-banner-1-colorful.dim_1600x600.png",
-    "frontend/public/assets/generated/hero-banner-2-colorful.dim_1600x600.png",
-    "frontend/public/assets/generated/hero-banner-3-colorful.dim_1600x600.png",
-    "frontend/public/assets/generated/trust-badges-set-colorful.dim_1024x256.png",
-    "frontend/src/components/AppLayout.tsx",
-    "frontend/src/components/BottomNav.tsx",
-    "frontend/src/components/HeroBannerSlider.tsx",
-    "frontend/src/components/ProductGrid.tsx",
-    "frontend/src/components/TopNav.tsx",
-    "frontend/src/components/status/OrderStatusBadge.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/data/vendors.ts",
     "frontend/src/index.css",
-    "frontend/src/pages/AboutPage.tsx",
-    "frontend/src/pages/CartPage.tsx",
-    "frontend/src/pages/CategoriesPage.tsx",
-    "frontend/src/pages/CheckoutPage.tsx",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/ProductPage.tsx",
-    "frontend/src/pages/admin/AdminDashboardPage.tsx",
-    "frontend/src/pages/admin/AdminOrdersPage.tsx",
-    "frontend/src/pages/customer/OrdersPage.tsx",
-    "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-    "frontend/src/pages/vendor/VendorOrdersPage.tsx",
-    "frontend/src/utils/statusStyles.ts",
+    "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
+    "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
+    "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
+    "frontend/src/pages/onboarding/VendorListPage.tsx",
+    "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+    "frontend/src/pages/onboarding/VendorShopPage.tsx",
+    "frontend/src/utils/onboardingStorage.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,157 +1,215 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Colorful palette-forward UI refresh (storefront + portals)",
+  "title": "Mobile-first customer/vendor onboarding flow with vendor list and simple vendor dashboard",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Increase overall UI colorfulness across storefront and customer/vendor/admin portals using the existing palette on key surfaces while maintaining strong contrast in light/dark modes and not editing immutable shadcn/ui sources.",
+      "id": "REQ-11",
+      "summary": "Replace Home page with a mobile-first landing that shows two large primary actions (Customer Login, Vendor Login) and routes into each flow.",
       "acceptanceCriteria": [
-        "Across Home, Categories, Product, Cart, Checkout, and the Admin/Vendor dashboards, visible accent color usage is increased beyond just the primary CTA buttons (e.g., colored section headers, chips, badges, and subtle tinted card backgrounds).",
-        "Text remains readable: no primary/secondary/accent-colored backgrounds have low-contrast foreground text in either light or dark mode.",
-        "No shadcn/ui immutable component source files are modified."
+        "On mobile widths, the two actions are prominently visible without relying on the existing marketplace sections",
+        "Both actions navigate to their respective flows (Customer Login and Vendor Login) using the app router"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Replace existing marketplace-focused homepage content with a landing screen that uses large rounded touch-friendly action cards/buttons for \"Customer Login\" and \"Vendor Login\" and routes via the TanStack router. Use shadcn-ui components (e.g., Card, Button) and/or the existing PrimaryCtaButton to ensure consistent large tap targets. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register and wire new onboarding routes so the Home page actions can navigate to the Customer Login and Vendor Login screens via the app router."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Create Customer Login Form with required validation and pass selected city into the Vendor List screen on submit.",
+      "acceptanceCriteria": [
+        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
+        "Submitting the form without required fields shows clear English validation feedback",
+        "Successful submit navigates to the Vendor List page and preserves the selected city for filtering"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
+          "operation": "create",
+          "description": "Implement the Customer Login form UI (Name, Mobile number, City dropdown, Area, Pin code) with required-field validation and clear English error messages. Use shadcn-ui form inputs (e.g., Input, Label, Select, Card, Button) for consistent styling and mobile-friendly spacing. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add a route for the Customer Login screen and wire navigation to the Vendor List route on successful submit while carrying the selected city forward via router search params."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Create Vendor List page that filters vendor cards by selected city and handles missing-city navigation gracefully.",
+      "acceptanceCriteria": [
+        "The page displays only vendors matching the selected city",
+        "Each vendor is rendered as a rounded card with the required fields and a visible \"View Shop\" button",
+        "If no city is present (e.g., direct navigation), the page shows an English prompt to select a city and a way to navigate back to the Customer Login Form"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "operation": "create",
+          "description": "Implement a Vendor List screen that reads the selected city from router search params, filters a vendor dataset accordingly, and renders rounded vendor cards with Shop name, Area, Mobile number, and a \"View Shop\" button. Include a missing-city empty state with an English prompt and a navigation control back to the Customer Login screen. Use shadcn-ui Card/Button components for consistent mobile-first UI. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/data/vendors.ts",
+          "operation": "create",
+          "description": "Add a small static vendor dataset containing city, shop name, area, and mobile number to support city filtering and vendor card rendering for the onboarding Vendor List UI."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add and wire the Vendor List route so Customer Login can navigate to it and direct navigation is supported."
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Implement View Shop navigation from vendor cards to a dedicated vendor shop screen that identifies the selected shop.",
+      "acceptanceCriteria": [
+        "Tapping \"View Shop\" navigates to a dedicated screen/route and does not do nothing",
+        "The destination screen shows the selected shop identity in English (at minimum the shop name)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/onboarding/VendorShopPage.tsx",
+          "operation": "create",
+          "description": "Create a minimal vendor shop screen/route that identifies the selected vendor (at minimum shop name; also show city/area when available) based on the vendor id route param and/or search params. Use shadcn-ui Card/Typography for a clear mobile-first layout. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/onboarding/VendorListPage.tsx",
+          "operation": "modify",
+          "description": "Wire each vendor card's \"View Shop\" button to navigate to the Vendor Shop route, passing a stable vendor identifier via route params and carrying city/area context as needed via search params."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the Vendor Shop route (with a vendor id param) in the router so navigation from Vendor List works."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Create Vendor Login Form with required validation and carry submitted vendor login info into Outlet Details.",
+      "acceptanceCriteria": [
+        "The City field is a dropdown limited to exactly: Kanpur, Unnao",
+        "Submitting the form without required fields shows clear English validation feedback",
+        "Successful submit navigates to the Outlet Details form page and preserves prior inputs for the flow"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/onboarding/VendorLoginPage.tsx",
+          "operation": "create",
+          "description": "Implement Vendor Login form UI (Name, Mobile, City dropdown, Area, Pin code) with required-field validation and English error messages. Use shadcn-ui inputs/selects/cards for mobile-first layout consistency. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/onboardingStorage.ts",
+          "operation": "create",
+          "description": "Add a small utility for storing and retrieving vendor onboarding draft data in sessionStorage (e.g., vendor login info) so the flow can carry inputs forward without exposing personal data in the URL."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add a route for Vendor Login and wire successful submit navigation to the Outlet Details route, persisting the vendor login info for the next step."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Create Outlet Details form with required validation including image upload UI and navigate to a simple Vendor Dashboard that displays submitted outlet details.",
+      "acceptanceCriteria": [
+        "The form includes an image file input for Outlet photo upload and shows a preview or filename after selection",
+        "GST is optional and does not block submission when empty",
+        "On successful submit, the app navigates to the Vendor Dashboard page and displays the outlet name in English"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
+          "operation": "create",
+          "description": "Implement the Outlet Details form UI (Outlet name, Outlet photo upload control accepting images with preview/filename, Outlet mobile, Aadhar number, GST optional) with required-field validation and English messages. Use shadcn-ui inputs/cards/buttons for consistent styling; ensure the image control is mobile-friendly. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/onboardingStorage.ts",
+          "operation": "modify",
+          "description": "Extend onboarding sessionStorage utilities to persist Outlet Details draft/submitted data (including a safe representation for the selected photo such as a local object URL for preview during the session) to support navigation to the dashboard."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register and wire the Outlet Details route and ensure submit navigates to the new simple Vendor Dashboard route."
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Create a simple Vendor Dashboard screen (distinct from existing vendor portal dashboard) that is reachable after Outlet Details submit and shows a mobile-first summary card layout.",
+      "acceptanceCriteria": [
+        "The dashboard is a distinct screen/route reachable via the Vendor onboarding flow",
+        "The dashboard renders correctly on mobile with large readable typography and rounded cards"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
+          "operation": "create",
+          "description": "Implement a dedicated onboarding Vendor Dashboard page that reads the submitted outlet details from onboarding storage and displays a clean mobile-first summary card (at minimum: Outlet name, in English). Use shadcn-ui Card components and large readable typography. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add and wire a dedicated route for the simple onboarding Vendor Dashboard page (distinct from the existing protected /vendor dashboard)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "summary": "Apply a consistent modern colorful (non-blue/non-purple) theme and shared styling across the new onboarding screens with rounded cards, large buttons, and soft shadows using English text throughout.",
+      "acceptanceCriteria": [
+        "All new screens share the same design language (spacing, radii, shadows, button styles)",
+        "Buttons meet mobile touch target expectations (visibly large and easy to tap)",
+        "All labels, placeholders, helper text, and messages on the new flow screens are in English"
       ],
       "file_operations": [
         {
           "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Add a small set of reusable, palette-aligned utility classes for: (1) tinted surfaces for cards/sections in light+dark modes, (2) section header accents, (3) stronger focus-visible rings using existing --ring/primary/secondary/accent tokens, and (4) empty-state container styling with subtle tint + border for better visual richness without sacrificing readability."
-        },
-        {
-          "path": "frontend/src/components/TopNav.tsx",
-          "operation": "modify",
-          "description": "Increase colorful palette usage in the header/nav: introduce subtle tinted/gradient header surface treatment, improve nav link hover/focus states, and make the cart count badge styling more intentional and readable in both modes (without changing any files under frontend/src/components/ui)."
-        },
-        {
-          "path": "frontend/src/components/BottomNav.tsx",
-          "operation": "modify",
-          "description": "Enhance active/hover/focus states for bottom navigation using palette accents (primary/secondary/accent), adding clearer visual hierarchy (e.g., active indicator, tinted background on active) while keeping contrast strong."
-        },
-        {
-          "path": "frontend/src/components/AppLayout.tsx",
-          "operation": "modify",
-          "description": "Apply a subtle palette-tinted global app background treatment (light/dark safe) behind main content so storefront and portal pages feel more colorful without creating noise."
+          "description": "Adjust global design tokens and/or add small reusable utility classes to enforce a consistent modern colorful theme across onboarding screens, ensuring the palette avoids blue/purple (e.g., coral/teal/lime), while keeping soft shadows, rounded cards, and large touch-friendly buttons consistent."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Increase use of palette accents on section headers and key callout surfaces (e.g., 'Shop by Category', 'Hot Deals', 'Featured Products') via tinted header chips/accents and lightly tinted cards while preserving spacing and readability. Keep any user-facing text changes in English."
+          "description": "Align the new Home landing styling with the updated colorful theme (rounded cards, soft shadows, large buttons, consistent spacing) and ensure all user-facing text remains English."
         },
         {
-          "path": "frontend/src/pages/CategoriesPage.tsx",
+          "path": "frontend/src/pages/onboarding/CustomerLoginPage.tsx",
           "operation": "modify",
-          "description": "Make category tiles more colorful via subtle tinted overlays/borders and improved hover/focus styling; ensure category name text remains readable over images in both light and dark modes."
+          "description": "Apply shared theme styling (rounded cards, soft shadows, large inputs/buttons, consistent spacing) to the Customer Login screen and ensure all text/validation messages are English."
         },
         {
-          "path": "frontend/src/pages/ProductPage.tsx",
+          "path": "frontend/src/pages/onboarding/VendorLoginPage.tsx",
           "operation": "modify",
-          "description": "Add palette accents to key product surfaces (image carousel container, pricing highlight, review section header, stock info) using subtle tints/borders and strong focus states for interactive elements; do not modify shadcn/ui component source files."
+          "description": "Apply shared theme styling (rounded cards, soft shadows, large inputs/buttons, consistent spacing) to the Vendor Login screen and ensure all text/validation messages are English."
         },
         {
-          "path": "frontend/src/pages/CartPage.tsx",
+          "path": "frontend/src/pages/onboarding/VendorListPage.tsx",
           "operation": "modify",
-          "description": "Improve colorful accents in cart list and order summary (tinted summary card, clearer hover/focus states on product links and quantity controls, more vibrant empty/auth-required states) while maintaining contrast in both modes."
+          "description": "Apply shared theme styling to vendor cards and list layout (rounded cards, visible large \"View Shop\" buttons, soft shadows) and ensure all prompts are English."
         },
         {
-          "path": "frontend/src/pages/CheckoutPage.tsx",
+          "path": "frontend/src/pages/onboarding/OutletDetailsPage.tsx",
           "operation": "modify",
-          "description": "Add subtle tinted backgrounds and palette-accent headers for summary/payment cards, and strengthen focus/hover states for the primary checkout action without reducing usability."
+          "description": "Apply shared theme styling to the Outlet Details form (large touch targets, rounded cards, consistent spacing) and ensure all labels/helper text are English."
         },
         {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "path": "frontend/src/pages/onboarding/SimpleVendorDashboardPage.tsx",
           "operation": "modify",
-          "description": "Make admin dashboard stat cards more visually distinct and palette-aligned (tinted icon containers, subtle card tints) and ensure chart styling remains readable in light/dark modes."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Increase palette accents in vendor dashboard (tinted quick actions card, more vibrant secondary action styling, and clearer visual hierarchy) while preserving layout consistency."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Add subtle gradients and tinted backgrounds using existing Tailwind theme tokens, and make hover/active/focus states more vibrant and usable without creating visual noise.",
-      "acceptanceCriteria": [
-        "Hero/banner areas and category cards show subtle, tasteful color treatment (tints/gradients) that is consistent with the existing palette.",
-        "Interactive elements (nav links, cards, product tiles, buttons) have clearer, more colorful hover/focus states than before.",
-        "The UI does not become visually noisy: spacing and hierarchy remain clear and consistent."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/HeroBannerSlider.tsx",
-          "operation": "modify",
-          "description": "Update hero slider to use the more vibrant generated banners and add a subtle palette-aligned gradient/tint overlay plus more vibrant but accessible controls/indicators. Replace banner image references to: frontend/public/assets/generated/hero-banner-1-colorful.dim_1600x600.png, frontend/public/assets/generated/hero-banner-2-colorful.dim_1600x600.png, frontend/public/assets/generated/hero-banner-3-colorful.dim_1600x600.png."
-        },
-        {
-          "path": "frontend/src/pages/AboutPage.tsx",
-          "operation": "modify",
-          "description": "Swap trust badges asset to the more vibrant version and ensure it sits on a tasteful tinted surface for visual richness. Update image reference to: frontend/public/assets/generated/trust-badges-set-colorful.dim_1024x256.png."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Add subtle palette gradients/tints to key callouts (hero adjacency and category area) and enrich hover states on category tiles/cards while keeping layout and hierarchy clear."
-        },
-        {
-          "path": "frontend/src/components/ProductGrid.tsx",
-          "operation": "modify",
-          "description": "Enhance product tile vibrancy: add subtle tinted card backgrounds/borders on hover, improve wishlist button visibility states, and strengthen focus-visible styling for tile interactions while keeping text readable."
-        },
-        {
-          "path": "frontend/src/pages/CategoriesPage.tsx",
-          "operation": "modify",
-          "description": "Introduce subtle tinted overlays/gradients for category cards and improve hover/active feedback for image tiles and titles using existing palette tokens."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add a small set of gradient/tint helper utilities (using existing OKLCH theme tokens and alpha) for hero overlays, callout cards, and hover/active states, ensuring consistent behavior in light and dark modes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Apply consistent, palette-aligned styling to badges and status indicators (order status, stock/availability, success/error/info) across customer/vendor/admin pages so the same status renders identically everywhere.",
-      "acceptanceCriteria": [
-        "Order status badges/pills use distinct, consistent colors aligned to the theme (e.g., accent/success green, secondary blue, destructive, muted) and are readable.",
-        "The same status value appears with the same styling anywhere it is rendered (customer orders, vendor orders, admin orders)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/statusStyles.ts",
-          "operation": "create",
-          "description": "Create a shared, palette-aligned status styling utility that maps known order statuses and common UI states (success/error/info/warning/muted) to consistent classNames that are readable in light and dark modes."
-        },
-        {
-          "path": "frontend/src/components/status/OrderStatusBadge.tsx",
-          "operation": "create",
-          "description": "Add a small reusable component that renders an order status pill/badge using the shared statusStyles mapping to guarantee consistent visuals anywhere order status is shown."
-        },
-        {
-          "path": "frontend/src/pages/customer/OrdersPage.tsx",
-          "operation": "modify",
-          "description": "Replace the local getStatusColor/getStatusText logic with the shared OrderStatusBadge and shared status text mapping so order status styling matches vendor/admin pages exactly."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorOrdersPage.tsx",
-          "operation": "modify",
-          "description": "Replace the local getStatusColor/getStatusText logic with the shared OrderStatusBadge to ensure consistent status presentation across portals."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
-          "operation": "modify",
-          "description": "Replace the local getStatusColor/getStatusText logic with the shared OrderStatusBadge so status pills are consistent with customer/vendor pages; ensure the status update control remains usable and visually consistent."
-        },
-        {
-          "path": "frontend/src/components/ProductGrid.tsx",
-          "operation": "modify",
-          "description": "Add consistent availability/status indicators (e.g., 'Out of stock', discount) using the shared status styling conventions so badges/pills are informative and palette-aligned."
-        },
-        {
-          "path": "frontend/src/pages/ProductPage.tsx",
-          "operation": "modify",
-          "description": "Apply shared status styling conventions to stock/availability messaging and promotional badges to keep status semantics consistent and readable across the app."
+          "description": "Apply shared theme styling to the simple Vendor Dashboard summary card layout (rounded cards, soft shadows, mobile-first typography) and ensure displayed labels are English."
         }
       ]
     }

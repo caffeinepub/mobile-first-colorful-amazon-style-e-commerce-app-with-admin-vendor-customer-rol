@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 11,
-  "summary": "ICP canister-based e-commerce starter app with Motoko backend (authorization + blob storage) and a React/Vite frontend featuring role-based access (admin/vendor/customer), Internet Identity login, and core storefront/admin/vendor/customer pages with a shadcn/ui component set and generated marketing assets.",
+  "projectStateVersion": 25,
+  "summary": "Shift toward a mobile-first colorful Amazon-like marketplace app flow: home login choice (Customer/Vendor), form-based onboarding, city-based vendor discovery, vendor outlet onboarding/dashboard, and admin vendor/wallet oversight, built atop existing ICP canister (Motoko) + React/Vite/shadcn UI foundation.",
   "existing_features": [
     {
       "id": "IF-1",
@@ -134,26 +134,66 @@
       "version": 1
     },
     {
-      "id": "feature-increase-overall-ui-colorfulness-across-the-app-storefront-customer-vendor-admin-by-applying-more-intentional-use-of-the-existing-theme-palette-primary-orange-yellow-secondary-blue-accent-green-in-key-surfaces-and-highlights-headers-nav-section-headers-cards-chips-badges-focus-states-and-empty-states-while-keeping-readability-and-contrast-strong-in-both-light-and-dark-modes",
-      "title": "Increase overall UI colorfulness across the app (storefront, customer, vendor, admin) by applying more intentional use of the existing theme palette (primary orange/yellow, secondary blue, accent green) in key surfaces and highlights (headers/nav, section headers, cards, chips/badges, focus states, and empty states) while keeping readability and contrast strong in both light and dark modes.",
+      "id": "feature-replace-the-current-home-page-content-with-a-mobile-first-landing-screen-that-shows-two-large-primary-actions-customer-login-and-vendor-login-as-big-rounded-cards-buttons-optimized-for-touch-large-tap-targets-clear-spacing",
+      "title": "Replace the current Home page content with a mobile-first landing screen that shows two large primary actions: \"Customer Login\" and \"Vendor Login\" as big rounded cards/buttons optimized for touch (large tap targets, clear spacing).",
       "reqIds": [
-        "REQ-1"
+        "REQ-11"
       ],
       "version": 1
     },
     {
-      "id": "feature-enhance-visual-richness-by-adding-subtle-color-gradients-and-tinted-backgrounds-using-existing-tailwind-theme-tokens-e-g-soft-primary-secondary-accent-tints-on-hero-overlays-category-tiles-and-key-callout-cards-and-update-hover-active-states-to-feel-more-vibrant-without-reducing-usability",
-      "title": "Enhance visual richness by adding subtle color gradients and tinted backgrounds using existing Tailwind theme tokens (e.g., soft primary/secondary/accent tints on hero overlays, category tiles, and key callout cards) and update hover/active states to feel more vibrant without reducing usability.",
+      "id": "feature-implement-the-customer-login-form-screen-with-the-following-fields-and-validation-name-required-mobile-number-required-city-dropdown-required-options-kanpur-unnao-area-required-pin-code-required-on-submit-navigate-to-the-vendor-list-page-and-carry-the-selected-city-forward",
+      "title": "Implement the Customer Login Form screen with the following fields and validation: Name (required), Mobile number (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Vendor List page and carry the selected city forward.",
       "reqIds": [
-        "REQ-2"
+        "REQ-12"
       ],
       "version": 1
     },
     {
-      "id": "feature-make-data-status-elements-more-colorful-and-informative-by-applying-consistent-palette-aligned-styling-to-badges-and-status-indicators-e-g-order-status-pills-stock-availability-success-error-info-states-across-customer-vendor-admin-pages",
-      "title": "Make data/status elements more colorful and informative by applying consistent, palette-aligned styling to badges and status indicators (e.g., order status pills, stock/availability, success/error/info states) across customer/vendor/admin pages.",
+      "id": "feature-implement-the-vendor-list-page-that-renders-vendor-cards-filtered-by-the-city-selected-in-the-customer-login-form-each-vendor-card-must-show-shop-name-area-mobile-number-and-a-view-shop-button",
+      "title": "Implement the Vendor List page that renders vendor cards filtered by the city selected in the Customer Login Form. Each vendor card must show: Shop name, Area, Mobile number, and a \"View Shop\" button.",
       "reqIds": [
-        "REQ-3"
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-define-the-view-shop-button-behavior-for-the-vendor-list-page-when-pressed-navigate-to-a-vendor-shop-route-screen-even-if-minimal-for-now-that-clearly-identifies-which-shop-was-selected-at-minimum-show-the-selected-shop-name-and-city-area",
+      "title": "Define the \"View Shop\" button behavior for the Vendor List page: when pressed, navigate to a vendor shop route/screen (even if minimal for now) that clearly identifies which shop was selected (at minimum show the selected Shop name and city/area).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-vendor-login-form-screen-with-the-following-fields-and-validation-name-required-mobile-required-city-dropdown-required-options-kanpur-unnao-area-required-pin-code-required-on-submit-navigate-to-the-outlet-details-form-page-and-carry-the-entered-vendor-login-info-forward",
+      "title": "Implement the Vendor Login Form screen with the following fields and validation: Name (required), Mobile (required), City dropdown (required; options: Kanpur, Unnao), Area (required), Pin code (required). On submit, navigate to the Outlet Details form page and carry the entered vendor login info forward.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-outlet-details-form-page-with-the-following-fields-and-validation-outlet-name-required-outlet-photo-upload-required-ui-control-accept-images-outlet-mobile-required-aadhar-number-required-gst-optional-on-submit-navigate-to-a-simple-vendor-dashboard-page-and-show-submitted-outlet-details-there-at-minimum-outlet-name",
+      "title": "Implement the Outlet Details form page with the following fields and validation: Outlet name (required), Outlet photo upload (required UI control; accept images), Outlet mobile (required), Aadhar number (required), GST (optional). On submit, navigate to a simple Vendor Dashboard page and show submitted outlet details there (at minimum: Outlet name).",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-simple-vendor-dashboard-page-not-the-existing-vendor-portal-dashboard-that-is-reachable-after-the-outlet-details-submit-and-presents-a-clean-mobile-first-summary-card-layout-at-minimum-showing-outlet-name-optionally-show-other-submitted-fields",
+      "title": "Create a simple Vendor Dashboard page (not the existing vendor portal dashboard) that is reachable after the Outlet Details submit and presents a clean mobile-first summary card layout (at minimum showing Outlet name; optionally show other submitted fields).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-consistent-modern-colorful-visual-theme-across-the-new-home-login-list-outlet-dashboard-screens-using-rounded-cards-large-buttons-and-soft-shadows-use-a-coherent-non-blue-non-purple-palette-e-g-coral-teal-lime-or-similar-and-ensure-all-user-facing-text-is-in-english",
+      "title": "Apply a consistent modern colorful visual theme across the new Home/Login/List/Outlet/Dashboard screens using rounded cards, large buttons, and soft shadows. Use a coherent non-blue/non-purple palette (e.g., coral/teal/lime or similar) and ensure all user-facing text is in English.",
+      "reqIds": [
+        "REQ-18"
       ],
       "version": 1
     }
@@ -161,8 +201,112 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Further enhance the UI to be more colorful while staying within the defined palette (orange/yellow primary with gradient buttons, blue secondary, green accent, light grey/white background).",
+      "summary": "Home screen with two prominent actions: Customer Login and Vendor Login (mobile-first, colorful rounded UI, bottom nav).",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Customer onboarding/login form (Name, Mobile, City dropdown: Kanpur/Unnao, Area, Pin code) and post-submit vendor list filtered by selected city with vendor cards (Outlet name, Area, Mobile, View Shop).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Vendor onboarding/login form (Name, Mobile, City: Kanpur/Unnao, Area, Pin code) then outlet details page (Outlet name, outlet picture upload, outlet mobile, Aadhar number, GST optional) leading to Vendor Dashboard creation.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Vendor Dashboard with outlet status (Enabled/Disabled), total sales, wallet due amount; wallet rules: add 10% commission per order, wallet limit 1000 INR triggers auto-disable, 'Pay Company' resets wallet to 0 and re-enables outlet.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Admin features for marketplace: view all vendors, enable/disable vendor outlets, view vendor wallet dues, view total orders.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Replace the current home screen experience with a mobile-first landing screen that shows two large primary actions: “Customer Login” and “Vendor Login”, using a bright, colorful, Amazon-like visual style (rounded cards, soft shadows, large tap targets) and keeping the existing mobile bottom navigation pattern.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement the Customer flow screens: a Customer Login form with fields Name, Mobile number, City dropdown (Kanpur, Unnao), Area, Pin code; after successful submit, navigate to a vendor list screen filtered by the selected city and render vendor cards showing Outlet name, Area, Mobile number, and a “View Shop” button.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add a “View Shop” customer experience for a selected vendor: when the customer taps “View Shop” on a vendor card, open a vendor shop page that lists products belonging to that vendor (using existing product card/grid patterns) and does not show products from other vendors.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Implement the Vendor flow screens: a Vendor Login form with fields Name, Mobile, City (Kanpur, Unnao), Area, Pin code; after submit, navigate to an Outlet Details page with fields Outlet name, Outlet picture upload, Outlet mobile number, Aadhar number, and GST number (optional); after successful submit, navigate into the Vendor Dashboard.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Extend backend vendor data to support outlet-specific fields required by the Vendor flow: city, area, pin code, outlet name, outlet mobile number, outlet picture (stored using the existing blob storage module), Aadhar number, optional GST number, and an outlet status (Enabled/Disabled). Ensure this data can be created/updated by the vendor and read by customers (for vendor discovery) and admins (for management).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Update the Vendor Dashboard to show: Outlet name, Status (Enabled/Disabled), Total sales, and Wallet due amount, using English labels and a mobile-first card layout consistent with the bright, rounded UI style.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement vendor wallet business rules in the backend: automatically add a 10% commission of each order’s sale amount to the vendor’s wallet due; enforce a wallet limit of 1000 INR; when wallet due reaches or exceeds 1000, automatically set the vendor outlet status to Disabled; provide a “Pay Company” action that resets wallet due to 0 and re-enables the outlet.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Implement the “Pay Company” button on the Vendor Dashboard that calls the backend pay/reset action and updates the UI state to reflect wallet due reset to 0 and status set back to Enabled.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Extend Admin vendor management features so admins can: view all vendors with outlet details, see each vendor’s wallet due, enable/disable vendor outlets, and see total orders (reusing the existing admin orders data where available).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Apply a consistent bright, colorful, Amazon-like theme across the new Customer/Vendor flow screens: rounded cards, soft shadows, large buttons, and mobile-friendly spacing, while keeping all user-facing text in English.",
+      "reqIds": [
+        "REQ-10"
+      ],
       "status": "pending"
     }
   ],
@@ -173,45 +317,28 @@
     "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
     "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
     "Authorization and blob-storage Motoko components updated to v4.0.0 (componentized modules used by backend/main.mo).",
-    "Build template expanded/updated to include a full React/Vite + shadcn/ui frontend template and ICP canister YAMLs under build-template/src."
+    "Build template expanded/updated to include a full React/Vite + shadcn/ui frontend template and ICP canister YAMLs under build-template/src.",
+    "Core infrastructure component updated to v1.0.2 alongside authorization/blob-storage v4.0.0 integrations in backend/main.mo.",
+    "Build template now includes image asset maintenance scripts (resize-images.js, prune-unused-images.js) for generated frontend assets.",
+    "Generated marketing assets now include additional \"colorful\" and \"realistic\" category-tile variants alongside the original sprite/hero/trust-badge images."
   ],
   "known_issues": [],
   "isFixRequest": false,
-  "imageRequirements": "## Edit Images\n- Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-1.dim_1600x600.png > hero-banner-1-colorful.dim_1600x600.png)\n- Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-2.dim_1600x600.png > hero-banner-2-colorful.dim_1600x600.png)\n- Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette (frontend/public/assets/generated/hero-banner-3.dim_1600x600.png > hero-banner-3-colorful.dim_1600x600.png)\n- Make icon colors more varied and vibrant while keeping clean flat-illustration readability (frontend/public/assets/generated/category-icons-sprite.dim_1024x1024.png > category-icons-sprite-colorful.dim_1024x1024.png)\n- Increase color vibrancy and clarity for each badge while keeping consistent style and high contrast (frontend/public/assets/generated/trust-badges-set.dim_1024x256.png > trust-badges-set-colorful.dim_1024x256.png)",
   "generatedImages": [
     {
-      "filename": "hero-banner-1-colorful.dim_1600x600.png",
-      "description": "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette",
-      "targetWidth": 1600,
-      "targetHeight": 600
+      "filename": "frontend/public/assets/generated/clothing-tile-realistic.dim_800x500.png",
+      "description": "Generated realistic clothing category tile illustration for storefront/category UI.",
+      "targetWidth": 800,
+      "targetHeight": 500
     },
     {
-      "filename": "hero-banner-2-colorful.dim_1600x600.png",
-      "description": "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette",
-      "targetWidth": 1600,
-      "targetHeight": 600
-    },
-    {
-      "filename": "hero-banner-3-colorful.dim_1600x600.png",
-      "description": "Increase saturation/contrast and add more vibrant, playful color variety while keeping a cohesive palette",
-      "targetWidth": 1600,
-      "targetHeight": 600
-    },
-    {
-      "filename": "category-icons-sprite-colorful.dim_1024x1024.png",
-      "description": "Make icon colors more varied and vibrant while keeping clean flat-illustration readability",
-      "targetWidth": 1024,
-      "targetHeight": 1024
-    },
-    {
-      "filename": "trust-badges-set-colorful.dim_1024x256.png",
-      "description": "Increase color vibrancy and clarity for each badge while keeping consistent style and high contrast",
-      "targetWidth": 1024,
-      "targetHeight": 256
+      "filename": "frontend/public/assets/generated/cosmetics-tile-realistic.dim_800x500.png",
+      "description": "Generated realistic cosmetics category tile illustration for storefront/category UI.",
+      "targetWidth": 800,
+      "targetHeight": 500
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Make the UI more colorful across the storefront and portals",
+  "projectName": "Mobile-first marketplace landing + customer/vendor onboarding, outlet wallet rules, and admin vendor controls",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

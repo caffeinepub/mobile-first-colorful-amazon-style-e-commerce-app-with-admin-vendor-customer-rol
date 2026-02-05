@@ -21,6 +21,12 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminVendorsPage from './pages/admin/AdminVendorsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import RequireRole from './components/auth/RequireRole';
+import CustomerLoginPage from './pages/onboarding/CustomerLoginPage';
+import VendorLoginPage from './pages/onboarding/VendorLoginPage';
+import VendorListPage from './pages/onboarding/VendorListPage';
+import VendorShopPage from './pages/onboarding/VendorShopPage';
+import OutletDetailsPage from './pages/onboarding/OutletDetailsPage';
+import SimpleVendorDashboardPage from './pages/onboarding/SimpleVendorDashboardPage';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -178,6 +184,42 @@ const adminOrdersRoute = createRoute({
   ),
 });
 
+const customerLoginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/customer-login',
+  component: CustomerLoginPage,
+});
+
+const vendorLoginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor-login',
+  component: VendorLoginPage,
+});
+
+const vendorListRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor-list',
+  component: VendorListPage,
+});
+
+const vendorShopRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor-shop/$vendorId',
+  component: VendorShopPage,
+});
+
+const outletDetailsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/outlet-details',
+  component: OutletDetailsPage,
+});
+
+const simpleVendorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor-dashboard',
+  component: SimpleVendorDashboardPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   categoriesRoute,
@@ -197,6 +239,12 @@ const routeTree = rootRoute.addChildren([
   adminProductsRoute,
   adminVendorsRoute,
   adminOrdersRoute,
+  customerLoginRoute,
+  vendorLoginRoute,
+  vendorListRoute,
+  vendorShopRoute,
+  outletDetailsRoute,
+  simpleVendorDashboardRoute,
 ]);
 
 const router = createRouter({ routeTree });

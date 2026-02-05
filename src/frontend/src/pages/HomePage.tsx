@@ -1,81 +1,75 @@
-import { Link } from '@tanstack/react-router';
-import { ArrowRight, Tag, TrendingUp, Sparkles } from 'lucide-react';
-import HeroBannerSlider from '../components/HeroBannerSlider';
-import ProductGrid from '../components/ProductGrid';
-import { Button } from '@/components/ui/button';
+import { useNavigate } from '@tanstack/react-router';
+import { UserCircle, Store } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useGetProducts, useGetCategories } from '../hooks/useQueries';
 
 export default function HomePage() {
-  const { data: products = [], isLoading: productsLoading } = useGetProducts('name');
-  const { data: categories = [] } = useGetCategories();
-
-  const featuredProducts = products.filter((p) => p.active).slice(0, 8);
-  const dealsProducts = products.filter((p) => p.discount && Number(p.discount) > 0).slice(0, 4);
+  const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-8">
-      {/* Hero Banner */}
-      <HeroBannerSlider />
-
-      {/* Top Categories */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <span className="section-header-accent">
-              <Sparkles className="h-4 w-4" />
-              Shop by Category
-            </span>
-          </div>
-          <Link to="/categories">
-            <Button variant="ghost" className="gap-2 hover:bg-secondary/10 hover:text-secondary focus-ring-secondary">
-              View All <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+            Welcome
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Choose how you'd like to continue
+          </p>
         </div>
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-          {categories.slice(0, 8).map((category) => (
-            <Link key={category.id} to="/categories/$categoryId" params={{ categoryId: category.id }}>
-              <Card className="hover:shadow-soft-lg hover-tint-primary transition-all cursor-pointer group">
-                <CardContent className="p-4 flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform border-2 border-primary/20">
-                    <img
-                      src={category.image.getDirectURL()}
-                      alt={category.name}
-                      className="w-8 h-8 object-contain"
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-center line-clamp-2 group-hover:text-primary transition-colors">{category.name}</span>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
 
-      {/* Deals Section */}
-      {dealsProducts.length > 0 && (
-        <section className="surface-accent-tint rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-xl bg-destructive/10 border border-destructive/20">
-              <Tag className="h-6 w-6 text-destructive" />
-            </div>
-            <h2 className="text-2xl font-bold">Hot Deals</h2>
-          </div>
-          <ProductGrid products={dealsProducts} isLoading={productsLoading} />
-        </section>
-      )}
+        {/* Action Cards */}
+        <div className="space-y-4">
+          {/* Customer Login Card */}
+          <Card
+            className="cursor-pointer transition-all duration-300 hover:shadow-soft-xl hover-tint-primary border-2 hover:border-primary/40 group"
+            onClick={() => navigate({ to: '/customer-login' })}
+          >
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform border-2 border-primary/30">
+                  <UserCircle className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-1 group-hover:text-primary transition-colors">
+                    Customer Login
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Browse vendors and shop
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Featured Products */}
-      <section className="surface-secondary-tint rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
-            <TrendingUp className="h-6 w-6 text-primary" />
-          </div>
-          <h2 className="text-2xl font-bold">Featured Products</h2>
+          {/* Vendor Login Card */}
+          <Card
+            className="cursor-pointer transition-all duration-300 hover:shadow-soft-xl hover-tint-accent border-2 hover:border-accent/40 group"
+            onClick={() => navigate({ to: '/vendor-login' })}
+          >
+            <CardContent className="p-8">
+              <div className="flex items-center gap-6">
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform border-2 border-accent/30">
+                  <Store className="h-8 w-8 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-1 group-hover:text-accent transition-colors">
+                    Vendor Login
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your outlet
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-        <ProductGrid products={featuredProducts} isLoading={productsLoading} />
-      </section>
+
+        {/* Footer */}
+        <div className="text-center text-sm text-muted-foreground pt-4">
+          <p>© 2026. Built with ❤️ using <a href="https://caffeine.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">caffeine.ai</a></p>
+        </div>
+      </div>
     </div>
   );
 }
