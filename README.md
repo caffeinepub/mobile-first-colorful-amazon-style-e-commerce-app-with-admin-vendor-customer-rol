@@ -1,2 +1,3 @@
-# mobile-first-colorful-amazon-style-e-commerce-app-with-admin-vendor-customer-rol
-Exported from Caffeine project: Apply orange/yellow primary theme with blue secondary, green accent, light background, and orange→yellow gradient buttons
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

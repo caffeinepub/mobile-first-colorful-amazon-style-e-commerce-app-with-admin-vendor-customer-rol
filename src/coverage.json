@@ -1,0 +1,85 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-05T07:57:30.471Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Update the app’s global theme tokens to match the provided palette across all pages and roles (storefront, customer, vendor, admin) by setting Tailwind/shadcn CSS variables for: Primary = orange/yellow, Secondary = blue, Accent = green, Background = light grey/white. Ensure text/foreground colors remain readable with sufficient contrast on the new background and on primary/secondary/accent surfaces.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Implement a consistent primary call-to-action button style that uses an orange→yellow gradient (left-to-right) and apply it to primary CTA actions across the app (e.g., Add to Cart, Checkout, Place Order, Save, Create/Update actions in admin/vendor dialogs) without editing any files under the immutable shadcn/ui component sources. Use only English for any user-facing button text that is updated during this work.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+          "frontend/src/components/ProductGrid.tsx",
+          "frontend/src/pages/CartPage.tsx",
+          "frontend/src/pages/CheckoutPage.tsx",
+          "frontend/src/pages/ProductPage.tsx",
+          "frontend/src/components/auth/ProfileSetupModal.tsx",
+          "frontend/src/pages/customer/CustomerProfilePage.tsx",
+          "frontend/src/pages/admin/AdminProductsPage.tsx",
+          "frontend/src/pages/vendor/VendorProductsPage.tsx",
+          "frontend/src/pages/admin/AdminVendorsPage.tsx",
+          "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "frontend/src/components/auth/LoginButton.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+          "frontend/src/components/ProductGrid.tsx",
+          "frontend/src/pages/CartPage.tsx",
+          "frontend/src/pages/CheckoutPage.tsx",
+          "frontend/src/pages/ProductPage.tsx",
+          "frontend/src/components/auth/ProfileSetupModal.tsx",
+          "frontend/src/pages/customer/CustomerProfilePage.tsx",
+          "frontend/src/pages/admin/AdminProductsPage.tsx",
+          "frontend/src/pages/vendor/VendorProductsPage.tsx",
+          "frontend/src/pages/admin/AdminVendorsPage.tsx",
+          "frontend/src/pages/vendor/VendorDashboardPage.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "build-template/README.md",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/ProductGrid.tsx",
+    "frontend/src/components/auth/ProfileSetupModal.tsx",
+    "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/CartPage.tsx",
+    "frontend/src/pages/CheckoutPage.tsx",
+    "frontend/src/pages/ProductPage.tsx",
+    "frontend/src/pages/admin/AdminProductsPage.tsx",
+    "frontend/src/pages/admin/AdminVendorsPage.tsx",
+    "frontend/src/pages/customer/CustomerProfilePage.tsx",
+    "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+    "frontend/src/pages/vendor/VendorProductsPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

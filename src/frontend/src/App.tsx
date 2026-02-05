@@ -1,0 +1,211 @@
+import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
+import { ThemeProvider } from 'next-themes';
+import { Toaster } from '@/components/ui/sonner';
+import AppLayout from './components/AppLayout';
+import HomePage from './pages/HomePage';
+import CategoriesPage from './pages/CategoriesPage';
+import CategoryListingPage from './pages/CategoryListingPage';
+import ProductPage from './pages/ProductPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import CustomerProfilePage from './pages/customer/CustomerProfilePage';
+import WishlistPage from './pages/customer/WishlistPage';
+import OrdersPage from './pages/customer/OrdersPage';
+import VendorDashboardPage from './pages/vendor/VendorDashboardPage';
+import VendorProductsPage from './pages/vendor/VendorProductsPage';
+import VendorOrdersPage from './pages/vendor/VendorOrdersPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminProductsPage from './pages/admin/AdminProductsPage';
+import AdminVendorsPage from './pages/admin/AdminVendorsPage';
+import AdminOrdersPage from './pages/admin/AdminOrdersPage';
+import RequireRole from './components/auth/RequireRole';
+
+const rootRoute = createRootRoute({
+  component: () => (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  ),
+});
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: HomePage,
+});
+
+const categoriesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/categories',
+  component: CategoriesPage,
+});
+
+const categoryListingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/categories/$categoryId',
+  component: CategoryListingPage,
+});
+
+const productRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/product/$productId',
+  component: ProductPage,
+});
+
+const cartRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/cart',
+  component: CartPage,
+});
+
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/checkout',
+  component: CheckoutPage,
+});
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: AboutPage,
+});
+
+const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/contact',
+  component: ContactPage,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/profile',
+  component: () => (
+    <RequireRole requiredRole="user">
+      <CustomerProfilePage />
+    </RequireRole>
+  ),
+});
+
+const wishlistRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/wishlist',
+  component: () => (
+    <RequireRole requiredRole="user">
+      <WishlistPage />
+    </RequireRole>
+  ),
+});
+
+const ordersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/orders',
+  component: () => (
+    <RequireRole requiredRole="user">
+      <OrdersPage />
+    </RequireRole>
+  ),
+});
+
+const vendorDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor',
+  component: () => (
+    <RequireRole requiredRole="vendor">
+      <VendorDashboardPage />
+    </RequireRole>
+  ),
+});
+
+const vendorProductsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor/products',
+  component: () => (
+    <RequireRole requiredRole="vendor">
+      <VendorProductsPage />
+    </RequireRole>
+  ),
+});
+
+const vendorOrdersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor/orders',
+  component: () => (
+    <RequireRole requiredRole="vendor">
+      <VendorOrdersPage />
+    </RequireRole>
+  ),
+});
+
+const adminDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  component: () => (
+    <RequireRole requiredRole="admin">
+      <AdminDashboardPage />
+    </RequireRole>
+  ),
+});
+
+const adminProductsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/products',
+  component: () => (
+    <RequireRole requiredRole="admin">
+      <AdminProductsPage />
+    </RequireRole>
+  ),
+});
+
+const adminVendorsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/vendors',
+  component: () => (
+    <RequireRole requiredRole="admin">
+      <AdminVendorsPage />
+    </RequireRole>
+  ),
+});
+
+const adminOrdersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/orders',
+  component: () => (
+    <RequireRole requiredRole="admin">
+      <AdminOrdersPage />
+    </RequireRole>
+  ),
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  categoriesRoute,
+  categoryListingRoute,
+  productRoute,
+  cartRoute,
+  checkoutRoute,
+  aboutRoute,
+  contactRoute,
+  profileRoute,
+  wishlistRoute,
+  ordersRoute,
+  vendorDashboardRoute,
+  vendorProductsRoute,
+  vendorOrdersRoute,
+  adminDashboardRoute,
+  adminProductsRoute,
+  adminVendorsRoute,
+  adminOrdersRoute,
+]);
+
+const router = createRouter({ routeTree });
+
+export default function App() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <RouterProvider router={router} />
+      <Toaster />
+    </ThemeProvider>
+  );
+}

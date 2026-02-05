@@ -1,0 +1,106 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Orange/Yellow primary theme + Blue secondary + Green accent + Gradient primary CTA buttons",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Update global Tailwind/shadcn theme tokens to the requested orange/yellow primary, blue secondary, green accent, and light background with readable foregrounds.",
+      "acceptanceCriteria": [
+        "Global theme variables used by Tailwind/shadcn (e.g., --background/--foreground/--primary/--secondary/--accent and their *-foreground counterparts) reflect the requested palette in the active (light) theme.",
+        "All major surfaces (page background, cards/popovers, nav bars) render on a light grey/white background without low-contrast text.",
+        "Secondary UI elements that previously used the old secondary color now render as blue (e.g., secondary badges/buttons/links where applicable).",
+        "Accent UI elements that previously used the old accent color now render as green (e.g., highlights/success-like accents where applicable)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Update the light theme CSS variables for --background/--foreground/--card/--popover plus --primary/--secondary/--accent (and their *-foreground counterparts) to match: Primary=orange/yellow, Secondary=blue, Accent=green, Background=light grey/white. Ensure the chosen *-foreground values maintain readable contrast on each surface; keep ring/border/muted tokens coherent with the new palette. (Do not edit any files under frontend/src/components/ui.)"
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Adjust supporting tokens that surface the palette in common UI (e.g., --ring, --success, and chart tokens if used for admin analytics) so they align with the updated primary/secondary/accent colors while preserving legibility on the light background."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Create and apply a consistent orange→yellow gradient primary CTA button style across the app via wrappers/composition (without modifying shadcn/ui sources).",
+      "acceptanceCriteria": [
+        "Primary CTA buttons render with a visible orange→yellow gradient and appropriate hover/active/focus states.",
+        "Gradient CTA buttons have readable text (e.g., white or high-contrast foreground) and a clear focus ring consistent with the updated theme.",
+        "No direct edits are made inside the immutable UI component directory (frontend/src/components/ui); gradient styling is applied via composition, utility classes, or wrapper components and then used throughout the app.",
+        "Buttons that represent destructive actions (delete/remove/cancel) do not use the orange→yellow gradient and continue to use a destructive styling."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add a reusable gradient CTA utility (e.g., a class in an appropriate Tailwind layer) that applies an orange→yellow left-to-right gradient, readable foreground text, and consistent hover/active/focus-visible ring styles aligned with the updated theme. (Do not edit any files under frontend/src/components/ui.)"
+        },
+        {
+          "path": "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+          "operation": "create",
+          "description": "Create a small wrapper component around the existing shadcn Button that composes the gradient CTA utility class for primary call-to-action usage while still allowing standard props/className overrides. This must not modify frontend/src/components/ui sources."
+        },
+        {
+          "path": "frontend/src/components/ProductGrid.tsx",
+          "operation": "modify",
+          "description": "Replace primary CTA usage for product actions (e.g., the 'Add to Cart' button) to use the new PrimaryCtaButton wrapper so CTAs render with the orange→yellow gradient. Keep non-primary actions (e.g., wishlist icon, destructive states) using their existing variants."
+        },
+        {
+          "path": "frontend/src/pages/CartPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the main cart CTA (e.g., 'Proceed to Checkout') and any other primary navigation CTAs on this page, while leaving destructive actions (e.g., remove item) on destructive/ghost styling."
+        },
+        {
+          "path": "frontend/src/pages/CheckoutPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the main checkout CTA (e.g., 'Place Order'), ensuring loading/disabled states preserve readability and the focus ring remains visible."
+        },
+        {
+          "path": "frontend/src/pages/ProductPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the page’s main purchase CTA (e.g., 'Add to Cart') and to other primary submission actions if applicable (e.g., 'Submit Review' if treated as a primary CTA), while keeping secondary/outline buttons (e.g., carousel controls, wishlist) non-gradient."
+        },
+        {
+          "path": "frontend/src/components/auth/ProfileSetupModal.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the profile setup submission CTA (e.g., 'Create Profile') to ensure consistent gradient styling for primary actions. Ensure all user-facing text remains English."
+        },
+        {
+          "path": "frontend/src/pages/customer/CustomerProfilePage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the profile save CTA (e.g., 'Save Changes') to ensure consistent gradient styling for primary actions. Ensure all user-facing text remains English."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminProductsPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to admin product primary CTAs (e.g., 'Add Product', 'Update Product' submit button), while ensuring destructive actions (e.g., 'Delete') remain destructive and non-gradient. Ensure all user-facing text remains English."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorProductsPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to vendor product primary CTAs (e.g., 'Add Product', 'Update Product' submit button), while ensuring destructive actions remain destructive and non-gradient. Ensure all user-facing text remains English."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminVendorsPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the admin 'Add Vendor' submission CTA while keeping 'Remove Vendor' destructive styling unchanged and non-gradient. Ensure all user-facing text remains English."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Apply PrimaryCtaButton to the vendor dashboard’s primary navigation CTA (e.g., 'Manage Products') while leaving secondary actions (e.g., outline 'View Orders') as non-gradient."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginButton.tsx",
+          "operation": "modify",
+          "description": "Ensure login/logout button styling remains appropriate under the new theme. If the unauthenticated state is treated as a primary CTA in this app, switch it to PrimaryCtaButton; otherwise keep it as a standard shadcn Button variant while maintaining English-only text."
+        }
+      ]
+    }
+  ]
+}

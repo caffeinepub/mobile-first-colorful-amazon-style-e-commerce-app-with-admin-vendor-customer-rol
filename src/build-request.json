@@ -1,0 +1,58 @@
+{
+  "kind": "build_request",
+  "title": "Apply orange/yellow primary theme with blue secondary, green accent, light background, and orange→yellow gradient buttons",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Update the app’s global theme tokens to match the provided palette across all pages and roles (storefront, customer, vendor, admin) by setting Tailwind/shadcn CSS variables for: Primary = orange/yellow, Secondary = blue, Accent = green, Background = light grey/white. Ensure text/foreground colors remain readable with sufficient contrast on the new background and on primary/secondary/accent surfaces.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Use this color palette:\n\nPrimary: Orange / Yellow\n\nSecondary: Blue\n\nAccent: Green\n\nBackground: Light grey / white"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Global theme variables used by Tailwind/shadcn (e.g., --background/--foreground/--primary/--secondary/--accent and their *-foreground counterparts) reflect the requested palette in the active (light) theme.",
+        "All major surfaces (page background, cards/popovers, nav bars) render on a light grey/white background without low-contrast text.",
+        "Secondary UI elements that previously used the old secondary color now render as blue (e.g., secondary badges/buttons/links where applicable).",
+        "Accent UI elements that previously used the old accent color now render as green (e.g., highlights/success-like accents where applicable)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement a consistent primary call-to-action button style that uses an orange→yellow gradient (left-to-right) and apply it to primary CTA actions across the app (e.g., Add to Cart, Checkout, Place Order, Save, Create/Update actions in admin/vendor dialogs) without editing any files under the immutable shadcn/ui component sources. Use only English for any user-facing button text that is updated during this work.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Buttons: Gradient orange → yellow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Primary CTA buttons render with a visible orange→yellow gradient and appropriate hover/active/focus states.",
+        "Gradient CTA buttons have readable text (e.g., white or high-contrast foreground) and a clear focus ring consistent with the updated theme.",
+        "No direct edits are made inside the immutable UI component directory (frontend/src/components/ui); gradient styling is applied via composition, utility classes, or wrapper components and then used throughout the app.",
+        "Buttons that represent destructive actions (delete/remove/cancel) do not use the orange→yellow gradient and continue to use a destructive styling."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit any files under frontend/src/components/ui (read-only shadcn/ui sources); apply styling via composition/wrappers/className usage.",
+    "Keep all user-facing text in English."
+  ],
+  "nonGoals": [
+    "No new backend features or schema changes.",
+    "No new pages or routing changes.",
+    "No third-party design systems beyond the existing Tailwind + shadcn setup."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

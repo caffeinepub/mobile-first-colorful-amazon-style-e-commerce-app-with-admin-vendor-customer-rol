@@ -1,0 +1,206 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "ICP canister-based e-commerce starter app with Motoko backend (authorization + blob storage) and a React/Vite frontend featuring role-based access (admin/vendor/customer), Internet Identity login, and core storefront/admin/vendor/customer pages with a shadcn/ui component set and generated marketing assets.",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Motoko backend canister scaffold with main entrypoints",
+      "synonyms": [
+        "core infrastructure",
+        "backend main canister"
+      ],
+      "description": "Base Motoko backend wiring (main.mo) integrating authorization and blob storage modules as the core application canister foundation.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Role-based authorization (admin/vendor/customer)",
+      "synonyms": [
+        "access control",
+        "RBAC",
+        "authorization mixin"
+      ],
+      "description": "Authorization layer implemented in Motoko (MixinAuthorization, access-control) to gate backend operations and support role checks used by the frontend RequireRole pattern.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Blob storage canister module",
+      "synonyms": [
+        "storage",
+        "blob store"
+      ],
+      "description": "Motoko blob storage module (Storage, Mixin) for storing and serving binary assets, with a frontend StorageClient utility for access.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Internet Identity authentication integration",
+      "synonyms": [
+        "II login",
+        "identity provider"
+      ],
+      "description": "Frontend hooks and components for Internet Identity sign-in (useInternetIdentity, useActor) including LoginButton and profile setup modal scaffolding.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Route-level role enforcement UI",
+      "synonyms": [
+        "RequireRole",
+        "AccessDenied"
+      ],
+      "description": "Frontend components to enforce and display role-based access at the UI layer (RequireRole + AccessDeniedScreen).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Storefront pages (home, categories, product, cart, checkout)",
+      "synonyms": [
+        "customer storefront"
+      ],
+      "description": "Core shopping UI pages and components: Home (HeroBannerSlider, ProductGrid), Categories, Category Listing, Product page, Cart, and Checkout.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Customer account pages (profile, orders, wishlist)",
+      "synonyms": [
+        "customer portal"
+      ],
+      "description": "Customer-facing authenticated pages for managing profile, viewing orders, and wishlist.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Vendor portal pages (dashboard, products, orders)",
+      "synonyms": [
+        "vendor admin"
+      ],
+      "description": "Vendor-facing pages for managing products and viewing vendor orders, with a vendor dashboard landing page.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Admin console pages (dashboard, products, orders, vendors)",
+      "synonyms": [
+        "admin portal"
+      ],
+      "description": "Admin-facing pages for managing products, orders, and vendors with an admin dashboard.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Application layout and navigation (top/bottom nav)",
+      "synonyms": [
+        "AppLayout",
+        "navigation"
+      ],
+      "description": "Reusable layout shell and navigation components (TopNav, BottomNav, AppLayout) connecting the storefront and role-based sections.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "React/Vite frontend scaffold with shadcn/ui component library",
+      "synonyms": [
+        "UI kit",
+        "shadcn"
+      ],
+      "description": "Frontend build system and UI foundation including Tailwind, shadcn/ui component set, and lint rules ensuring II provider requirements.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Build/deploy template for ICP project",
+      "synonyms": [
+        "build-template",
+        "dockerfile",
+        "icp.yaml"
+      ],
+      "description": "Project template artifacts for building and deploying (Dockerfile, deploy scripts, ICP configuration, workspace/package setup).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-app-s-global-theme-tokens-to-match-the-provided-palette-across-all-pages-and-roles-storefront-customer-vendor-admin-by-setting-tailwind-shadcn-css-variables-for-primary-orange-yellow-secondary-blue-accent-green-background-light-grey-white-ensure-text-foreground-colors-remain-readable-with-sufficient-contrast-on-the-new-background-and-on-primary-secondary-accent-surfaces",
+      "title": "Update the app’s global theme tokens to match the provided palette across all pages and roles (storefront, customer, vendor, admin) by setting Tailwind/shadcn CSS variables for: Primary = orange/yellow, Secondary = blue, Accent = green, Background = light grey/white. Ensure text/foreground colors remain readable with sufficient contrast on the new background and on primary/secondary/accent surfaces.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-consistent-primary-call-to-action-button-style-that-uses-an-orange-yellow-gradient-left-to-right-and-apply-it-to-primary-cta-actions-across-the-app-e-g-add-to-cart-checkout-place-order-save-create-update-actions-in-admin-vendor-dialogs-without-editing-any-files-under-the-immutable-shadcn-ui-component-sources-use-only-english-for-any-user-facing-button-text-that-is-updated-during-this-work",
+      "title": "Implement a consistent primary call-to-action button style that uses an orange→yellow gradient (left-to-right) and apply it to primary CTA actions across the app (e.g., Add to Cart, Checkout, Place Order, Save, Create/Update actions in admin/vendor dialogs) without editing any files under the immutable shadcn/ui component sources. Use only English for any user-facing button text that is updated during this work.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Apply specified UI color palette/theme (primary orange/yellow, secondary blue, accent green, light grey/white background, orange→yellow gradient buttons) across the app",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "architectural_notes": [
+    "Frontend is React + Vite + Tailwind with shadcn/ui components and shared AppLayout navigation shell.",
+    "Authentication uses Internet Identity; UI includes login flow and profile setup modal scaffolding.",
+    "Authorization is enforced via Motoko RBAC (access-control + authorization mixin) and mirrored in frontend via RequireRole/AccessDenied patterns.",
+    "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
+    "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
+    "Introduce theme/design tokens for the specified color palette (primary orange/yellow, secondary blue, accent green, light grey/white background) and gradient button styling to ensure consistent UI across pages/components."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/category-icons-sprite.dim_1024x1024.png",
+      "description": "Generated category icons sprite sheet for storefront UI.",
+      "targetWidth": 1024,
+      "targetHeight": 1024
+    },
+    {
+      "filename": "frontend/public/assets/generated/hero-banner-1.dim_1600x600.png",
+      "description": "Generated hero banner image variant 1 for homepage slider.",
+      "targetWidth": 1600,
+      "targetHeight": 600
+    },
+    {
+      "filename": "frontend/public/assets/generated/hero-banner-2.dim_1600x600.png",
+      "description": "Generated hero banner image variant 2 for homepage slider.",
+      "targetWidth": 1600,
+      "targetHeight": 600
+    },
+    {
+      "filename": "frontend/public/assets/generated/hero-banner-3.dim_1600x600.png",
+      "description": "Generated hero banner image variant 3 for homepage slider.",
+      "targetWidth": 1600,
+      "targetHeight": 600
+    },
+    {
+      "filename": "frontend/public/assets/generated/trust-badges-set.dim_1024x256.png",
+      "description": "Generated trust badges set for marketing/checkout UI.",
+      "targetWidth": 1024,
+      "targetHeight": 256
+    }
+  ],
+  "projectName": "Apply orange/yellow primary theme with blue secondary, green accent, light background, and orange→yellow gradient buttons",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

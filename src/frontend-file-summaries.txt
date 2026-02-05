@@ -1,0 +1,18 @@
+{
+  "frontend/src/pages/admin/AdminDashboardPage.tsx": "Admin dashboard displaying analytics metrics (products, orders, revenue, vendors) with a bar chart visualization using Recharts.",
+  "frontend/src/pages/admin/AdminProductsPage.tsx": "Admin product management page with CRUD operations, using PrimaryCtaButton for \"Add Product\" and form submission CTAs while keeping destructive actions non-gradient.",
+  "frontend/src/pages/admin/AdminVendorsPage.tsx": "Admin vendor management page for adding and removing vendors, using PrimaryCtaButton for the \"Add Vendor\" CTA while keeping \"Remove Vendor\" destructive.",
+  "frontend/src/pages/admin/AdminOrdersPage.tsx": "Admin orders page displaying all orders with status management and the ability to update order status through a dropdown selector.",
+  "frontend/src/pages/vendor/VendorOrdersPage.tsx": "Vendor orders page showing orders specific to the logged-in vendor with status badges and order details.",
+  "frontend/src/index.css": "Global styles with OKLCH color system updated to orange/yellow primary, blue secondary, green accent, and light grey/white background; includes gradient-primary-cta utility class for orange→yellow gradient buttons.",
+  "frontend/src/components/buttons/PrimaryCtaButton.tsx": "Wrapper component around shadcn Button that applies the gradient-primary-cta utility class for consistent orange→yellow gradient styling on primary CTAs, using React.ComponentPropsWithoutRef for proper type inference without an empty interface.",
+  "frontend/src/components/ProductGrid.tsx": "Product grid component displaying products in a responsive grid layout with Add to Cart buttons now using PrimaryCtaButton for gradient styling.",
+  "frontend/src/pages/CartPage.tsx": "Shopping cart page with cart item management and checkout navigation, using PrimaryCtaButton for primary actions like \"Proceed to Checkout\" and \"Continue Shopping\".",
+  "frontend/src/pages/CheckoutPage.tsx": "Checkout page with order summary and place order functionality, using PrimaryCtaButton for the \"Place Order\" CTA.",
+  "frontend/src/pages/ProductPage.tsx": "Product detail page with image carousel, product info, and reviews section, using PrimaryCtaButton for \"Add to Cart\" and \"Submit Review\" actions.",
+  "frontend/src/components/auth/ProfileSetupModal.tsx": "Modal dialog for first-time user profile setup with form fields for name, email, phone, and address, using PrimaryCtaButton for the \"Create Profile\" submission.",
+  "frontend/src/pages/customer/CustomerProfilePage.tsx": "Customer profile management page with editable profile fields, using PrimaryCtaButton for the \"Save Changes\" action.",
+  "frontend/src/pages/vendor/VendorProductsPage.tsx": "Vendor product management page with CRUD operations for vendor's own products, using PrimaryCtaButton for \"Add Product\" and form submission CTAs.",
+  "frontend/src/pages/vendor/VendorDashboardPage.tsx": "Vendor dashboard with analytics metrics and quick actions, using PrimaryCtaButton for the primary \"Manage Products\" navigation CTA.",
+  "frontend/src/components/auth/LoginButton.tsx": "Login/logout button component using standard shadcn Button variants (outline for authenticated, default for unauthenticated) without gradient styling."
+}
