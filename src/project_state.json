@@ -1,37 +1,32 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Admin dashboard rebuild to remove role-based guards and use a login-only AdminBypass wrapper for stable rendering.",
-  "architectural_notes": [
-    "Admin routes must not use role-based guards for now; use a single AdminBypass that only checks authentication (logged-in) and redirects to login otherwise.",
-    "Admin dashboard UI should prioritize minimal, stable components and a simple layout during this rebuild."
-  ],
-  "known_issues": [
-    "Admin dashboard crashes due to SafeAdminGate role guard."
-  ],
-  "isFixRequest": true,
+  "summary": "Upgrade the Admin Dashboard into a full control panel with new sections for Vendor Management and Orders Panel accessible via visible cards and menu options.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-remove-safeadmingate-and-any-role-based-route-guard-logic-from-all-admin-routes-and-replace-it-with-a-new-adminbypass-wrapper-that-only-requires-the-user-to-be-logged-in",
-      "title": "Remove `SafeAdminGate` and any role-based route guard logic from all `/admin` routes, and replace it with a new `AdminBypass` wrapper that only requires the user to be logged in.",
+      "id": "feature-upgrade-the-admin-landing-page-into-an-admin-control-panel-that-shows-visible-navigation-cards-and-menu-options-for-the-admin-sections-vendor-management-and-orders-panel-and-keep-existing-admin-sections-accessible",
+      "title": "Upgrade the /admin landing page into an Admin Control Panel that shows visible navigation cards and menu options for the admin sections: Vendor Management and Orders Panel (and keep existing admin sections accessible).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-frontend-src-components-auth-adminbypass-tsx-as-a-login-only-wrapper-it-must-not-check-roles-it-must-redirect-unauthenticated-users-to-the-login-route-it-must-render-children-for-authenticated-users",
-      "title": "Implement `frontend/src/components/auth/AdminBypass.tsx` as a login-only wrapper: it must not check roles; it must redirect unauthenticated users to the login route; it must render children for authenticated users.",
+      "id": "feature-implement-the-vendor-management-admin-section-to-support-viewing-all-vendors-approving-rejecting-vendors-enabling-disabling-vendor-outlets-and-viewing-vendor-documents",
+      "title": "Implement the Vendor Management admin section to support: viewing all vendors, approving/rejecting vendors, enabling/disabling vendor outlets, and viewing vendor documents.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-rebuild-frontend-src-pages-admin-admindashboardpage-tsx-to-use-a-minimal-safe-and-stable-layout-avoid-complex-fragile-ui-patterns-while-preserving-core-functionality-vendor-list-wallet-due-enable-disable-outlet",
-      "title": "Rebuild `frontend/src/pages/admin/AdminDashboardPage.tsx` to use a minimal, safe, and stable layout (avoid complex/fragile UI patterns) while preserving core functionality (vendor list + wallet due + enable/disable outlet).",
+      "id": "feature-implement-the-orders-panel-admin-section-to-support-viewing-all-orders-filtering-by-city-kanpur-unnao-and-order-status-tracking",
+      "title": "Implement the Orders Panel admin section to support viewing all orders, filtering by city (Kanpur, Unnao), and order status tracking.",
       "reqIds": [
-        "REQ-3"
+        "REQ-4"
       ],
       "version": 1
     }
@@ -39,24 +34,40 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Remove SafeAdminGate and all role-based route guards from admin routes",
+      "summary": "Upgrade Admin Dashboard into a full control panel with visible cards and menu options for admin sections",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Implement AdminBypass wrapper: require logged-in user, redirect to login if not logged in, otherwise render admin pages (no role checks)",
+      "summary": "Add Vendor Management section: view all vendors, approve/reject vendors, enable/disable vendor outlet, view vendor documents",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Rebuild admin dashboard using minimal safe components with a simple, stable layout (no role verification logic for now)",
+      "summary": "Add Orders Panel section: view all orders, filter by city (Kanpur, Unnao), order status tracking",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Extend the backend vendor model and APIs so the admin UI can approve/reject vendors and fetch vendor documents for viewing.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Extend the backend order model so each order has a city value that can be used by the admin Orders Panel filter (Kanpur/Unnao), and ensure existing order creation provides/populates this value.",
+      "reqIds": [
+        "REQ-5"
+      ],
       "status": "pending"
     }
   ],
-  "projectName": "Replace SafeAdminGate with login-only AdminBypass and stabilize admin routes/dashboard",
+  "projectName": "Upgrade Admin Dashboard into a full admin control panel (Vendor Management + Orders Panel)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

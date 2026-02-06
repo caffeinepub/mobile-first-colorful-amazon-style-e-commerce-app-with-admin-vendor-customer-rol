@@ -1,77 +1,126 @@
 {
   "kind": "build_request",
-  "title": "Replace SafeAdminGate with login-only AdminBypass and stabilize admin routes/dashboard",
-  "priority": "high",
+  "title": "Upgrade Admin Dashboard into a full admin control panel (Vendor Management + Orders Panel)",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Remove `SafeAdminGate` and any role-based route guard logic from all `/admin` routes, and replace it with a new `AdminBypass` wrapper that only requires the user to be logged in.",
+      "text": "Upgrade the /admin landing page into an Admin Control Panel that shows visible navigation cards and menu options for the admin sections: Vendor Management and Orders Panel (and keep existing admin sections accessible).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Remove SafeAdminGate and all role-based route guards from admin routes.\n\nReplace with a simple AdminBypass wrapper that:\n- does not check roles\n- only checks that user is logged in\n- if not logged in, redirect to login\n- if logged in, allow admin page to render"
+          "Upgrade the Admin Dashboard to a full control panel.\n\nAdd these admin sections with visible cards and menu options:\n\n1) Vendor Management\n...\n\n2) Orders Panel\n..."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/App.tsx` no longer imports or renders `SafeAdminGate` for `/admin`, `/admin/products`, `/admin/vendors`, and `/admin/orders`.",
-        "No admin route uses `RequireRole` (or any `useIsAdmin`/role-check gate) to guard rendering.",
-        "All admin pages still render inside `AdminErrorBoundary`."
+        "Visiting /admin shows a control panel page with at least two prominent cards: “Vendor Management” and “Orders Panel”.",
+        "The control panel provides persistent menu/navigation options (e.g., top tabs/links) that allow navigating to Vendor Management and Orders Panel pages without relying only on browser back.",
+        "Existing admin routes (/admin/products, /admin/vendors, /admin/orders) remain reachable and do not regress."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement `frontend/src/components/auth/AdminBypass.tsx` as a login-only wrapper: it must not check roles; it must redirect unauthenticated users to the login route; it must render children for authenticated users.",
-      "target": "frontend",
+      "text": "Implement the Vendor Management admin section to support: viewing all vendors, approving/rejecting vendors, enabling/disabling vendor outlets, and viewing vendor documents.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Replace with a simple AdminBypass wrapper that:\n- does not check roles\n- only checks that user is logged in\n- if not logged in, redirect to login\n- if logged in, allow admin page to render"
+          "1) Vendor Management\n- View all vendors\n- Approve / Reject vendor\n- Enable / Disable vendor outlet\n- View vendor documents"
         ]
       },
       "acceptanceCriteria": [
-        "`AdminBypass` does not import or call any role-checking hooks/utilities (e.g., `useIsAdmin`, `useGetCallerRole`, `RequireRole`, token checks).",
-        "When the user is not logged in, navigating to any `/admin*` route redirects to `/customer-login` (existing login page).",
-        "When the user is logged in, `AdminBypass` renders its `children` without additional gating.",
-        "If auth state is still initializing, `AdminBypass` shows a simple stable loading state (no role verification)."
+        "Admin can see a list/table/grid of all vendors (using backend data, not static data).",
+        "Each vendor row/card provides actions to set approval state (Approve and Reject) and reflects the current approval state in the UI.",
+        "Each vendor row/card provides an Enable/Disable outlet control and reflects current outlet status in the UI.",
+        "Vendor documents are viewable per vendor (a vendor details panel/page/modal is acceptable) and the UI gracefully shows an empty state when no documents exist.",
+        "All vendor management actions show success/error feedback and refresh vendor data after mutations."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Rebuild `frontend/src/pages/admin/AdminDashboardPage.tsx` to use a minimal, safe, and stable layout (avoid complex/fragile UI patterns) while preserving core functionality (vendor list + wallet due + enable/disable outlet).",
-      "target": "frontend",
+      "text": "Extend the backend vendor model and APIs so the admin UI can approve/reject vendors and fetch vendor documents for viewing.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Rebuild admin dashboard with minimal safe components only.\nDo not include role verification logic for now.\n\nKeep layout simple and stable."
+          "- Approve / Reject vendor\n- View vendor documents"
         ]
       },
       "acceptanceCriteria": [
-        "`AdminDashboardPage` continues to: (1) fetch and display vendors, (2) show wallet due, and (3) allow enabling/disabling vendor outlet status via the existing mutation.",
-        "The page layout is simplified (no unnecessary gradients/animated/complex decorative wrappers that could contribute to instability); use basic container, headings, and cards/tables with predictable rendering.",
-        "No role verification logic is added to `AdminDashboardPage` (it must not check admin role before running).",
-        "The dashboard renders without crashing even when vendor list is empty, loading, or mutation errors occur (errors should be handled with existing `toast` messaging and overall `AdminErrorBoundary`)."
+        "Backend exposes admin-authorized operations to set a vendor’s approval state (e.g., via updating the vendor record).",
+        "Backend exposes an admin-authorized query to fetch a vendor’s document list by vendor principal.",
+        "Vendor documents are stored in canister state and include enough metadata for display (at minimum: name/title and a retrievable blob reference) and can be returned to the frontend for viewing/download.",
+        "All new/updated admin endpoints enforce admin authorization consistently with existing admin-only patterns (e.g., same style as getVendors/getAllOrders)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement the Orders Panel admin section to support viewing all orders, filtering by city (Kanpur, Unnao), and order status tracking.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "2) Orders Panel\n- View all orders\n- Filter by city (Kanpur, Unnao)\n- Order status tracking"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin can view all orders (existing behavior remains).",
+        "Orders page includes a city filter control with options: All, Kanpur, Unnao.",
+        "Selecting a city filters the visible orders accordingly.",
+        "Order status tracking remains visible per order (status badge/text) and existing status update behavior continues to work."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Extend the backend order model so each order has a city value that can be used by the admin Orders Panel filter (Kanpur/Unnao), and ensure existing order creation provides/populates this value.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "- Filter by city (Kanpur, Unnao)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Order records include a city field suitable for filtering in the admin UI.",
+        "Order creation logic populates the city field (using an explicit input or a deterministic derivation from existing stored data) so newly created orders can be filtered by city.",
+        "Admin getAllOrders continues to work and returns city data with each order."
       ]
     }
   ],
   "constraints": [
-    "Do not add any role verification logic for admin routes/pages for now (no admin role checks, no RequireRole, no SafeAdminGate behavior reintroduced).",
-    "Redirect unauthenticated users attempting to access `/admin*` routes to the existing `/customer-login` route.",
-    "Do not modify files under `frontend/src/components/ui` or other frontend immutable paths listed in SYSTEM_CONTEXT."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui (compose existing shadcn components instead).",
+    "Do not modify frontend immutable hook paths listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/main.tsx).",
+    "User-facing text must be in English."
   ],
   "nonGoals": [
-    "Reintroducing admin role-based authorization/verification on frontend routes.",
-    "Changing backend authorization rules or backend data models.",
-    "Adding new admin features beyond stabilizing routing and simplifying the admin dashboard UI."
+    "Adding third-party authentication providers (only Internet Identity is supported).",
+    "Adding real-time updates via WebSockets or push notifications.",
+    "Implementing external database storage; persistence must remain within the canister/state patterns already used."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

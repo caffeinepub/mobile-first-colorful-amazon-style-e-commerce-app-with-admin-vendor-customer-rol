@@ -1,65 +1,91 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Login-only admin gating with AdminBypass and stabilized Admin Dashboard",
+  "title": "Admin Control Panel: Vendor Management + Orders Panel (frontend upgrade)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace SafeAdminGate/role-based guarding on all /admin routes with a login-only AdminBypass wrapper while keeping AdminErrorBoundary.",
+      "summary": "Upgrade /admin into an Admin Control Panel with prominent navigation cards and persistent admin navigation, while keeping existing admin routes reachable.",
       "acceptanceCriteria": [
-        "`frontend/src/App.tsx` no longer imports or renders `SafeAdminGate` for `/admin`, `/admin/products`, `/admin/vendors`, and `/admin/orders`.",
-        "No admin route uses `RequireRole` (or any `useIsAdmin`/role-check gate) to guard rendering.",
-        "All admin pages still render inside `AdminErrorBoundary`."
+        "Visiting /admin shows a control panel page with at least two prominent cards: “Vendor Management” and “Orders Panel”.",
+        "The control panel provides persistent menu/navigation options (e.g., top tabs/links) that allow navigating to Vendor Management and Orders Panel pages without relying only on browser back.",
+        "Existing admin routes (/admin/products, /admin/vendors, /admin/orders) remain reachable and do not regress."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/admin/AdminNav.tsx",
+          "operation": "create",
+          "description": "Create a shared AdminNav component (tabs/links) for persistent navigation across admin pages (Control Panel, Vendor Management, Orders Panel, and existing admin sections). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Replace the current vendor-list dashboard UI with an Admin Control Panel layout: add prominent navigation cards linking to Vendor Management (/admin/vendors) and Orders Panel (/admin/orders), and include the shared AdminNav for persistent navigation."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminProductsPage.tsx",
+          "operation": "modify",
+          "description": "Wire in the shared AdminNav so persistent admin navigation is available on the Products admin page (ensuring existing functionality remains intact)."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminVendorsPage.tsx",
+          "operation": "modify",
+          "description": "Wire in the shared AdminNav so persistent admin navigation is available on the Vendor Management page (while implementing the expanded vendor management capabilities in REQ-2)."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
+          "operation": "modify",
+          "description": "Wire in the shared AdminNav so persistent admin navigation is available on the Orders Panel page (while implementing city filtering in REQ-4)."
+        },
+        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Remove `SafeAdminGate` import/usage and wrap `/admin`, `/admin/products`, `/admin/vendors`, `/admin/orders` route components with the new `AdminBypass` (login-only) while keeping `AdminErrorBoundary` as the outer wrapper."
+          "description": "Tighten admin route protection by using the authorization component’s role-gated UI approach (use RequireRole requiredRole=\"admin\" around admin routes) and ensure the /admin, /admin/products, /admin/vendors, /admin/orders routes remain registered and reachable. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add AdminBypass component that only checks authentication and redirects unauthenticated users to /customer-login.",
+      "summary": "Implement Vendor Management admin UX: list vendors from backend data, approve/reject, enable/disable outlets, and view vendor documents with success/error feedback and data refresh.",
       "acceptanceCriteria": [
-        "`AdminBypass` does not import or call any role-checking hooks/utilities (e.g., `useIsAdmin`, `useGetCallerRole`, `RequireRole`, token checks).",
-        "When the user is not logged in, navigating to any `/admin*` route redirects to `/customer-login` (existing login page).",
-        "When the user is logged in, `AdminBypass` renders its `children` without additional gating.",
-        "If auth state is still initializing, `AdminBypass` shows a simple stable loading state (no role verification)."
+        "Admin can see a list/table/grid of all vendors (using backend data, not static data).",
+        "Each vendor row/card provides actions to set approval state (Approve and Reject) and reflects the current approval state in the UI.",
+        "Each vendor row/card provides an Enable/Disable outlet control and reflects current outlet status in the UI.",
+        "Vendor documents are viewable per vendor (a vendor details panel/page/modal is acceptable) and the UI gracefully shows an empty state when no documents exist.",
+        "All vendor management actions show success/error feedback and refresh vendor data after mutations."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/auth/AdminBypass.tsx",
-          "operation": "create",
-          "description": "Implement `AdminBypass` as a login-only wrapper using `useInternetIdentity` to determine (a) initializing state and (b) authenticated state; show a minimal, stable loading UI while initializing; redirect unauthenticated users to the `/customer-login` route using TanStack Router navigation; render `children` when authenticated."
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add/adjust React Query hooks to use backend vendor admin capabilities: fetch all vendors, approve vendor, reject vendor, set vendor outlet status, and fetch vendor documents. Ensure mutations invalidate/refetch vendor queries and surface errors for UI feedback."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/admin/AdminVendorsPage.tsx",
           "operation": "modify",
-          "description": "Import and use `AdminBypass` for all `/admin*` routes to enforce login-only access and redirect unauthenticated users to `/customer-login`."
+          "description": "Upgrade the page into the Vendor Management section: render all vendors from backend data; add Approve/Reject actions that reflect verified state; add Enable/Disable outlet controls reflecting outletStatus; add a documents viewer (Dialog/Drawer) that fetches documents per vendor, shows empty state, and supports opening/downloading via blob-storage ExternalBlob direct URLs. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Simplify AdminDashboardPage UI to a minimal, stable layout while preserving vendor list, wallet due, and outlet enable/disable mutation behavior.",
+      "id": "REQ-4",
+      "summary": "Enhance the admin Orders Panel to support city filtering (All/Kanpur/Unnao) while preserving order status visibility and status update behavior.",
       "acceptanceCriteria": [
-        "`AdminDashboardPage` continues to: (1) fetch and display vendors, (2) show wallet due, and (3) allow enabling/disabling vendor outlet status via the existing mutation.",
-        "The page layout is simplified (no unnecessary gradients/animated/complex decorative wrappers that could contribute to instability); use basic container, headings, and cards/tables with predictable rendering.",
-        "No role verification logic is added to `AdminDashboardPage` (it must not check admin role before running).",
-        "The dashboard renders without crashing even when vendor list is empty, loading, or mutation errors occur (errors should be handled with existing `toast` messaging and overall `AdminErrorBoundary`)."
+        "Admin can view all orders (existing behavior remains).",
+        "Orders page includes a city filter control with options: All, Kanpur, Unnao.",
+        "Selecting a city filters the visible orders accordingly.",
+        "Order status tracking remains visible per order (status badge/text) and existing status update behavior continues to work."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Rebuild the dashboard layout to a minimal, predictable structure (simple container + headings + a basic table/list of vendors). Keep existing functionality: fetch vendors, display wallet due, and toggle outlet status via the existing `useUpdateVendor` mutation with `toast` success/error messaging. Ensure stable rendering for loading, empty, and error states; avoid decorative gradients/animations and avoid introducing any role checks."
-        },
-        {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Remove the `isAdmin`-dependent `enabled` gating in `useGetVendors()` so the vendor list query can run for any authenticated session where an actor is available (no frontend role verification); rely on existing backend behavior for authorization failures and keep the hook’s safe fallback behavior (return empty array on errors)."
+          "description": "Add an optional city-scoped orders query hook that can call the backend city-filter capability when a city filter is selected, while keeping the existing all-orders query for the 'All' option."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
+          "operation": "modify",
+          "description": "Add a city filter control (All, Kanpur, Unnao) and filter the displayed orders accordingly (either client-side using the order.city field or by switching to the city-scoped query). Keep existing status badge display and status update mutation behavior unchanged."
         }
       ]
     }

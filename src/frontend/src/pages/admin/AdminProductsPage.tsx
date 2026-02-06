@@ -12,6 +12,7 @@ import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { toast } from 'sonner';
 import type { Product } from '../../backend';
 import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
+import AdminNav from '../../components/admin/AdminNav';
 
 export default function AdminProductsPage() {
   const { identity } = useInternetIdentity();
@@ -95,6 +96,8 @@ export default function AdminProductsPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <AdminNav />
+      
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Manage Products</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

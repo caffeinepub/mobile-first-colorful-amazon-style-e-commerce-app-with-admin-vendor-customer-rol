@@ -16,12 +16,21 @@ export interface Category {
   'name' : string,
   'image' : ExternalBlob,
 }
+export type City = { 'other' : null } |
+  { 'unnao' : null } |
+  { 'kanpur' : null };
+export interface Discount {
+  'code' : string,
+  'vendor' : [] | [Principal],
+  'percentage' : bigint,
+}
 export type ExternalBlob = Uint8Array;
 export interface Order {
   'id' : string,
   'status' : OrderStatus,
   'total' : bigint,
   'customer' : Principal,
+  'city' : City,
   'vendor' : Principal,
   'timestamp' : Time,
   'items' : Array<OrderItem>,
@@ -72,14 +81,9 @@ export type UserRole__1 = { 'admin' : null } |
 export interface Vendor {
   'principal' : Principal,
   'verified' : boolean,
+  'documents' : Array<ExternalBlob>,
   'outletStatus' : OutletStatus,
   'name' : string,
-  'outletName' : string,
-  'walletDue' : bigint,
-}
-export interface VendorDashboardStats {
-  'totalSalesAmount' : bigint,
-  'outletStatus' : OutletStatus,
   'outletName' : string,
   'walletDue' : bigint,
 }
@@ -112,55 +116,42 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addCategory' : ActorMethod<[Category], undefined>,
-  'addItemToCart' : ActorMethod<[string, bigint], undefined>,
+  'addDiscount' : ActorMethod<[Discount], undefined>,
+  'addOrUpdateVendor' : ActorMethod<[Principal, Vendor], undefined>,
   'addProduct' : ActorMethod<[Product], undefined>,
   'addReview' : ActorMethod<[string, Review], undefined>,
+  'addToCart' : ActorMethod<[CartItem], undefined>,
   'addToWishlist' : ActorMethod<[string], undefined>,
-  'addVendor' : ActorMethod<[Principal, Vendor], undefined>,
+  'approveVendor' : ActorMethod<[Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'clearCart' : ActorMethod<[], undefined>,
   'createOrder' : ActorMethod<[Order], undefined>,
-  'deleteCategory' : ActorMethod<[string], undefined>,
   'deleteProduct' : ActorMethod<[string], undefined>,
+  'getAllCategories' : ActorMethod<[], Array<Category>>,
   'getAllOrders' : ActorMethod<[], Array<Order>>,
-  'getAnalytics' : ActorMethod<
-    [],
-    {
-      'totalProducts' : bigint,
-      'totalOrders' : bigint,
-      'totalRevenue' : bigint,
-      'totalVendors' : bigint,
-    }
-  >,
+  'getAllProducts' : ActorMethod<[], Array<Product>>,
+  'getAllVendors' : ActorMethod<[], Array<Vendor>>,
   'getCallerRole' : ActorMethod<[], UserRole__1>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCart' : ActorMethod<[], Array<CartItem>>,
-  'getCategories' : ActorMethod<[], Array<Category>>,
-  'getCategory' : ActorMethod<[string], Category>,
   'getCustomerOrders' : ActorMethod<[], Array<Order>>,
-  'getOrder' : ActorMethod<[string], Order>,
-  'getProduct' : ActorMethod<[string], Product>,
-  'getProducts' : ActorMethod<[string], Array<Product>>,
+  'getDiscounts' : ActorMethod<[], Array<Discount>>,
+  'getOrdersByCity' : ActorMethod<[City], Array<Order>>,
+  'getOrdersByStatus' : ActorMethod<[OrderStatus], Array<Order>>,
+  'getProduct' : ActorMethod<[string], [] | [Product]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
-  'getVendor' : ActorMethod<[Principal], [] | [Vendor]>,
-  'getVendorDashboardStats' : ActorMethod<[], VendorDashboardStats>,
+  'getVendorDocuments' : ActorMethod<[Principal], Array<ExternalBlob>>,
   'getVendorOrders' : ActorMethod<[], Array<Order>>,
   'getVendorProducts' : ActorMethod<[], Array<Product>>,
-  'getVendors' : ActorMethod<[], Array<Vendor>>,
   'getWishlist' : ActorMethod<[], Array<string>>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isVendor' : ActorMethod<[], boolean>,
-  'payCompany' : ActorMethod<[], undefined>,
-  'removeCartItem' : ActorMethod<[string], undefined>,
-  'removeFromWishlist' : ActorMethod<[string], undefined>,
-  'removeVendor' : ActorMethod<[Principal], undefined>,
+  'rejectVendor' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'updateCartQuantity' : ActorMethod<[string, bigint], undefined>,
-  'updateCategory' : ActorMethod<[string, Category], undefined>,
+  'setVendorOutletStatus' : ActorMethod<[Principal, OutletStatus], undefined>,
   'updateOrderStatus' : ActorMethod<[string, OrderStatus], undefined>,
   'updateProduct' : ActorMethod<[string, Product], undefined>,
-  'updateVendor' : ActorMethod<[Principal, Vendor], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

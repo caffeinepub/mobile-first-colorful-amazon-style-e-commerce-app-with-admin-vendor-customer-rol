@@ -20,13 +20,12 @@ export interface UserProfile {
     address: string;
     phone: string;
 }
-export interface VendorDashboardStats {
-    totalSalesAmount: bigint;
-    outletStatus: OutletStatus;
-    outletName: string;
-    walletDue: bigint;
-}
 export type Time = bigint;
+export interface Discount {
+    code: string;
+    vendor?: Principal;
+    percentage: bigint;
+}
 export interface OrderItem {
     productId: string;
     quantity: bigint;
@@ -42,6 +41,7 @@ export interface Order {
     status: OrderStatus;
     total: bigint;
     customer: Principal;
+    city: City;
     vendor: Principal;
     timestamp: Time;
     items: Array<OrderItem>;
@@ -53,6 +53,7 @@ export interface CartItem {
 export interface Vendor {
     principal: Principal;
     verified: boolean;
+    documents: Array<ExternalBlob>;
     outletStatus: OutletStatus;
     name: string;
     outletName: string;
@@ -75,6 +76,11 @@ export interface Product {
     category: string;
     price: bigint;
     images: Array<ExternalBlob>;
+}
+export enum City {
+    other = "other",
+    unnao = "unnao",
+    kanpur = "kanpur"
 }
 export enum OrderStatus {
     shipped = "shipped",
@@ -99,50 +105,40 @@ export enum UserRole__1 {
 }
 export interface backendInterface {
     addCategory(category: Category): Promise<void>;
-    addItemToCart(productId: string, quantity: bigint): Promise<void>;
+    addDiscount(discount: Discount): Promise<void>;
+    addOrUpdateVendor(vendorPrincipal: Principal, vendor: Vendor): Promise<void>;
     addProduct(product: Product): Promise<void>;
     addReview(productId: string, review: Review): Promise<void>;
+    addToCart(item: CartItem): Promise<void>;
     addToWishlist(productId: string): Promise<void>;
-    addVendor(vendorPrincipal: Principal, vendor: Vendor): Promise<void>;
+    approveVendor(vendorPrincipal: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearCart(): Promise<void>;
     createOrder(order: Order): Promise<void>;
-    deleteCategory(id: string): Promise<void>;
-    deleteProduct(id: string): Promise<void>;
+    deleteProduct(productId: string): Promise<void>;
+    getAllCategories(): Promise<Array<Category>>;
     getAllOrders(): Promise<Array<Order>>;
-    getAnalytics(): Promise<{
-        totalProducts: bigint;
-        totalOrders: bigint;
-        totalRevenue: bigint;
-        totalVendors: bigint;
-    }>;
+    getAllProducts(): Promise<Array<Product>>;
+    getAllVendors(): Promise<Array<Vendor>>;
     getCallerRole(): Promise<UserRole__1>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCart(): Promise<Array<CartItem>>;
-    getCategories(): Promise<Array<Category>>;
-    getCategory(id: string): Promise<Category>;
     getCustomerOrders(): Promise<Array<Order>>;
-    getOrder(orderId: string): Promise<Order>;
-    getProduct(id: string): Promise<Product>;
-    getProducts(_sortBy: string): Promise<Array<Product>>;
+    getDiscounts(): Promise<Array<Discount>>;
+    getOrdersByCity(city: City): Promise<Array<Order>>;
+    getOrdersByStatus(status: OrderStatus): Promise<Array<Order>>;
+    getProduct(productId: string): Promise<Product | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
-    getVendor(vendorPrincipal: Principal): Promise<Vendor | null>;
-    getVendorDashboardStats(): Promise<VendorDashboardStats>;
+    getVendorDocuments(vendorPrincipal: Principal): Promise<Array<ExternalBlob>>;
     getVendorOrders(): Promise<Array<Order>>;
     getVendorProducts(): Promise<Array<Product>>;
-    getVendors(): Promise<Array<Vendor>>;
     getWishlist(): Promise<Array<string>>;
     isCallerAdmin(): Promise<boolean>;
     isVendor(): Promise<boolean>;
-    payCompany(): Promise<void>;
-    removeCartItem(productId: string): Promise<void>;
-    removeFromWishlist(productId: string): Promise<void>;
-    removeVendor(vendorPrincipal: Principal): Promise<void>;
+    rejectVendor(vendorPrincipal: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateCartQuantity(productId: string, quantity: bigint): Promise<void>;
-    updateCategory(id: string, category: Category): Promise<void>;
+    setVendorOutletStatus(vendorPrincipal: Principal, status: OutletStatus): Promise<void>;
     updateOrderStatus(orderId: string, status: OrderStatus): Promise<void>;
-    updateProduct(id: string, product: Product): Promise<void>;
-    updateVendor(vendorPrincipal: Principal, vendor: Vendor): Promise<void>;
+    updateProduct(productId: string, product: Product): Promise<void>;
 }

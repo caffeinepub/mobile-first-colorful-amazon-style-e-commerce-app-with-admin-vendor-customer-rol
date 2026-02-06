@@ -33,8 +33,7 @@ export function getUrlParameter(paramName: string): string | null {
 }
 
 /**
- * Checks if a URL parameter exists in the current URL
- * Works with both query strings (?param=value) and hash-based routing (#/?param=value)
+ * Checks if a parameter exists in the URL (query string or hash)
  *
  * @param paramName - The name of the parameter to check
  * @returns True if the parameter exists, false otherwise

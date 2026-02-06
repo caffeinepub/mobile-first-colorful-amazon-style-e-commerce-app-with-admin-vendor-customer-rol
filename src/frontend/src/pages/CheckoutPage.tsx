@@ -5,6 +5,7 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import PrimaryCtaButton from '../components/buttons/PrimaryCtaButton';
+import { City } from '../backend';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ export default function CheckoutPage() {
         total: BigInt(Math.round(total)),
         status: { pending: null } as any,
         timestamp: BigInt(Date.now() * 1000000),
+        city: City.other, // Default city - could be enhanced with user selection
       });
 
       await clearCart.mutateAsync();

@@ -1,141 +1,102 @@
-import { Users, Wallet, Power } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useGetVendors, useUpdateVendor } from '../../hooks/useQueries';
-import { toast } from 'sonner';
-import { formatInr } from '../../utils/formatInr';
-import { OutletStatus } from '../../backend';
-import type { Vendor } from '../../backend';
+import { useNavigate } from '@tanstack/react-router';
+import AdminNav from '../../components/admin/AdminNav';
 
 export default function AdminDashboardPage() {
-  const { data: vendors = [], isLoading } = useGetVendors();
-  const updateVendor = useUpdateVendor();
+  const navigate = useNavigate();
 
-  const handleToggleOutletStatus = async (vendor: Vendor) => {
-    try {
-      const newStatus = vendor.outletStatus === OutletStatus.enabled 
-        ? OutletStatus.disabled 
-        : OutletStatus.enabled;
-
-      const updatedVendor: Vendor = {
-        ...vendor,
-        outletStatus: newStatus,
-      };
-
-      await updateVendor.mutateAsync({
-        vendorPrincipal: vendor.principal,
-        vendor: updatedVendor,
-      });
-
-      toast.success(
-        `Vendor outlet ${newStatus === OutletStatus.enabled ? 'enabled' : 'disabled'}`,
-        {
-          description: `${vendor.name}'s outlet is now ${newStatus === OutletStatus.enabled ? 'enabled' : 'disabled'}.`,
-        }
-      );
-    } catch (error: any) {
-      toast.error('Failed to update vendor status', {
-        description: error.message || 'Please try again.',
-      });
-    }
-  };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <div className="space-y-4">
-          <div className="h-8 bg-muted rounded w-48 animate-pulse"></div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-muted rounded animate-pulse"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const controlPanelCards = [
+    {
+      title: 'Vendor Management',
+      description: 'View all vendors, approve/reject applications, manage outlet status, and view documents',
+      icon: Users,
+      path: '/admin/vendors',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+    },
+    {
+      title: 'Orders Panel',
+      description: 'View all orders, filter by city (Kanpur, Unnao), and track order status',
+      icon: ShoppingCart,
+      path: '/admin/orders',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+    },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <AdminNav />
+      
       <div className="flex items-center gap-3 mb-6">
-        <Users className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-secondary">
+          <Users className="h-8 w-8 text-white" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Admin Control Panel
+          </h1>
+          <p className="text-muted-foreground">Manage your marketplace operations</p>
+        </div>
       </div>
 
-      {vendors.length === 0 ? (
-        <div className="text-center py-16">
-          <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <p className="text-muted-foreground text-lg">No vendors yet. Add your first vendor!</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4">Vendor Management</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {vendors.map((vendor) => {
-              const isEnabled = vendor.outletStatus === OutletStatus.enabled;
-              const walletDue = Number(vendor.walletDue);
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        {controlPanelCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Card
+              key={card.path}
+              className="border-2 hover:border-primary/50 hover:shadow-soft-lg transition-all cursor-pointer group"
+              onClick={() => navigate({ to: card.path })}
+            >
+              <CardHeader>
+                <div className="flex items-start justify-between mb-2">
+                  <div className={`p-3 rounded-xl ${card.bgColor}`}>
+                    <Icon className={`h-8 w-8 ${card.color}`} />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl">{card.title}</CardTitle>
+                <CardDescription className="text-sm leading-relaxed">
+                  {card.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  Open {card.title}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-              return (
-                <Card key={vendor.principal.toString()} className="border-2">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg">{vendor.name || 'Unnamed Vendor'}</CardTitle>
-                      <Badge variant={isEnabled ? 'default' : 'secondary'} className="gap-1">
-                        <Power className="h-3 w-3" />
-                        {isEnabled ? 'Enabled' : 'Disabled'}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground font-mono break-all mt-1">
-                      {vendor.principal.toString()}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {vendor.outletName && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">Outlet:</span>
-                        <span className="font-medium">{vendor.outletName}</span>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-                      <Wallet className="h-4 w-4 text-primary" />
-                      <div className="flex-1">
-                        <p className="text-xs text-muted-foreground">Wallet Due</p>
-                        <p className="text-lg font-bold text-primary">
-                          {formatInr(walletDue)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={() => handleToggleOutletStatus(vendor)}
-                      disabled={updateVendor.isPending}
-                      variant={isEnabled ? 'destructive' : 'default'}
-                      className="w-full"
-                      size="sm"
-                    >
-                      {updateVendor.isPending ? (
-                        <>
-                          <span className="animate-spin mr-2">⏳</span>
-                          Updating...
-                        </>
-                      ) : (
-                        <>
-                          <Power className="h-4 w-4 mr-2" />
-                          {isEnabled ? 'Disable Outlet' : 'Enable Outlet'}
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <Card className="border-2">
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>Common administrative tasks</CardDescription>
+        </CardHeader>
+        <CardContent className="grid sm:grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="justify-start"
+            onClick={() => navigate({ to: '/admin/products' })}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Manage Products
+          </Button>
+          <Button
+            variant="outline"
+            className="justify-start"
+            onClick={() => navigate({ to: '/admin/vendors' })}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            View All Vendors
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,17 +1,27 @@
-import List "mo:core/List";
+import Array "mo:core/Array";
 import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
-import Array "mo:core/Array";
 import Principal "mo:core/Principal";
+import Iter "mo:core/Iter";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
+import Migration "migration";
 
+// Apply migration logic to transform old actor state on upgrades
+(with migration = Migration.run)
 actor {
   include MixinStorage();
+
+  // Redefine City type
+  public type City = {
+    #kanpur;
+    #unnao;
+    #other;
+  };
 
   // =========================
   // Types & Shared State
@@ -67,6 +77,7 @@ actor {
     outletName : Text;
     outletStatus : OutletStatus;
     walletDue : Nat;
+    documents : [Storage.ExternalBlob];
   };
 
   public type OutletStatus = {
@@ -96,6 +107,7 @@ actor {
     status : OrderStatus;
     timestamp : Time.Time;
     vendor : Principal;
+    city : City;
   };
 
   public type UserProfile = {
@@ -107,35 +119,32 @@ actor {
 
   let products = Map.empty<Text, Product>();
   let categories = Map.empty<Text, Category>();
-  let carts = Map.empty<Principal, List.List<CartItem>>();
-  let discounts = Map.empty<Principal, List.List<Discount>>();
+  let carts = Map.empty<Principal, [CartItem]>();
+  let discounts = Map.empty<Principal, [Discount]>();
   let vendors = Map.empty<Principal, Vendor>();
   let orders = Map.empty<Text, Order>();
-  let wishlists = Map.empty<Principal, List.List<Text>>();
+  let wishlists = Map.empty<Principal, [Text]>();
   let userProfiles = Map.empty<Principal, UserProfile>();
 
   let vendorPrincipals = Map.empty<Principal, Bool>();
 
   // Track if we've initialized the first admin
-  var hasInitializedAdmin = false;
+  stable var hasInitializedAdmin = false;
 
   // =========================
   // Authorization with Persistent State
   // =========================
 
-  var accessControlState = AccessControl.initState();
+  let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // Bootstrap: Ensure admin exists on first authenticated call
+  // Initialize first caller as admin (only once, in shared functions)
   func ensureAdminExists(caller : Principal) {
     if (not hasInitializedAdmin and caller != Principal.fromText("2vxsx-fae")) {
       if (not AccessControl.isAdmin(accessControlState, caller)) {
-        // No admin exists, make this caller the first admin
         AccessControl.assignRole(accessControlState, caller, caller, #admin);
-        hasInitializedAdmin := true;
-      } else {
-        hasInitializedAdmin := true;
       };
+      hasInitializedAdmin := true;
     };
   };
 
@@ -157,38 +166,19 @@ actor {
     caller != Principal.fromText("2vxsx-fae");
   };
 
-  // Role checking
-  public query ({ caller }) func getCallerRole() : async UserRole {
-    if (AccessControl.isAdmin(accessControlState, caller)) {
-      return #admin;
-    } else if (callerIsVendor(caller)) {
-      return #vendor;
-    } else {
-      return #customer;
-    };
-  };
-
-  public query ({ caller }) func isVendor() : async Bool {
-    callerIsVendor(caller);
-  };
-
   // =========================
-  // User Profile APIs
+  // User Profile Management
   // =========================
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to view profile");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view profiles");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    ensureAdminExists(caller);
-
-    if (caller != user and not callerIsAdmin(caller)) {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
@@ -196,379 +186,269 @@ actor {
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to save profile");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
   };
 
   // =========================
-  // Product APIs
+  // Roles & Access
   // =========================
 
-  public query ({ caller }) func getProducts(_sortBy : Text) : async [Product] {
-    products.values().toArray();
+  public query ({ caller }) func getCallerRole() : async UserRole {
+    if (AccessControl.isAdmin(accessControlState, caller)) { return #admin };
+    if (callerIsVendor(caller)) { return #vendor };
+    #customer;
   };
 
-  public query ({ caller }) func getProduct(id : Text) : async Product {
-    switch (products.get(id)) {
-      case (null) { Runtime.trap("Product not found") };
-      case (?product) { product };
-    };
+  public query ({ caller }) func isVendor() : async Bool {
+    callerIsVendor(caller);
   };
+
+  // =========================
+  // Product Management
+  // =========================
 
   public shared ({ caller }) func addProduct(product : Product) : async () {
     ensureAdminExists(caller);
-
-    if (not callerIsAdmin(caller) and not callerIsVendor(caller)) {
-      Runtime.trap("Unauthorized: Only admins or vendors can add products");
+    if (not callerIsVendor(caller) and not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only vendors can add products");
     };
-
     if (callerIsVendor(caller) and product.vendor != caller) {
-      Runtime.trap("Unauthorized: Vendors can only add products under their own name");
+      Runtime.trap("Unauthorized: Vendors can only add their own products");
     };
-
     products.add(product.id, product);
   };
 
-  public shared ({ caller }) func updateProduct(id : Text, product : Product) : async () {
+  public shared ({ caller }) func updateProduct(productId : Text, product : Product) : async () {
     ensureAdminExists(caller);
-
-    switch (products.get(id)) {
+    let existingProduct = switch (products.get(productId)) {
       case (null) { Runtime.trap("Product not found") };
-      case (?existingProduct) {
-        if (callerIsAdmin(caller)) {
-          products.add(id, product);
-          return;
-        };
-
-        if (callerIsVendor(caller) and existingProduct.vendor == caller) {
-          if (product.vendor != caller) {
-            Runtime.trap("Unauthorized: Cannot change product ownership");
-          };
-          products.add(id, product);
-          return;
-        };
-
-        Runtime.trap("Unauthorized: Only admins or product owner can update products");
-      };
+      case (?p) { p };
     };
+    if (not callerIsAdmin(caller) and existingProduct.vendor != caller) {
+      Runtime.trap("Unauthorized: Can only update your own products");
+    };
+    products.add(productId, product);
   };
 
-  public shared ({ caller }) func deleteProduct(id : Text) : async () {
+  public shared ({ caller }) func deleteProduct(productId : Text) : async () {
     ensureAdminExists(caller);
-
-    switch (products.get(id)) {
+    let existingProduct = switch (products.get(productId)) {
       case (null) { Runtime.trap("Product not found") };
-      case (?existingProduct) {
-        if (callerIsAdmin(caller)) {
-          products.remove(id);
-          return;
-        };
-
-        if (callerIsVendor(caller) and existingProduct.vendor == caller) {
-          products.remove(id);
-          return;
-        };
-
-        Runtime.trap("Unauthorized: Only admins or product owner can delete products");
-      };
+      case (?p) { p };
     };
+    if (not callerIsAdmin(caller) and existingProduct.vendor != caller) {
+      Runtime.trap("Unauthorized: Can only delete your own products");
+    };
+    products.remove(productId);
+  };
+
+  public query func getProduct(productId : Text) : async ?Product {
+    products.get(productId);
+  };
+
+  public query func getAllProducts() : async [Product] {
+    products.values().toArray();
   };
 
   public query ({ caller }) func getVendorProducts() : async [Product] {
-    ensureAdminExists(caller);
-
     if (not callerIsVendor(caller)) {
       Runtime.trap("Unauthorized: Only vendors can view their products");
     };
-
-    products.values().filter(func(p) { p.vendor == caller }).toArray();
+    let allProducts = products.values().toArray();
+    allProducts.filter(func(p) { p.vendor == caller });
   };
 
   // =========================
-  // Cart APIs
+  // Category Management
   // =========================
 
-  public shared ({ caller }) func addItemToCart(productId : Text, quantity : Nat) : async () {
+  public shared ({ caller }) func addCategory(category : Category) : async () {
     ensureAdminExists(caller);
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can add categories");
+    };
+    categories.add(category.id, category);
+  };
 
+  public query func getAllCategories() : async [Category] {
+    categories.values().toArray();
+  };
+
+  // =========================
+  // Cart Management
+  // =========================
+
+  public shared ({ caller }) func addToCart(item : CartItem) : async () {
+    ensureAdminExists(caller);
     if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to add items to cart");
     };
-
-    let cart = switch (carts.get(caller)) {
-      case (null) { List.empty<CartItem>() };
-      case (?existing) { existing };
+    let currentCart = switch (carts.get(caller)) {
+      case (null) { [] };
+      case (?cart) { cart };
     };
-    cart.add({ productId; quantity });
-    carts.add(caller, cart);
+    let updatedCart = currentCart.concat([item]);
+    carts.add(caller, updatedCart);
   };
 
   public query ({ caller }) func getCart() : async [CartItem] {
-    ensureAdminExists(caller);
-
     if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to view cart");
     };
-
     switch (carts.get(caller)) {
       case (null) { [] };
-      case (?cart) { cart.toArray() };
+      case (?cart) { cart };
     };
   };
 
   public shared ({ caller }) func clearCart() : async () {
     ensureAdminExists(caller);
-
     if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to clear cart");
     };
-
     carts.remove(caller);
   };
 
-  public shared ({ caller }) func updateCartQuantity(productId : Text, quantity : Nat) : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to update cart");
-    };
-
-    switch (carts.get(caller)) {
-      case (null) { Runtime.trap("Cart does not exist") };
-      case (?existingCart) {
-        let updatedCart = existingCart.toArray().map(
-          func(item) {
-            if (item.productId == productId) {
-              { item with quantity };
-            } else {
-              item;
-            };
-          }
-        );
-        let newCart = List.fromArray<CartItem>(updatedCart);
-        carts.add(caller, newCart);
-      };
-    };
-  };
-
-  public shared ({ caller }) func removeCartItem(productId : Text) : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to remove items from cart");
-    };
-
-    switch (carts.get(caller)) {
-      case (null) { Runtime.trap("Cart does not exist") };
-      case (?existingCart) {
-        let filteredCart = existingCart.filter(
-          func(item) { item.productId != productId }
-        );
-        carts.add(caller, filteredCart);
-      };
-    };
-  };
-
   // =========================
-  // Review APIs
+  // Review Management
   // =========================
 
   public shared ({ caller }) func addReview(productId : Text, review : Review) : async () {
     ensureAdminExists(caller);
-
     if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to add reviews");
     };
-
     if (review.reviewer != caller) {
-      Runtime.trap("Unauthorized: Cannot submit review on behalf of another customer");
+      Runtime.trap("Unauthorized: Cannot add review on behalf of another user");
     };
-
-    switch (products.get(productId)) {
+    let product = switch (products.get(productId)) {
       case (null) { Runtime.trap("Product not found") };
-      case (?product) {
-        let reviewsList = List.fromArray<Review>(product.ratings);
-        reviewsList.add(review);
-        let updatedReviews = reviewsList.toArray();
-        let updatedProduct = { product with ratings = updatedReviews };
-        products.add(productId, updatedProduct);
-      };
+      case (?p) { p };
+    };
+    let newRatings = product.ratings.concat([review]);
+    let updatedProduct = { product with ratings = newRatings };
+    products.add(productId, updatedProduct);
+  };
+
+  // =========================
+  // Wishlist Management
+  // =========================
+
+  public shared ({ caller }) func addToWishlist(productId : Text) : async () {
+    ensureAdminExists(caller);
+    if (not callerIsAuthenticated(caller)) {
+      Runtime.trap("Unauthorized: Please sign in to add to wishlist");
+    };
+    let currentWishlist = switch (wishlists.get(caller)) {
+      case (null) { [] };
+      case (?wl) { wl };
+    };
+    let updatedWishlist = currentWishlist.concat([productId]);
+    wishlists.add(caller, updatedWishlist);
+  };
+
+  public query ({ caller }) func getWishlist() : async [Text] {
+    if (not callerIsAuthenticated(caller)) {
+      Runtime.trap("Unauthorized: Please sign in to view wishlist");
+    };
+    switch (wishlists.get(caller)) {
+      case (null) { [] };
+      case (?wl) { wl };
     };
   };
 
   // =========================
-  // Category APIs
+  // Vendor Management (Admin-only)
   // =========================
 
-  public query ({ caller }) func getCategories() : async [Category] {
-    categories.values().toArray();
-  };
-
-  public query ({ caller }) func getCategory(id : Text) : async Category {
-    switch (categories.get(id)) {
-      case (null) { Runtime.trap("Category not found") };
-      case (?category) { category };
-    };
-  };
-
-  public shared ({ caller }) func addCategory(category : Category) : async () {
+  public shared ({ caller }) func addOrUpdateVendor(vendorPrincipal : Principal, vendor : Vendor) : async () {
     ensureAdminExists(caller);
-
-    if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can add categories");
-    };
-
-    categories.add(category.id, category);
-  };
-
-  public shared ({ caller }) func updateCategory(id : Text, category : Category) : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can update categories");
-    };
-
-    switch (categories.get(id)) {
-      case (null) { Runtime.trap("Category not found") };
-      case (?_) {
-        categories.add(id, category);
-      };
-    };
-  };
-
-  public shared ({ caller }) func deleteCategory(id : Text) : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can delete categories");
-    };
-
-    categories.remove(id);
-  };
-
-  // =========================
-  // Vendor Management APIs
-  // =========================
-
-  public shared ({ caller }) func addVendor(vendorPrincipal : Principal, vendor : Vendor) : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can add vendors");
-    };
-
-    vendors.add(vendorPrincipal, vendor);
-    vendorPrincipals.add(vendorPrincipal, true);
-
-    // Assign user role in AccessControl (user = customer)
-    AccessControl.assignRole(accessControlState, caller, vendorPrincipal, #user);
-  };
-
-  public shared ({ caller }) func updateVendor(vendorPrincipal : Principal, vendor : Vendor) : async () {
-    ensureAdminExists(caller);
-
     if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can update vendors");
     };
-
-    switch (vendors.get(vendorPrincipal)) {
-      case (null) { Runtime.trap("Vendor not found") };
-      case (?_) {
-        vendors.add(vendorPrincipal, vendor);
-      };
-    };
+    vendors.add(vendorPrincipal, vendor);
+    vendorPrincipals.add(vendorPrincipal, true);
+    AccessControl.assignRole(accessControlState, caller, vendorPrincipal, #user);
   };
 
-  public shared ({ caller }) func removeVendor(vendorPrincipal : Principal) : async () {
-    ensureAdminExists(caller);
-
+  public query ({ caller }) func getAllVendors() : async [Vendor] {
     if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can remove vendors");
+      Runtime.trap("Unauthorized: Only admins can view all vendors");
     };
+    vendors.values().toArray();
+  };
 
+  public shared ({ caller }) func approveVendor(vendorPrincipal : Principal) : async () {
+    ensureAdminExists(caller);
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can approve vendors");
+    };
+    let vendor = switch (vendors.get(vendorPrincipal)) {
+      case (null) { Runtime.trap("Vendor not found") };
+      case (?vendor) { vendor };
+    };
+    let updatedVendor = { vendor with verified = true };
+    vendors.add(vendorPrincipal, updatedVendor);
+  };
+
+  public shared ({ caller }) func rejectVendor(vendorPrincipal : Principal) : async () {
+    ensureAdminExists(caller);
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can reject vendors");
+    };
     vendors.remove(vendorPrincipal);
     vendorPrincipals.remove(vendorPrincipal);
   };
 
-  public query ({ caller }) func getVendors() : async [Vendor] {
+  public shared ({ caller }) func setVendorOutletStatus(vendorPrincipal : Principal, status : OutletStatus) : async () {
     ensureAdminExists(caller);
-
     if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can view all vendors");
+      Runtime.trap("Unauthorized: Only admins can change outlet status");
     };
-
-    vendors.values().toArray();
-  };
-
-  public query ({ caller }) func getVendor(vendorPrincipal : Principal) : async ?Vendor {
-    vendors.get(vendorPrincipal);
-  };
-
-  public type VendorDashboardStats = {
-    outletName : Text;
-    outletStatus : OutletStatus;
-    walletDue : Nat;
-    totalSalesAmount : Nat;
-  };
-
-  public query ({ caller }) func getVendorDashboardStats() : async VendorDashboardStats {
-    ensureAdminExists(caller);
-
-    if (not callerIsVendor(caller)) {
-      Runtime.trap("Unauthorized: Only vendors can access dashboard stats");
-    };
-
-    let vendor = switch (vendors.get(caller)) {
+    let vendor = switch (vendors.get(vendorPrincipal)) {
       case (null) { Runtime.trap("Vendor not found") };
       case (?vendor) { vendor };
     };
+    let updatedVendor = { vendor with outletStatus = status };
+    vendors.add(vendorPrincipal, updatedVendor);
+  };
 
-    let vendorOrders = orders.values().filter(func(o) { o.vendor == caller });
-    let totalSales = vendorOrders.foldLeft(
-      0,
-      func(acc, order) { acc + order.total },
-    );
-
-    {
-      outletName = vendor.outletName;
-      outletStatus = vendor.outletStatus;
-      walletDue = vendor.walletDue;
-      totalSalesAmount = totalSales;
+  public query ({ caller }) func getVendorDocuments(vendorPrincipal : Principal) : async [Storage.ExternalBlob] {
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can view vendor documents");
     };
+    let vendor = switch (vendors.get(vendorPrincipal)) {
+      case (null) { Runtime.trap("Vendor not found") };
+      case (?vendor) { vendor };
+    };
+    vendor.documents;
   };
 
   // =========================
-  // Order APIs
+  // Order Management
   // =========================
 
   public shared ({ caller }) func createOrder(order : Order) : async () {
     ensureAdminExists(caller);
-
     if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to create orders");
     };
-
     if (order.customer != caller) {
       Runtime.trap("Unauthorized: Cannot create order on behalf of another customer");
     };
-
     orders.add(order.id, order);
 
-    // Update vendor's wallet due
     let vendor = switch (vendors.get(order.vendor)) {
       case (null) { Runtime.trap("Vendor not found") };
       case (?vendor) { vendor };
     };
 
-    let commission = order.total / 10; // 10% commission
+    let commission = order.total / 10;
     let newWalletDue = vendor.walletDue + commission;
-
-    let newStatus = if (newWalletDue >= 1000) { #disabled } else {
-      #enabled;
-    };
+    let newStatus = if (newWalletDue >= 1000) { #disabled } else { #enabled };
 
     let updatedVendor = {
       vendor with
@@ -578,182 +458,77 @@ actor {
     vendors.add(order.vendor, updatedVendor);
   };
 
-  public shared ({ caller }) func payCompany() : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsVendor(caller)) {
-      Runtime.trap("Unauthorized: Only vendors can perform this action");
-    };
-
-    let vendor = switch (vendors.get(caller)) {
-      case (null) { Runtime.trap("Vendor not found") };
-      case (?vendor) { vendor };
-    };
-
-    if (vendor.walletDue == 0) {
-      Runtime.trap("No outstanding balance to pay");
-    };
-
-    let updatedVendor = {
-      vendor with
-      walletDue = 0;
-      outletStatus = #enabled;
-    };
-    vendors.add(caller, updatedVendor);
-  };
-
-  public query ({ caller }) func getCustomerOrders() : async [Order] {
-    ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to view orders");
-    };
-
-    orders.values().filter(func(o) { o.customer == caller }).toArray();
-  };
-
-  public query ({ caller }) func getVendorOrders() : async [Order] {
-    ensureAdminExists(caller);
-
-    if (not callerIsVendor(caller)) {
-      Runtime.trap("Unauthorized: Only vendors can view their orders");
-    };
-
-    orders.values().filter(func(o) { o.vendor == caller }).toArray();
-  };
-
   public query ({ caller }) func getAllOrders() : async [Order] {
-    ensureAdminExists(caller);
-
     if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can view all orders");
     };
-
     orders.values().toArray();
   };
 
-  public query ({ caller }) func getOrder(orderId : Text) : async Order {
-    ensureAdminExists(caller);
-
-    switch (orders.get(orderId)) {
-      case (null) { Runtime.trap("Order not found") };
-      case (?order) {
-        if (order.customer == caller) {
-          return order;
-        };
-
-        if (callerIsVendor(caller) and order.vendor == caller) {
-          return order;
-        };
-
-        if (callerIsAdmin(caller)) {
-          return order;
-        };
-
-        Runtime.trap("Unauthorized: Cannot view this order");
-      };
+  public query ({ caller }) func getOrdersByCity(city : City) : async [Order] {
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can view orders by city");
     };
+    let allOrders = orders.values().toArray();
+    allOrders.filter(func(order) { order.city == city });
+  };
+
+  public query ({ caller }) func getOrdersByStatus(status : OrderStatus) : async [Order] {
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can view orders by status");
+    };
+    let allOrders = orders.values().toArray();
+    allOrders.filter(func(order) { order.status == status });
+  };
+
+  public query ({ caller }) func getCustomerOrders() : async [Order] {
+    if (not callerIsAuthenticated(caller)) {
+      Runtime.trap("Unauthorized: Please sign in to view orders");
+    };
+    let allOrders = orders.values().toArray();
+    allOrders.filter(func(order) { order.customer == caller });
+  };
+
+  public query ({ caller }) func getVendorOrders() : async [Order] {
+    if (not callerIsVendor(caller)) {
+      Runtime.trap("Unauthorized: Only vendors can view their orders");
+    };
+    let allOrders = orders.values().toArray();
+    allOrders.filter(func(order) { order.vendor == caller });
   };
 
   public shared ({ caller }) func updateOrderStatus(orderId : Text, status : OrderStatus) : async () {
     ensureAdminExists(caller);
-
-    switch (orders.get(orderId)) {
+    let order = switch (orders.get(orderId)) {
       case (null) { Runtime.trap("Order not found") };
-      case (?order) {
-        // Admins can update any order
-        if (callerIsAdmin(caller)) {
-          let updatedOrder = { order with status };
-          orders.add(orderId, updatedOrder);
-          return;
-        };
-
-        // Vendors can update their own orders
-        if (callerIsVendor(caller) and order.vendor == caller) {
-          let updatedOrder = { order with status };
-          orders.add(orderId, updatedOrder);
-          return;
-        };
-
-        Runtime.trap("Unauthorized: Only admins or order vendor can update order status");
-      };
+      case (?o) { o };
     };
+    if (not callerIsAdmin(caller) and order.vendor != caller) {
+      Runtime.trap("Unauthorized: Can only update your own orders");
+    };
+    let updatedOrder = { order with status = status };
+    orders.add(orderId, updatedOrder);
   };
 
   // =========================
-  // Wishlist APIs
+  // Discount Management
   // =========================
 
-  public shared ({ caller }) func addToWishlist(productId : Text) : async () {
+  public shared ({ caller }) func addDiscount(discount : Discount) : async () {
     ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to add to wishlist");
+    if (not callerIsVendor(caller) and not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only vendors can add discounts");
     };
-
-    let wishlist = switch (wishlists.get(caller)) {
-      case (null) { List.empty<Text>() };
-      case (?existing) { existing };
-    };
-    wishlist.add(productId);
-    wishlists.add(caller, wishlist);
-  };
-
-  public shared ({ caller }) func removeFromWishlist(productId : Text) : async () {
-    ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to remove from wishlist");
-    };
-
-    switch (wishlists.get(caller)) {
-      case (null) { Runtime.trap("Wishlist does not exist") };
-      case (?existingWishlist) {
-        let filteredWishlist = existingWishlist.filter(
-          func(id) { id != productId }
-        );
-        wishlists.add(caller, filteredWishlist);
-      };
-    };
-  };
-
-  public query ({ caller }) func getWishlist() : async [Text] {
-    ensureAdminExists(caller);
-
-    if (not callerIsAuthenticated(caller)) {
-      Runtime.trap("Unauthorized: Please sign in to view wishlist");
-    };
-
-    switch (wishlists.get(caller)) {
+    let currentDiscounts = switch (discounts.get(caller)) {
       case (null) { [] };
-      case (?wishlist) { wishlist.toArray() };
+      case (?d) { d };
     };
+    let updatedDiscounts = currentDiscounts.concat([discount]);
+    discounts.add(caller, updatedDiscounts);
   };
 
-  // =========================
-  // Analytics APIs (Admin only)
-  // =========================
-
-  public query ({ caller }) func getAnalytics() : async {
-    totalOrders : Nat;
-    totalRevenue : Nat;
-    totalProducts : Nat;
-    totalVendors : Nat;
-  } {
-    ensureAdminExists(caller);
-
-    if (not callerIsAdmin(caller)) {
-      Runtime.trap("Unauthorized: Only admins can view analytics");
-    };
-
-    let allOrders = orders.values().toArray();
-    let totalRevenue = allOrders.foldLeft(0, func(acc, order) { acc + order.total });
-
-    {
-      totalOrders = allOrders.size();
-      totalRevenue;
-      totalProducts = products.size();
-      totalVendors = vendors.size();
-    };
+  public query func getDiscounts() : async [Discount] {
+    let allDiscounts = discounts.values();
+    allDiscounts.toArray().flatten();
   };
 };

@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, VendorDashboardStats, UserRole__1 } from '../backend';
+import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, UserRole__1, City, OutletStatus } from '../backend';
 import { Principal } from '@dfinity/principal';
+import { ExternalBlob } from '../backend';
 
 // User Profile Queries
 export function useGetCallerUserProfile() {
@@ -149,7 +150,7 @@ export function useGetProducts(sortBy: string = 'name') {
     queryKey: ['products', sortBy],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getProducts(sortBy);
+      return actor.getAllProducts();
     },
     enabled: !!actor && !isFetching,
   });
@@ -229,7 +230,7 @@ export function useGetCategories() {
     queryKey: ['categories'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getCategories();
+      return actor.getAllCategories();
     },
     enabled: !!actor && !isFetching,
   });
@@ -259,39 +260,9 @@ export function useAddToCart() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ productId, quantity }: { productId: string; quantity: bigint }) => {
+    mutationFn: async (item: CartItem) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addItemToCart(productId, quantity);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
-    },
-  });
-}
-
-export function useUpdateCartQuantity() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ productId, quantity }: { productId: string; quantity: bigint }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.updateCartQuantity(productId, quantity);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
-    },
-  });
-}
-
-export function useRemoveFromCart() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (productId: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.removeCartItem(productId);
+      return actor.addToCart(item);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
@@ -348,21 +319,6 @@ export function useAddToWishlist() {
   });
 }
 
-export function useRemoveFromWishlist() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (productId: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.removeFromWishlist(productId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['wishlist'] });
-    },
-  });
-}
-
 // Order Queries
 export function useGetCustomerOrders() {
   const { actor, isFetching } = useActor();
@@ -394,7 +350,9 @@ export function useCreateOrder() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customerOrders'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      queryClient.invalidateQueries({ queryKey: ['vendorDashboardStats'] });
+      queryClient.invalidateQueries({ queryKey: ['allOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['ordersByCity'] });
+      queryClient.invalidateQueries({ queryKey: ['vendorOrders'] });
     },
   });
 }
@@ -434,38 +392,6 @@ export function useGetVendorOrders() {
   });
 }
 
-export function useGetVendorDashboardStats() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<VendorDashboardStats | null>({
-    queryKey: ['vendorDashboardStats'],
-    queryFn: async () => {
-      if (!actor) return null;
-      try {
-        return await actor.getVendorDashboardStats();
-      } catch {
-        return null;
-      }
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function usePayCompany() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.payCompany();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendorDashboardStats'] });
-    },
-  });
-}
-
 // Admin Queries
 export function useGetAllOrders() {
   const { actor, isFetching } = useActor();
@@ -484,17 +410,20 @@ export function useGetAllOrders() {
   });
 }
 
-export function useGetAnalytics() {
+export function useGetOrdersByCity(city: City) {
   const { actor, isFetching } = useActor();
 
-  return useQuery({
-    queryKey: ['analytics'],
+  return useQuery<Order[]>({
+    queryKey: ['ordersByCity', city],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return await actor.getAnalytics();
+      if (!actor) return [];
+      try {
+        return await actor.getOrdersByCity(city);
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
-    retry: 1,
   });
 }
 
@@ -506,12 +435,74 @@ export function useGetVendors() {
     queryFn: async () => {
       if (!actor) return [];
       try {
-        return await actor.getVendors();
+        return await actor.getAllVendors();
       } catch {
         return [];
       }
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useApproveVendor() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vendorPrincipal: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.approveVendor(vendorPrincipal);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    },
+  });
+}
+
+export function useRejectVendor() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vendorPrincipal: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.rejectVendor(vendorPrincipal);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    },
+  });
+}
+
+export function useSetVendorOutletStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ vendorPrincipal, status }: { vendorPrincipal: Principal; status: OutletStatus }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.setVendorOutletStatus(vendorPrincipal, status);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    },
+  });
+}
+
+export function useGetVendorDocuments(vendorPrincipal: Principal) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<ExternalBlob[]>({
+    queryKey: ['vendorDocuments', vendorPrincipal.toString()],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getVendorDocuments(vendorPrincipal);
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching && vendorPrincipal.toString() !== Principal.anonymous().toString(),
   });
 }
 
@@ -522,7 +513,7 @@ export function useUpdateVendor() {
   return useMutation({
     mutationFn: async ({ vendorPrincipal, vendor }: { vendorPrincipal: Principal; vendor: Vendor }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateVendor(vendorPrincipal, vendor);
+      return actor.addOrUpdateVendor(vendorPrincipal, vendor);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
@@ -557,6 +548,7 @@ export function useUpdateOrderStatus() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['ordersByCity'] });
       queryClient.invalidateQueries({ queryKey: ['vendorOrders'] });
       queryClient.invalidateQueries({ queryKey: ['customerOrders'] });
     },
