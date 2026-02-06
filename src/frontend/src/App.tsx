@@ -22,6 +22,7 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminVendorsPage from './pages/admin/AdminVendorsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import RequireRole from './components/auth/RequireRole';
+import AdminErrorBoundary from './components/admin/AdminErrorBoundary';
 import CustomerLoginPage from './pages/onboarding/CustomerLoginPage';
 import VendorLoginPage from './pages/onboarding/VendorLoginPage';
 import VendorListPage from './pages/onboarding/VendorListPage';
@@ -149,9 +150,11 @@ const adminDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
   component: () => (
-    <RequireRole requiredRole="admin">
-      <AdminDashboardPage />
-    </RequireRole>
+    <AdminErrorBoundary>
+      <RequireRole requiredRole="admin">
+        <AdminDashboardPage />
+      </RequireRole>
+    </AdminErrorBoundary>
   ),
 });
 
@@ -159,9 +162,11 @@ const adminProductsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/products',
   component: () => (
-    <RequireRole requiredRole="admin">
-      <AdminProductsPage />
-    </RequireRole>
+    <AdminErrorBoundary>
+      <RequireRole requiredRole="admin">
+        <AdminProductsPage />
+      </RequireRole>
+    </AdminErrorBoundary>
   ),
 });
 
@@ -169,9 +174,11 @@ const adminVendorsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/vendors',
   component: () => (
-    <RequireRole requiredRole="admin">
-      <AdminVendorsPage />
-    </RequireRole>
+    <AdminErrorBoundary>
+      <RequireRole requiredRole="admin">
+        <AdminVendorsPage />
+      </RequireRole>
+    </AdminErrorBoundary>
   ),
 });
 
@@ -179,9 +186,11 @@ const adminOrdersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin/orders',
   component: () => (
-    <RequireRole requiredRole="admin">
-      <AdminOrdersPage />
-    </RequireRole>
+    <AdminErrorBoundary>
+      <RequireRole requiredRole="admin">
+        <AdminOrdersPage />
+      </RequireRole>
+    </AdminErrorBoundary>
   ),
 });
 

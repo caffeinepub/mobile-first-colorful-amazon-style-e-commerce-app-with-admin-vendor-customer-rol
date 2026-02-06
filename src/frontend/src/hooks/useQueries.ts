@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, VendorDashboardStats } from '../backend';
+import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, VendorDashboardStats, UserRole } from '../backend';
+import { Principal } from '@dfinity/principal';
 
 // User Profile Queries
 export function useGetCallerUserProfile() {
@@ -53,6 +54,23 @@ export function useGetCallerUserRole() {
   });
 }
 
+export function useIsAdmin() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['isAdmin'],
+    queryFn: async () => {
+      if (!actor) return false;
+      try {
+        return await actor.isCallerAdmin();
+      } catch {
+        return false;
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
 export function useIsVendor() {
   const { actor, isFetching } = useActor();
 
@@ -63,6 +81,46 @@ export function useIsVendor() {
       return actor.isVendor();
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAssignAdminRole() {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      if (!identity) throw new Error('Not authenticated');
+      
+      const principal = identity.getPrincipal();
+      // Use UserRole.admin enum value
+      await actor.assignCallerUserRole(principal, 'admin' as UserRole);
+    },
+    onSuccess: async () => {
+      // First invalidate the actor to force re-initialization
+      await queryClient.invalidateQueries({ queryKey: ['actor'] });
+      
+      // Wait for actor to reinitialize
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Then invalidate and refetch role queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['callerUserRole'] }),
+        queryClient.invalidateQueries({ queryKey: ['isAdmin'] }),
+      ]);
+      
+      // Force refetch to ensure data is fresh
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['callerUserRole'] }),
+        queryClient.refetchQueries({ queryKey: ['isAdmin'] }),
+      ]);
+    },
+    onError: (error) => {
+      // Log the full error for debugging
+      console.error('Admin role assignment error:', error);
+    },
   });
 }
 

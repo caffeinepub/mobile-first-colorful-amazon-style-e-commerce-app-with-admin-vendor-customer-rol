@@ -220,7 +220,6 @@ export interface backendInterface {
     getVendorProducts(): Promise<Array<Product>>;
     getVendors(): Promise<Array<Vendor>>;
     getWishlist(): Promise<Array<string>>;
-    isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isVendor(): Promise<boolean>;
     payCompany(): Promise<void>;
@@ -743,20 +742,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getWishlist();
-            return result;
-        }
-    }
-    async isAdmin(): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.isAdmin();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.isAdmin();
             return result;
         }
     }

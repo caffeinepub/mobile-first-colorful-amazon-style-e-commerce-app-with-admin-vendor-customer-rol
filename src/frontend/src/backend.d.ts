@@ -127,7 +127,6 @@ export interface backendInterface {
     getVendorProducts(): Promise<Array<Product>>;
     getVendors(): Promise<Array<Vendor>>;
     getWishlist(): Promise<Array<string>>;
-    isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isVendor(): Promise<boolean>;
     payCompany(): Promise<void>;

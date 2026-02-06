@@ -1,104 +1,97 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Rename branding to QuickBazar and update logo/PWA icons",
+  "title": "Admin routes: surface actor initialization failures, add admin diagnostics, and prevent blank screens with error boundaries",
   "requirements": [
     {
-      "id": "REQ-14",
-      "summary": "Rename all visible “ShopHub” branding to “QuickBazar” across UI and app metadata (HTML + PWA manifest + Apple web app title), ensuring no remaining user-facing ShopHub/Marketplace naming.",
+      "id": "REQ-17",
+      "summary": "Show an explicit, actionable error UI on /admin routes when the backend actor React Query is errored (instead of a blank/infinite loading state).",
       "acceptanceCriteria": [
-        "Top navigation brand text shows “QuickBazar” instead of “ShopHub”.",
-        "frontend/index.html <title> and apple-mobile-web-app-title use “QuickBazar”.",
-        "frontend/public/manifest.webmanifest uses “QuickBazar” for name/short_name (and does not mention “ShopHub” or “Marketplace”).",
-        "A case-insensitive search in the frontend codebase shows no remaining user-facing “ShopHub” branding."
+        "If the actor React Query is in an error state, /admin shows an error UI (not a blank page and not an infinite skeleton).",
+        "The error UI includes a short, English explanation that initialization failed and prompts the user to retry/refresh access.",
+        "The UI works consistently for /admin, /admin/products, /admin/vendors, and /admin/orders."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/TopNav.tsx",
-          "operation": "modify",
-          "description": "Update the top navigation brand text from “ShopHub” to “QuickBazar” (consistent casing, no space), and align any related accessibility labels/alt text that are part of the brand presentation."
-        },
-        {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Set the document <title> to “QuickBazar” and update the apple-mobile-web-app-title meta tag to “QuickBazar” to match the new branding."
-        },
-        {
-          "path": "frontend/public/manifest.webmanifest",
-          "operation": "modify",
-          "description": "Update PWA manifest name/short_name to “QuickBazar” and ensure no occurrence of “ShopHub” or “Marketplace” remains in manifest user-visible fields (including description if needed). Keep existing icon src paths unchanged."
-        },
-        {
-          "path": "frontend/public/offline.html",
-          "operation": "modify",
-          "description": "Update offline page metadata/title to reflect “QuickBazar” (e.g., document title), ensuring the offline experience does not display legacy “Marketplace” branding."
-        },
-        {
-          "path": "frontend/src/pages/AboutPage.tsx",
-          "operation": "modify",
-          "description": "Replace user-facing “ShopHub” mentions with “QuickBazar” in About page headings/body copy."
-        },
-        {
-          "path": "frontend/src/pages/ContactPage.tsx",
-          "operation": "modify",
-          "description": "Replace user-facing “shophub” branding in contact details (e.g., support email text/link) with “QuickBazar”-appropriate branding so users do not see “ShopHub”."
-        },
-        {
-          "path": "frontend/public/sw.js",
-          "operation": "modify",
-          "description": "Update service worker cache naming/versioning to reflect “QuickBazar” branding (to avoid keeping old branded cache names) while preserving existing offline and precache behavior."
-        }
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "summary": "Replace the existing header logo reference with a newly generated QuickBazar logo stored under frontend/public/assets/generated and render it crisply without layout shift.",
-      "acceptanceCriteria": [
-        "TopNav no longer references /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg.",
-        "TopNav renders the newly generated logo image from /assets/generated/ and the image alt text is updated to “QuickBazar logo”.",
-        "Logo renders crisply on mobile and desktop without layout shift (no stretched or pixelated appearance)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
+          "path": "frontend/src/hooks/useActorQueryState.ts",
           "operation": "create",
-          "description": "Add the newly generated QuickBazar logo asset at frontend/public/assets/generated/quickbazar-logo.dim_512x512.png (transparent background), matching the provided image requirement."
+          "description": "Add a lightweight hook that reads the React Query cache for the actor query (status/error/data) and subscribes to changes without re-running the actor creation logic."
         },
         {
-          "path": "frontend/src/components/TopNav.tsx",
+          "path": "frontend/src/utils/errors.ts",
+          "operation": "create",
+          "description": "Add a small shared helper to extract a user-friendly English message from unknown errors (including backend trap/reject messages) for reuse across admin diagnostics."
+        },
+        {
+          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
           "operation": "modify",
-          "description": "Remove the legacy header logo reference (/assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and render the new generated logo from frontend/public/assets/generated/quickbazar-logo.dim_512x512.png. Update alt text to “QuickBazar logo”, and adjust sizing/rendering (e.g., explicit dimensions and appropriate object-fit) to ensure crisp display and prevent layout shift."
+          "description": "Enhance the error UI to optionally render actor initialization failure details (status + extracted error message) in the existing diagnostics area and to present an explicit English initialization-failed message with a retry/refresh prompt when provided by callers. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/auth/RequireRole.tsx",
+          "operation": "modify",
+          "description": "Use the actor query cache state (via the new hook) to detect actor initialization failures for admin routes and render a visible error screen (AccessDeniedScreen with diagnostics) instead of returning only loading skeletons. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-16",
-      "summary": "Regenerate and replace existing PWA icon assets with QuickBazar-branded icons, keeping the same filenames/paths referenced by the manifest.",
+      "id": "REQ-18",
+      "summary": "Make RequireRole aware of actor query error/null-actor states for admin protection and show AccessDeniedScreen with admin diagnostics and the underlying actor error when available.",
       "acceptanceCriteria": [
-        "The following existing files are replaced with newly generated QuickBazar-branded icons while keeping the same filenames and dimensions: pwa-icon.dim_192x192.png, pwa-icon.dim_512x512.png, pwa-maskable.dim_512x512.png, apple-touch-icon.dim_180x180.png.",
-        "frontend/public/manifest.webmanifest continues to reference the same icon paths under /assets/generated/ and installs successfully as a PWA.",
-        "On iOS/Android “Add to Home Screen”, the installed icon shows the updated QuickBazar design (not the old icon)."
+        "When identity is present and the actor query has status=error, RequireRole(requiredRole='admin') renders AccessDeniedScreen with showAdminButton=true.",
+        "AccessDeniedScreen shows an English message that includes (or is derived from) the actor initialization error when available from the query state.",
+        "When the actor query is pending, RequireRole shows the loading skeleton; when it succeeds, RequireRole proceeds with the existing deterministic admin state machine."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+          "path": "frontend/src/components/auth/RequireRole.tsx",
           "operation": "modify",
-          "description": "Replace the existing 192x192 PWA icon file contents with the newly generated QuickBazar-branded design, keeping the exact same filename and path."
+          "description": "Update the admin deterministic state machine to add a distinct actor-init-failed branch: if identity exists and actor query status is error (or actor is null due to init failure), render AccessDeniedScreen with showAdminButton=true and pass/derive the actor error message when available; keep the existing pending/success behavior intact. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
           "operation": "modify",
-          "description": "Replace the existing 512x512 PWA icon file contents with the newly generated QuickBazar-branded design, keeping the exact same filename and path."
+          "description": "Accept an optional actor error/status input from RequireRole and display it as part of the admin diagnostics panel in clear English (derived via the shared error-extraction helper). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "summary": "Emit a single structured console log when admin routes enter the actor-initialization-failed denial path (not spammed per render).",
+      "acceptanceCriteria": [
+        "A single structured console message is emitted when transitioning into the actor-init-failed AccessDenied state for admin routes (and not spammed on every render).",
+        "The log includes principal (if available), actor query status, and token-present boolean."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/auth/RequireRole.tsx",
+          "operation": "modify",
+          "description": "Add a one-time-per-transition structured console log when entering the actor-init-failed admin denial path, including principal (if available), actor query status, and a boolean indicating whether the caffeineAdminToken parameter/secret is present (checked via urlParams utilities). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
+          "path": "frontend/src/utils/urlParams.ts",
           "operation": "modify",
-          "description": "Replace the existing 512x512 maskable icon file contents with the newly generated QuickBazar-branded design (with safe padding), keeping the exact same filename and path."
+          "description": "Export a stable token-present helper (e.g., hasParameter/hasSecretParameter) that reflects whether caffeineAdminToken is currently present in URL or persisted session, so admin diagnostics and the structured log can consistently report token presence."
+        }
+      ]
+    },
+    {
+      "id": "REQ-20",
+      "summary": "Add an error boundary around admin pages so runtime rendering exceptions show a visible fallback UI instead of a blank page.",
+      "acceptanceCriteria": [
+        "If an admin page throws during render, the app displays an English fallback UI with a safe navigation option (e.g., Go to Home) instead of rendering blank content.",
+        "The error boundary does not break non-admin routes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/admin/AdminErrorBoundary.tsx",
+          "operation": "create",
+          "description": "Create a route-level React error boundary component for admin pages that shows an English fallback message and a safe navigation option (e.g., Go to Home) when an admin screen throws during render."
         },
         {
-          "path": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Replace the existing 180x180 Apple touch icon file contents with the newly generated QuickBazar-branded design, keeping the exact same filename and path."
+          "description": "Wrap /admin, /admin/products, /admin/vendors, and /admin/orders route components with the new AdminErrorBoundary (inside or alongside RequireRole) so admin-only crashes display fallback UI while non-admin routes remain unchanged."
         }
       ]
     }

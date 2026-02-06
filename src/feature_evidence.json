@@ -2,16 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-rename-the-app-branding-from-shophub-to-quickbazar-across-all-visible-ui-and-app-metadata-including-the-top-navigation-brand-text-html-title-pwa-manifest-name-short-name-and-apple-web-app-title-meta-tag-use-quickbazar-no-space-consistently",
-      "featureTitle": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
+      "featureId": "feature-prevent-admin-routes-from-rendering-a-blank-loading-only-screen-when-the-backend-actor-fails-to-initialize-e-g-initializeaccesscontrolwithsecret-errors-by-detecting-the-react-query-actor-query-error-state-and-rendering-an-explicit-user-visible-error-screen-instead",
+      "featureTitle": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
       "files": [
-        "frontend/index.html",
-        "frontend/public/manifest.webmanifest",
-        "frontend/public/offline.html",
-        "frontend/public/sw.js",
-        "frontend/src/components/TopNav.tsx",
-        "frontend/src/pages/AboutPage.tsx",
-        "frontend/src/pages/ContactPage.tsx"
+        "frontend/src/components/auth/AccessDeniedScreen.tsx",
+        "frontend/src/components/auth/RequireRole.tsx",
+        "frontend/src/hooks/useActorQueryState.ts",
+        "frontend/src/utils/errors.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -23,15 +20,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-14"
+        "REQ-17"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-remove-the-existing-header-logo-image-reference-currently-assets-colorful-illustrative-online-shop-logo-jpg-jpeg-and-replace-it-with-a-newly-generated-quickbazar-logo-asset-stored-under-frontend-public-assets-generated",
-      "featureTitle": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
+      "featureId": "feature-update-frontend-src-components-auth-requirerole-tsx-to-include-actor-query-state-awareness-for-admin-protection-if-identity-exists-but-the-actor-query-is-errored-or-the-actor-is-null-due-to-an-initialization-failure-render-accessdeniedscreen-with-admin-diagnostics-enabled-showadminbutton-and-include-the-underlying-actor-error-message-when-available",
+      "featureTitle": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
       "files": [
-        "frontend/src/components/TopNav.tsx"
+        "frontend/src/components/auth/AccessDeniedScreen.tsx",
+        "frontend/src/components/auth/RequireRole.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -43,14 +41,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-18"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-pwa-icon-assets-to-match-the-new-quickbazar-branding-by-regenerating-the-existing-icon-files-referenced-by-the-manifest-keep-the-same-filenames-paths-so-the-manifest-references-remain-valid",
-      "featureTitle": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
-      "files": [],
+      "featureId": "feature-add-a-lightweight-structured-console-log-when-admin-enters-the-actor-initialization-failed-path-including-principal-if-available-actor-query-status-and-whether-the-caffeineadmintoken-parameter-is-present-to-aid-debugging-of-admin-access-flakiness",
+      "featureTitle": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
+      "files": [
+        "frontend/src/components/auth/RequireRole.tsx",
+        "frontend/src/utils/urlParams.ts"
+      ],
       "components": [
         "authorization@4.0.0",
         "blob-storage@4.0.0",
@@ -61,7 +62,28 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-19"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-global-react-error-boundary-or-route-level-error-boundary-around-admin-pages-so-that-runtime-rendering-exceptions-in-admin-screens-e-g-charts-components-display-a-visible-fallback-message-instead-of-a-blank-page",
+      "featureTitle": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/admin/AdminErrorBoundary.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-20"
       ],
       "confidence": "high"
     }

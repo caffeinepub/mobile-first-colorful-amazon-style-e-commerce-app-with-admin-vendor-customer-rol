@@ -145,7 +145,6 @@ export interface _SERVICE {
   'getVendorProducts' : ActorMethod<[], Array<Product>>,
   'getVendors' : ActorMethod<[], Array<Vendor>>,
   'getWishlist' : ActorMethod<[], Array<string>>,
-  'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isVendor' : ActorMethod<[], boolean>,
   'payCompany' : ActorMethod<[], undefined>,

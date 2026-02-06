@@ -26,7 +26,7 @@
   "frontend/src/pages/AboutPage.tsx": "About page with gradient title, tinted mission section, colorful feature cards with gradient icon containers, and QuickBazar branding throughout.",
   "frontend/src/pages/customer/OrdersPage.tsx": "Customer orders page using shared OrderStatusBadge component for consistent status display, colorful page header with gradient title, tinted card headers, and vibrant empty state styling.",
   "frontend/src/utils/categoryMatch.ts": "Utility function to find a category by name using case-insensitive comparison, supporting conditional navigation for featured category tiles.",
-  "frontend/src/App.tsx": "Main app component with TanStack router configuration, ThemeProvider, Toaster, and service worker registration on mount for PWA functionality.",
+  "frontend/src/App.tsx": "Main app component with TanStack router configuration, ThemeProvider, Toaster, AdminErrorBoundary wrapping all admin routes, and service worker registration for PWA functionality.",
   "frontend/src/pages/onboarding/CustomerLoginPage.tsx": "Customer login form with floating label inputs, rounded styling, royal blue focus states, city dropdown selector, mobile-friendly spacing, and gradient primary CTA button for navigation to vendor list.",
   "frontend/src/pages/onboarding/VendorLoginPage.tsx": "Vendor login form with floating label inputs, rounded styling, royal blue focus states, city dropdown selector, mobile-friendly spacing, and gradient primary CTA button for navigation to outlet details.",
   "frontend/src/pages/onboarding/VendorListPage.tsx": "Displays filtered vendor cards by selected city with shop name, area, mobile number, and View Shop button; shows empty state with navigation back to customer login if no city is selected.",
@@ -36,7 +36,7 @@
   "frontend/src/utils/onboardingStorage.ts": "Session storage utilities for persisting customer login, vendor login, and outlet details data across the onboarding flow without exposing personal data in URLs.",
   "frontend/src/data/vendors.ts": "Static vendor dataset with shop name, city, area, and mobile number for 8 sample vendors across Kanpur and Unnao to support city-filtered vendor list display.",
   "frontend/src/utils/formatInr.ts": "Utility function to format bigint/Nat currency amounts as INR with ₹ symbol and proper locale formatting.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including new useGetVendorDashboardStats and usePayCompany hooks for vendor dashboard features with proper cache invalidation.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for backend operations with enhanced useAssignAdminRole that invalidates the actor cache to force re-initialization after role assignment.",
   "frontend/src/pages/customer/WishlistPage.tsx": "Read-only wishlist page displaying saved products without any add/remove wishlist actions, showing product cards with images, prices, and discounts.",
   "frontend/tailwind.config.js": "Tailwind configuration extended with marketplace color tokens (primary, secondary, accent, highlight), larger border radii (up to 3xl), enhanced soft shadows, and custom animations for the bright colorful theme.",
   "frontend/src/utils/categoryColors.ts": "Deterministic category color utility that maps category IDs to consistent colorful gradient backgrounds using a hash function to ensure stable color assignment across renders.",
@@ -46,5 +46,14 @@
   "frontend/public/manifest.webmanifest": "Web App Manifest with QuickBazar branding, standalone display mode, theme colors, and icon references for PWA installation.",
   "frontend/public/sw.js": "Service worker implementing cache-first strategy for static assets with QuickBazar cache naming, network-first for navigation, offline fallback page, and explicit exclusion of authenticated/private API responses.",
   "frontend/public/offline.html": "Friendly offline fallback page with colorful gradient design, emoji icon, and retry button matching the QuickBazar marketplace theme.",
-  "frontend/src/pages/ContactPage.tsx": "Contact page with message form, email/phone/WhatsApp contact cards, and QuickBazar-branded support email address."
+  "frontend/src/pages/ContactPage.tsx": "Contact page with message form, email/phone/WhatsApp contact cards, and QuickBazar-branded support email address.",
+  "frontend/src/components/auth/RequireRole.tsx": "Role-based access control component with deterministic state machine that detects actor initialization failures for admin routes and renders visible error screens with diagnostics instead of blank loading states.",
+  "frontend/src/components/auth/AccessDeniedScreen.tsx": "Access denied screen with admin diagnostics showing principal ID, token presence, actor status, and initialization error details, plus refresh and admin role assignment actions.",
+  "frontend/src/hooks/useInternetIdentity.ts": "Internet Identity provider hook using Vite-compatible import.meta.env.VITE_II_URL instead of process.env for browser builds, with fallback to default II URL.",
+  "frontend/src/vite-env.d.ts": "TypeScript declarations for Vite's import.meta.env interface, defining VITE_II_URL environment variable type.",
+  "frontend/DEPLOYMENT.md": "Developer documentation explaining the production build failure cause (Node-style env access in browser) and the minimal changes made to fix it (Vite env vars, type declarations).",
+  "frontend/src/utils/urlParams.ts": "URL parameter utilities with support for hash-based routing, session storage persistence, and a hasParameter function for checking token presence in diagnostics without exposing values.",
+  "frontend/src/hooks/useActorQueryState.ts": "Lightweight hook that reads the React Query cache for the actor query and subscribes to changes without re-running actor creation logic, allowing components to detect actor initialization failures.",
+  "frontend/src/utils/errors.ts": "Shared helper utilities to extract user-friendly English messages from unknown errors (including backend trap/reject messages) for reuse across admin diagnostics and error displays.",
+  "frontend/src/components/admin/AdminErrorBoundary.tsx": "Route-level React error boundary component for admin pages that catches rendering exceptions and displays a user-friendly fallback UI with refresh and navigation options instead of blank screens."
 }

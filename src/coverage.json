@@ -1,66 +1,69 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T11:57:19.057Z",
+  "generatedAt": "2026-02-05T15:24:44.683Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-14",
-        "summary": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
+        "id": "REQ-17",
+        "summary": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/TopNav.tsx",
-          "frontend/index.html",
-          "frontend/public/manifest.webmanifest",
-          "frontend/public/offline.html",
-          "frontend/src/pages/AboutPage.tsx",
-          "frontend/src/pages/ContactPage.tsx",
-          "frontend/public/sw.js"
+          "frontend/src/hooks/useActorQueryState.ts",
+          "frontend/src/utils/errors.ts",
+          "frontend/src/components/auth/AccessDeniedScreen.tsx",
+          "frontend/src/components/auth/RequireRole.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/TopNav.tsx",
-          "frontend/index.html",
-          "frontend/public/manifest.webmanifest",
-          "frontend/public/offline.html",
-          "frontend/src/pages/AboutPage.tsx",
-          "frontend/src/pages/ContactPage.tsx",
-          "frontend/public/sw.js"
+          "frontend/src/hooks/useActorQueryState.ts",
+          "frontend/src/utils/errors.ts",
+          "frontend/src/components/auth/AccessDeniedScreen.tsx",
+          "frontend/src/components/auth/RequireRole.tsx"
         ]
       },
       {
-        "id": "REQ-15",
-        "summary": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
+        "id": "REQ-18",
+        "summary": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
-          "frontend/src/components/TopNav.tsx"
+          "frontend/src/components/auth/RequireRole.tsx",
+          "frontend/src/components/auth/AccessDeniedScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
-          "frontend/src/components/TopNav.tsx"
+          "frontend/src/components/auth/RequireRole.tsx",
+          "frontend/src/components/auth/AccessDeniedScreen.tsx"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
+        "id": "REQ-19",
+        "summary": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-          "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
-          "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png"
+          "frontend/src/components/auth/RequireRole.tsx",
+          "frontend/src/utils/urlParams.ts"
         ],
         "matchedFiles": [
-          "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-          "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-          "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
-          "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png"
+          "frontend/src/components/auth/RequireRole.tsx",
+          "frontend/src/utils/urlParams.ts"
+        ]
+      },
+      {
+        "id": "REQ-20",
+        "summary": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/admin/AdminErrorBoundary.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/admin/AdminErrorBoundary.tsx",
+          "frontend/src/App.tsx"
         ]
       }
     ]
@@ -70,18 +73,13 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.html",
-    "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
-    "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-    "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-    "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
-    "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
-    "frontend/public/manifest.webmanifest",
-    "frontend/public/offline.html",
-    "frontend/public/sw.js",
-    "frontend/src/components/TopNav.tsx",
-    "frontend/src/pages/AboutPage.tsx",
-    "frontend/src/pages/ContactPage.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/admin/AdminErrorBoundary.tsx",
+    "frontend/src/components/auth/AccessDeniedScreen.tsx",
+    "frontend/src/components/auth/RequireRole.tsx",
+    "frontend/src/hooks/useActorQueryState.ts",
+    "frontend/src/utils/errors.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

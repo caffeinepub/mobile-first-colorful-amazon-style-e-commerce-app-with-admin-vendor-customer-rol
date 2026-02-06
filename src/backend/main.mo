@@ -1,13 +1,10 @@
-import Map "mo:core/Map";
 import List "mo:core/List";
+import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
-import Nat "mo:core/Nat";
-import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
-import Order "mo:core/Order";
-import Principal "mo:core/Principal";
 import Array "mo:core/Array";
+import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
@@ -32,19 +29,6 @@ actor {
     ratings : [Review];
     stock : Nat;
     active : Bool;
-  };
-
-  module Product {
-    public func compare(product1 : Product, product2 : Product) : Order.Order {
-      Text.compare(product1.name, product2.name);
-    };
-
-    public func compareByPrice(product1 : Product, product2 : Product) : Order.Order {
-      switch (Nat.compare(product1.price, product2.price)) {
-        case (#equal) { Text.compare(product1.name, product2.name) };
-        case (order) { order };
-      };
-    };
   };
 
   public type Category = {
@@ -124,19 +108,15 @@ actor {
   let wishlists = Map.empty<Principal, List.List<Text>>();
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  // Track vendor assignments separately (since we use #user role for both vendors and customers)
   let vendorPrincipals = Map.empty<Principal, Bool>();
 
   // =========================
-  // Authorization
+  // Authorization with Persistent State
   // =========================
 
-  let accessControlState = AccessControl.initState();
+  // Initialize access control with persistent state
+  var accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
-
-  public query ({ caller }) func isAdmin() : async Bool {
-    AccessControl.isAdmin(accessControlState, caller);
-  };
 
   public query ({ caller }) func isVendor() : async Bool {
     switch (vendorPrincipals.get(caller)) {
@@ -181,15 +161,12 @@ actor {
   // Product APIs
   // =========================
 
+  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getProducts(sortBy : Text) : async [Product] {
-    products.values().toArray().sort(
-      switch (sortBy) {
-        case ("price") { Product.compareByPrice };
-        case (_) { Product.compare };
-      }
-    );
+    products.values().toArray();
   };
 
+  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getProduct(id : Text) : async Product {
     switch (products.get(id)) {
       case (null) { Runtime.trap("Product not found") };
@@ -362,10 +339,12 @@ actor {
   // Category APIs
   // =========================
 
+  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getCategories() : async [Category] {
     categories.values().toArray();
   };
 
+  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getCategory(id : Text) : async Category {
     switch (categories.get(id)) {
       case (null) { Runtime.trap("Category not found") };
@@ -414,6 +393,7 @@ actor {
     vendors.add(vendorPrincipal, vendor);
     vendorPrincipals.add(vendorPrincipal, true);
 
+    // AccessControl.assignRole already includes admin-only guard
     AccessControl.assignRole(accessControlState, caller, vendorPrincipal, #user);
   };
 
@@ -447,6 +427,7 @@ actor {
     vendors.values().toArray();
   };
 
+  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getVendor(vendorPrincipal : Principal) : async ?Vendor {
     vendors.get(vendorPrincipal);
   };
@@ -586,15 +567,24 @@ actor {
   };
 
   public shared ({ caller }) func updateOrderStatus(orderId : Text, status : OrderStatus) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update order status");
-    };
-
     switch (orders.get(orderId)) {
       case (null) { Runtime.trap("Order not found") };
       case (?order) {
-        let updatedOrder = { order with status };
-        orders.add(orderId, updatedOrder);
+        // Admins can update any order
+        if (AccessControl.isAdmin(accessControlState, caller)) {
+          let updatedOrder = { order with status };
+          orders.add(orderId, updatedOrder);
+          return;
+        };
+
+        // Vendors can update their own orders
+        if (callerIsVendor(caller) and order.vendor == caller) {
+          let updatedOrder = { order with status };
+          orders.add(orderId, updatedOrder);
+          return;
+        };
+
+        Runtime.trap("Unauthorized: Only admins or order vendor can update order status");
       };
     };
   };

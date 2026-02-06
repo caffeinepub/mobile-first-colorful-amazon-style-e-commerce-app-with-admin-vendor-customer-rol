@@ -1,7 +1,56 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 67,
+  "projectStateVersion": 94,
   "summary": "Mobile-first colorful Amazon-like marketplace app with strict role-based capabilities: customers can only shop (no data editing), vendors can only create/manage their own outlet and products (including photo upload), and admins can change/manage everything; built on ICP (Motoko) + React/Vite/shadcn with existing RBAC + RequireRole patterns.",
+  "architectural_notes": [
+    "Frontend is React + Vite + Tailwind with shadcn/ui components and shared AppLayout navigation shell.",
+    "Authentication uses Internet Identity; UI includes login flow and profile setup modal scaffolding.",
+    "Authorization is enforced via Motoko RBAC (access-control + authorization mixin) and mirrored in frontend via RequireRole/AccessDenied patterns.",
+    "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
+    "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
+    "Authorization and blob-storage Motoko components updated to v4.0.0 (componentized modules used by backend/main.mo).",
+    "Core infrastructure component updated to v1.0.2 alongside authorization/blob-storage v4.0.0 integrations in backend/main.mo.",
+    "Build template now includes image asset maintenance scripts (resize-images.js, prune-unused-images.js) for generated frontend assets.",
+    "Build-template React frontend now vendors full shadcn/ui component sources plus custom ESLint rules (require Internet Identity provider; prevent BigInt in query keys) for consistent ICP/II-ready apps.",
+    "Frontend now includes PWA assets (manifest.webmanifest, sw.js, offline.html, generated icons) to support installable and offline-tolerant behavior."
+  ],
+  "known_issues": [
+    "Intermittent admin dashboard access: page initially opens, then shows Access Denied (possible auth/role state mismatch or session refresh issue).",
+    "Admin page currently shows blank/no content (user reports nothing is displayed)."
+  ],
+  "isFixRequest": true,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
+      "description": "Generated Apple touch icon for PWA/installable support.",
+      "targetWidth": 180,
+      "targetHeight": 180
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
+      "description": "Generated PWA icon (192x192).",
+      "targetWidth": 192,
+      "targetHeight": 192
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
+      "description": "Generated PWA icon (512x512).",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
+      "description": "Generated maskable PWA icon (512x512).",
+      "targetWidth": 512,
+      "targetHeight": 512
+    },
+    {
+      "filename": "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
+      "description": "Generated QuickBazar logo asset.",
+      "targetWidth": 512,
+      "targetHeight": 512
+    }
+  ],
   "existing_features": [
     {
       "id": "IF-1",
@@ -283,93 +332,65 @@
       "version": 1
     },
     {
-      "id": "feature-rename-the-app-branding-from-shophub-to-quickbazar-across-all-visible-ui-and-app-metadata-including-the-top-navigation-brand-text-html-title-pwa-manifest-name-short-name-and-apple-web-app-title-meta-tag-use-quickbazar-no-space-consistently",
-      "title": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
+      "id": "feature-prevent-protected-pages-especially-admin-from-rendering-their-content-until-the-required-role-check-has-completed-do-not-render-the-children-by-default-while-role-admin-vendor-queries-are-still-unfetched",
+      "title": "Prevent protected pages (especially /admin) from rendering their content until the required role check has completed; do not render the children by default while role/admin/vendor queries are still unfetched.",
       "reqIds": [
         "REQ-14"
       ],
       "version": 1
     },
     {
-      "id": "feature-remove-the-existing-header-logo-image-reference-currently-assets-colorful-illustrative-online-shop-logo-jpg-jpeg-and-replace-it-with-a-newly-generated-quickbazar-logo-asset-stored-under-frontend-public-assets-generated",
-      "title": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
+      "id": "feature-update-the-role-guarding-logic-frontend-src-components-auth-requirerole-tsx-so-that-each-requiredrole-admin-vendor-user-has-a-deterministic-state-machine-1-unauthenticated-accessdenied-sign-in-message-2-authenticated-but-role-check-not-fetched-yet-loading-ui-3-fetched-and-unauthorized-accessdenied-4-fetched-and-authorized-render-children",
+      "title": "Update the role-guarding logic (frontend/src/components/auth/RequireRole.tsx) so that each requiredRole ('admin', 'vendor', 'user') has a deterministic state machine: (1) unauthenticated => AccessDenied sign-in message, (2) authenticated but role check not fetched yet => loading UI, (3) fetched and unauthorized => AccessDenied, (4) fetched and authorized => render children.",
       "reqIds": [
         "REQ-15"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-pwa-icon-assets-to-match-the-new-quickbazar-branding-by-regenerating-the-existing-icon-files-referenced-by-the-manifest-keep-the-same-filenames-paths-so-the-manifest-references-remain-valid",
-      "title": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
+      "id": "feature-add-lightweight-debugging-visibility-for-admin-access-flakiness-log-a-single-structured-console-message-from-requirerole-when-it-transitions-into-an-accessdenied-state-for-admin-routes-including-principal-if-available-and-current-query-states-adminfetched-adminloading-isadmin",
+      "title": "Add lightweight debugging visibility for admin access flakiness: log a single structured console message from RequireRole when it transitions into an AccessDenied state for admin routes, including principal (if available) and current query states (adminFetched/adminLoading/isAdmin).",
       "reqIds": [
         "REQ-16"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-prevent-admin-routes-from-rendering-a-blank-loading-only-screen-when-the-backend-actor-fails-to-initialize-e-g-initializeaccesscontrolwithsecret-errors-by-detecting-the-react-query-actor-query-error-state-and-rendering-an-explicit-user-visible-error-screen-instead",
+      "title": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-auth-requirerole-tsx-to-include-actor-query-state-awareness-for-admin-protection-if-identity-exists-but-the-actor-query-is-errored-or-the-actor-is-null-due-to-an-initialization-failure-render-accessdeniedscreen-with-admin-diagnostics-enabled-showadminbutton-and-include-the-underlying-actor-error-message-when-available",
+      "title": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-lightweight-structured-console-log-when-admin-enters-the-actor-initialization-failed-path-including-principal-if-available-actor-query-status-and-whether-the-caffeineadmintoken-parameter-is-present-to-aid-debugging-of-admin-access-flakiness",
+      "title": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-global-react-error-boundary-or-route-level-error-boundary-around-admin-pages-so-that-runtime-rendering-exceptions-in-admin-screens-e-g-charts-components-display-a-visible-fallback-message-instead-of-a-blank-page",
+      "title": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Rename app/project from ShopHub to QuickBazar (\"Quick bazar\") across the UI/branding.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Replace/remove existing logo and add a new good-looking logo (designer choice) for QuickBazar.",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "architectural_notes": [
-    "Frontend is React + Vite + Tailwind with shadcn/ui components and shared AppLayout navigation shell.",
-    "Authentication uses Internet Identity; UI includes login flow and profile setup modal scaffolding.",
-    "Authorization is enforced via Motoko RBAC (access-control + authorization mixin) and mirrored in frontend via RequireRole/AccessDenied patterns.",
-    "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
-    "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
-    "Authorization and blob-storage Motoko components updated to v4.0.0 (componentized modules used by backend/main.mo).",
-    "Core infrastructure component updated to v1.0.2 alongside authorization/blob-storage v4.0.0 integrations in backend/main.mo.",
-    "Build template now includes image asset maintenance scripts (resize-images.js, prune-unused-images.js) for generated frontend assets.",
-    "Build-template React frontend now vendors full shadcn/ui component sources plus custom ESLint rules (require Internet Identity provider; prevent BigInt in query keys) for consistent ICP/II-ready apps.",
-    "Frontend now includes PWA assets (manifest.webmanifest, sw.js, offline.html, generated icons) to support installable and offline-tolerant behavior."
-  ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Distinct, modern marketplace logo mark with bold typography and vibrant colors on transparent background (quickbazar-logo.dim_512x512.png)\n- App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_512x512.png)\n- App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_192x192.png)\n- Maskable app icon, centered symbol with safe padding and solid/vibrant background matching the logo identity (pwa-maskable.dim_512x512.png)\n- Apple touch icon, rounded-square symbol matching the logo identity (apple-touch-icon.dim_180x180.png)",
-  "generatedImages": [
-    {
-      "filename": "quickbazar-logo.dim_512x512.png",
-      "description": "Distinct, modern marketplace logo mark with bold typography and vibrant colors on transparent background",
-      "targetWidth": 512,
-      "targetHeight": 512
-    },
-    {
-      "filename": "pwa-icon.dim_512x512.png",
-      "description": "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo",
-      "targetWidth": 512,
-      "targetHeight": 512
-    },
-    {
-      "filename": "pwa-icon.dim_192x192.png",
-      "description": "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo",
-      "targetWidth": 192,
-      "targetHeight": 192
-    },
-    {
-      "filename": "pwa-maskable.dim_512x512.png",
-      "description": "Maskable app icon, centered symbol with safe padding and solid/vibrant background matching the logo identity",
-      "targetWidth": 512,
-      "targetHeight": 512
-    },
-    {
-      "filename": "apple-touch-icon.dim_180x180.png",
-      "description": "Apple touch icon, rounded-square symbol matching the logo identity",
-      "targetWidth": 180,
-      "targetHeight": 180
-    }
-  ],
+  "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "QuickBazar",
+  "projectName": "Mobile-first marketplace landing + customer/vendor onboarding, outlet wallet rules, and admin vendor controls",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

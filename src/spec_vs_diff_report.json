@@ -1,54 +1,45 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T11:57:19.019Z",
-  "summary": "Branding updates to “QuickBazar” were applied in TopNav, index.html metadata, and manifest name/short_name, and the header logo reference was switched to /assets/generated/quickbazar-logo.dim_512x512.png. However, the manifest still contains the word “marketplace” in its description, and the diff does not provide evidence that the required icon PNG files themselves were regenerated/replaced.",
+  "generatedAt": "2026-02-05T15:24:44.679Z",
+  "summary": "REQ-17/18/19 appear implemented via RequireRole actor-query error awareness, enhanced AccessDeniedScreen diagnostics/refresh logic, and a one-time structured console log. REQ-20 (admin error boundary actually applied to admin routes) is not clearly evidenced in the provided diff summary because App.tsx is truncated before showing admin route components being wrapped.",
   "missing_requirements": [
     {
-      "id": "REQ-14",
-      "requirement": "frontend/public/manifest.webmanifest uses “QuickBazar” for name/short_name and does not mention “ShopHub” or “Marketplace”.",
-      "reason": "Although name/short_name are updated to “QuickBazar”, the manifest description still contains the word “marketplace,” which conflicts with the acceptance criterion stating it should not mention “Marketplace”.",
+      "id": "REQ-20",
+      "requirement": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens display a visible fallback message instead of a blank page, without breaking non-admin routes.",
+      "reason": "An AdminErrorBoundary component was added, and App.tsx imports it, but the diff summary does not show it being used to wrap the /admin routes (the relevant portion of App.tsx is truncated). Without evidence of route-level/global wrapping, the requirement cannot be confirmed as implemented.",
       "evidence": [
-        "frontend/public/manifest.webmanifest"
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "requirement": "Replace/regenerate the existing PWA icon image files (pwa-icon.dim_192x192.png, pwa-icon.dim_512x512.png, pwa-maskable.dim_512x512.png, apple-touch-icon.dim_180x180.png) with newly generated QuickBazar-branded icons while keeping the same filenames/paths.",
-      "reason": "The diff shows manifest and service worker referencing these icon paths, but no binary/image file changes are included in the provided diff summary, so replacement of the actual PNG assets is not evidenced.",
-      "evidence": [
-        "frontend/public/manifest.webmanifest",
-        "frontend/public/sw.js",
-        "frontend/index.html"
+        "frontend/src/components/admin/AdminErrorBoundary.tsx",
+        "frontend/src/App.tsx (truncated; shows import but not usage)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Service worker caching logic updates including new CACHE_NAME ('quickbazar-v1') and precaching of generated assets.",
-      "reason": "The BuildRequest focuses on renaming branding and generating/replacing logo and PWA icons; it does not request modifying service worker caching behavior or cache naming.",
+      "description": "SessionStorage-based URL parameter persistence utilities (storeSessionParameter/getSessionParameter/getPersistedUrlParameter/clearSessionParameter) in urlParams.ts.",
+      "reason": "The BuildRequest focuses on preventing blank admin pages and improving diagnostics/error handling; it does not request adding generalized persisted URL parameter/session storage utilities.",
       "evidence": [
-        "frontend/public/sw.js"
+        "frontend/src/utils/urlParams.ts"
       ]
     },
     {
-      "description": "Offline fallback HTML page branded/styled with “Offline - QuickBazar” and a custom UI.",
-      "reason": "Updating/adding an offline page experience was not requested in the BuildRequest requirements (REQ-14/15/16).",
+      "description": "Generic shared error parsing/formatting helpers (extractErrorMessage/formatErrorForDiagnostics) added as a standalone utility module.",
+      "reason": "While related to diagnostics, the BuildRequest does not explicitly request introducing a new shared errors utility file; it only requires that the actor initialization error message be shown when available.",
       "evidence": [
-        "frontend/public/offline.html"
+        "frontend/src/utils/errors.ts"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/index.html",
-    "frontend/public/manifest.webmanifest",
-    "frontend/public/offline.html",
-    "frontend/public/sw.js",
-    "frontend/src/components/TopNav.tsx",
-    "frontend/src/pages/AboutPage.tsx",
-    "frontend/src/pages/ContactPage.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/admin/AdminErrorBoundary.tsx",
+    "frontend/src/components/auth/AccessDeniedScreen.tsx",
+    "frontend/src/components/auth/RequireRole.tsx",
+    "frontend/src/hooks/useActorQueryState.ts",
+    "frontend/src/utils/errors.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]
 }

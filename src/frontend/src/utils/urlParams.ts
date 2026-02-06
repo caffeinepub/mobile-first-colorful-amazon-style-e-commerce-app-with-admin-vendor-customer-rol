@@ -206,3 +206,14 @@ export function getSecretFromHash(paramName: string): string | null {
 export function getSecretParameter(paramName: string): string | null {
     return getSecretFromHash(paramName);
 }
+
+/**
+ * Checks if a parameter is present in URL or sessionStorage
+ * Useful for diagnostics to report token presence without exposing the actual value
+ *
+ * @param paramName - The name of the parameter to check
+ * @returns True if the parameter is present, false otherwise
+ */
+export function hasParameter(paramName: string): boolean {
+    return getPersistedUrlParameter(paramName) !== null;
+}

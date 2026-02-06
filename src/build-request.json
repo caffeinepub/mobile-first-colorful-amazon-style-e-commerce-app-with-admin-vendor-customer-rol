@@ -1,88 +1,84 @@
 {
   "kind": "build_request",
-  "title": "Rename branding to QuickBazar and generate/replace app logo",
-  "priority": "normal",
+  "title": "Fix blank /admin page by handling actor initialization failures and showing actionable admin diagnostics",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-14",
-      "text": "Rename the app branding from “ShopHub” to “QuickBazar” across all visible UI and app metadata (including the top navigation brand text, HTML title, PWA manifest name/short_name, and Apple web app title meta tag). Use “QuickBazar” (no space) consistently.",
+      "id": "REQ-17",
+      "text": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-7",
-          "recent-messages-9",
-          "recent-messages-11"
+          "msg-6"
         ],
         "quotes": [
-          "is app ka naam Quick bazar rakh dijiye",
-          "is app ka rename  karna hai shophub ko change karke QuickBazar kar dijiye logo hata kar koi achha sa logo laga dijiye",
-          "aap apne according logo bana dijiye"
+          "ab yeh admin page mein kuch show ho nahi raha"
         ]
       },
       "acceptanceCriteria": [
-        "Top navigation brand text shows “QuickBazar” instead of “ShopHub”.",
-        "frontend/index.html <title> and apple-mobile-web-app-title use “QuickBazar”.",
-        "frontend/public/manifest.webmanifest uses “QuickBazar” for name/short_name (and does not mention “ShopHub” or “Marketplace”).",
-        "A case-insensitive search in the frontend codebase shows no remaining user-facing “ShopHub” branding."
+        "If the actor React Query is in an error state, /admin shows an error UI (not a blank page and not an infinite skeleton).",
+        "The error UI includes a short, English explanation that initialization failed and prompts the user to retry/refresh access.",
+        "The UI works consistently for /admin, /admin/products, /admin/vendors, and /admin/orders."
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Remove the existing header logo image reference (currently /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg) and replace it with a newly generated QuickBazar logo asset stored under frontend/public/assets/generated.",
+      "id": "REQ-18",
+      "text": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-9",
-          "recent-messages-11"
+          "msg-6"
         ],
         "quotes": [
-          "...logo hata kar koi achha sa logo laga dijiye",
-          "aap apne according logo bana dijiye"
+          "admin page mein kuch show ho nahi raha"
         ]
       },
       "acceptanceCriteria": [
-        "TopNav no longer references /assets/Colorful Illustrative Online Shop Logo.jpg.jpeg.",
-        "TopNav renders the newly generated logo image from /assets/generated/ and the image alt text is updated to “QuickBazar logo”.",
-        "Logo renders crisply on mobile and desktop without layout shift (no stretched or pixelated appearance)."
+        "When identity is present and the actor query has status=error, RequireRole(requiredRole='admin') renders AccessDeniedScreen with showAdminButton=true.",
+        "AccessDeniedScreen shows an English message that includes (or is derived from) the actor initialization error when available from the query state.",
+        "When the actor query is pending, RequireRole shows the loading skeleton; when it succeeds, RequireRole proceeds with the existing deterministic admin state machine."
       ]
     },
     {
-      "id": "REQ-16",
-      "text": "Update PWA icon assets to match the new QuickBazar branding by regenerating the existing icon files referenced by the manifest (keep the same filenames/paths so the manifest references remain valid).",
+      "id": "REQ-19",
+      "text": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-9",
-          "recent-messages-11"
-        ],
-        "quotes": [
-          "...logo hata kar koi achha sa logo laga dijiye",
-          "aap apne according logo bana dijiye"
+          "msg-6"
         ]
       },
       "acceptanceCriteria": [
-        "The following existing files are replaced with newly generated QuickBazar-branded icons while keeping the same filenames and dimensions: pwa-icon.dim_192x192.png, pwa-icon.dim_512x512.png, pwa-maskable.dim_512x512.png, apple-touch-icon.dim_180x180.png.",
-        "frontend/public/manifest.webmanifest continues to reference the same icon paths under /assets/generated/ and installs successfully as a PWA.",
-        "On iOS/Android “Add to Home Screen”, the installed icon shows the updated QuickBazar design (not the old icon)."
+        "A single structured console message is emitted when transitioning into the actor-init-failed AccessDenied state for admin routes (and not spammed on every render).",
+        "The log includes principal (if available), actor query status, and token-present boolean."
+      ]
+    },
+    {
+      "id": "REQ-20",
+      "text": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If an admin page throws during render, the app displays an English fallback UI with a safe navigation option (e.g., Go to Home) instead of rendering blank content.",
+        "The error boundary does not break non-admin routes."
       ]
     }
   ],
   "constraints": [
-    "Frontend files under frontend/src/components/ui must not be edited; compose them instead.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, or frontend/src/main.tsx."
+    "Do not edit files under frontend/src/components/ui (shadcn/ui sources are read-only).",
+    "Do not edit immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
+    "Keep role capability enforcement intact; only improve failure/edge-case handling so the admin page never appears blank."
   ],
   "nonGoals": [
-    "No changes to backend canister logic, data models, or authorization.",
-    "No changes to routing structure or role-based access behavior beyond branding text/icon updates."
+    "Changing backend authorization rules or admin token semantics.",
+    "Adding new admin features or analytics metrics beyond fixing visibility and diagnostics."
   ],
   "imageRequirements": {
-    "required": [
-      "Distinct, modern marketplace logo mark with bold typography and vibrant colors on transparent background (quickbazar-logo.dim_512x512.png)",
-      "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_512x512.png)",
-      "App icon, rounded-square marketplace symbol with vibrant background and the same visual identity as the logo (pwa-icon.dim_192x192.png)",
-      "Maskable app icon, centered symbol with safe padding and solid/vibrant background matching the logo identity (pwa-maskable.dim_512x512.png)",
-      "Apple touch icon, rounded-square symbol matching the logo identity (apple-touch-icon.dim_180x180.png)"
-    ],
+    "required": [],
     "edits": []
   },
   "userProfileUpdate": {
