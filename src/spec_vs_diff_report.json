@@ -1,70 +1,63 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T11:07:15.966Z",
-  "summary": "Most UI theming work appears implemented: new global CSS variables/palette in index.css, reusable marketplace-card styling, a PrimaryCtaButton wrapper for gradient CTAs with tap-scale, and multiple page/component updates (products, categories page, hero slider, admin/vendor dashboards) to use the new theme. However, some requirements are not fully evidenced (notably Home page category cards being square gradient tiles per REQ-4), and several unrelated functional/feature changes are indicated in the diff summaries.",
+  "generatedAt": "2026-02-06T11:35:24.749Z",
+  "summary": "Diff adds a PWA manifest with required fields and icons, implements a custom service worker with precache + navigation/app-shell offline fallback behavior, and adds a Chrome mobile A2HS install banner via a new hook and component. However, the diff summary does not show the required Apple touch icon metadata in index.html, does not provide evidence that the referenced generated icon PNG files were added to /public/assets/generated, and does not show evidence of service worker registration succeeding in production builds.",
   "missing_requirements": [
     {
-      "id": "REQ-4",
-      "requirement": "Revise category card UI (including any category-card grids on the Home page) to use colorful gradient square cards with large icons and a tap animation, while preserving navigation behavior and category color mapping.",
-      "reason": "CategoriesPage shows square gradient/icon cards, but the HomePage category section in the diff appears to use tall rectangular cards (\"relative h-44\") rather than square/near-square tiles. This suggests the Home page category card grid portion of the requirement is not met.",
+      "id": "REQ-2",
+      "requirement": "frontend/index.html includes an apple-touch-icon link that points to an existing generated PNG (180x180).",
+      "reason": "No diff evidence shows any changes to frontend/index.html to add the required apple-touch-icon <link> tag.",
       "evidence": [
-        "frontend/src/pages/HomePage.tsx",
-        "frontend/src/pages/CategoriesPage.tsx"
+        "frontend/public/manifest.webmanifest",
+        "frontend/public/sw.js"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "All referenced icon files exist in frontend/public/assets/generated/ and are served correctly at runtime (no 404s).",
+      "reason": "The manifest and service worker reference multiple /assets/generated/*.png files, but the diff summary does not include any added/modified files under frontend/public/assets/generated, so existence/serving cannot be confirmed from the provided diff.",
+      "evidence": [
+        "frontend/public/manifest.webmanifest",
+        "frontend/public/sw.js"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "The service worker is registered by the app in production builds (no console error; registration succeeds when supported).",
+      "reason": "Service worker implementation exists (frontend/public/sw.js), but the diff shows no registration code changes (and frontend/src/main.tsx is immutable), so registration success cannot be verified from the diff summary.",
+      "evidence": [
+        "frontend/public/sw.js",
+        "frontend/src/App.tsx (truncated)",
+        "frontend/src/components/AppLayout.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "New/expanded URL parameter + sessionStorage persistence utilities (including handling hash routing) not related to marketplace theming.",
-      "reason": "The BuildRequest is strictly UI theming and explicitly avoids new non-UI features; these utilities are unrelated to applying a marketplace theme.",
+      "description": "Additional URL parameter/sessionStorage utilities unrelated to PWA enablement were modified.",
+      "reason": "BuildRequest focuses on manifest/icons/service worker/offline caching/A2HS prompt; changes to URL parameter helpers are not requested and no PWA-related usage is shown in the diff summary.",
       "evidence": [
-        "frontend/src/utils/urlParams.ts"
+        "frontend/src/utils/urlParams.ts (truncated)"
       ]
     },
     {
-      "description": "Shopping cart behavior changed to a read-only cart view (quantity update/remove actions removed).",
-      "reason": "BuildRequest is UI-only and explicitly lists non-goals as adding/changing marketplace features; removing cart actions changes functionality rather than styling.",
+      "description": "Service worker precaches an extra asset '/assets/generated/quickbazar-logo.dim_512x512.png' not mentioned in the requested required image list.",
+      "reason": "BuildRequest specifies a set of required PWA icons; the logo file is not listed as a requirement and its addition is not necessary per the described scope (though it may be harmless).",
       "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Checkout page changes adding payment placeholder and altering order placement fields (e.g., city field, commissionApplied: false).",
-      "reason": "Request prohibits backend/data model/feature changes and is focused on UI presentation; these sound like workflow/logic changes beyond theming.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Product detail page logic refactor (fetch all products and find by ID) plus enhanced carousel controls and new pricing surfaces/badges beyond global styling.",
-      "reason": "While UI improvements are in-scope, changing data-fetching strategy/logic is not requested and risks functional regression; the request emphasizes keeping existing functionality unchanged.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Customer profile page behavior changed to read-only and addition of new role hook usage (useGetCallerRole) and enum extraction logic.",
-      "reason": "Not requested; this is feature/logic change rather than applying a theme.",
-      "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/public/sw.js"
       ]
     }
   ],
-  "confidence": 0.66,
+  "confidence": 0.68,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/DealCard.tsx",
-    "frontend/src/components/HeroBannerSlider.tsx",
-    "frontend/src/components/ProductGrid.tsx",
-    "frontend/src/components/buttons/PrimaryCtaButton.tsx",
-    "frontend/src/index.css",
-    "frontend/src/pages/CategoriesPage.tsx",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
-    "frontend/src/pages/admin/AdminDashboardPage.tsx",
-    "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-    "frontend/src/pages/vendor/VendorWalletPage.tsx",
+    "frontend/public/manifest.webmanifest",
+    "frontend/public/sw.js",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AppLayout.tsx",
+    "frontend/src/components/pwa/A2HSInstallBanner.tsx",
+    "frontend/src/hooks/useA2HS.ts",
     "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]

@@ -316,8 +316,8 @@ const router = createRouter({ routeTree });
 
 export default function App() {
   useEffect(() => {
-    // Register service worker for PWA functionality
-    if ('serviceWorker' in navigator) {
+    // Register service worker for PWA functionality in production
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {

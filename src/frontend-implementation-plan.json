@@ -1,219 +1,132 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Colorful Amazon-style mobile-first marketplace theme (Tailwind + shared UI polish)",
+  "title": "Make QuickBazar fully PWA installable (manifest, icons, service worker, offline caching, A2HS prompt)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Update global Tailwind theme tokens, CSS variables, and shared utility classes to the requested marketplace palette and styling rules.",
+      "summary": "Complete the web app manifest with mobile-first PWA settings (name/short_name, start_url, scope, standalone display, orange theme/background colors, portrait orientation).",
       "acceptanceCriteria": [
-        "Global theme variables in frontend/src/index.css reflect: primary=orange, secondary=purple, success=green, destructive=red, and a light background surface scheme.",
-        "Tailwind config continues to map Tailwind color tokens (primary/secondary/success/destructive/background/card/etc.) to the CSS variables without breaking existing builds.",
-        "A consistent set of reusable utility classes exists for: (a) primary gradient buttons and (b) standard marketplace cards (rounded + soft shadow + hover/tap interactions) that can be applied across pages.",
-        "All changes remain mobile-first (spacing and typography scale appropriately on small screens first)."
+        "frontend/public/manifest.webmanifest contains: name, short_name, start_url set to '/', scope set to '/', display set to 'standalone', and explicit theme_color + background_color values.",
+        "The theme_color used in the manifest matches the <meta name=\"theme-color\"> value in frontend/index.html.",
+        "Manifest icons reference real files under /assets/generated/ with correct sizes/type fields.",
+        "PWA continues to prefer portrait usage on mobile (orientation remains portrait-primary or equivalent)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/public/manifest.webmanifest",
           "operation": "modify",
-          "description": "Adjust :root theme tokens to match the requested palette (primary orange, secondary purple, success green, destructive red, light background surfaces), ensure rounded-corners defaults, and add/standardize reusable utilities for marketplace cards and gradient primary buttons (including consistent hover/tap interactions and typography defaults)."
+          "description": "Update the manifest to include scope:'/' and ensure mobile-first PWA fields are complete (name/short_name, start_url:'/', display:'standalone', portrait orientation, and orange marketplace theme_color/background_color). Ensure icon entries reference the generated icon files under /assets/generated/ with correct sizes/type/purpose."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Verify Tailwind token mappings remain correctly wired to the updated CSS variables (primary/secondary/success/destructive/background/card/etc.) and extend theme as needed (e.g., ensure highlight/warning tokens used by pages have matching utilities) without breaking the build."
+          "description": "Verify <meta name='theme-color'> matches the manifest theme_color value and keep mobile-first PWA meta/link tags aligned with the updated manifest."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Standardize primary action buttons across the app to use gradient-filled rounded buttons with responsive mobile tap feedback and reduced-motion support.",
+      "summary": "Provide a complete installable icon set (including maskable) and wire icons into the manifest and Apple touch metadata for Android Chrome and iOS Safari.",
       "acceptanceCriteria": [
-        "Primary action buttons visually match: gradient fill, rounded corners, bold label, and shadow.",
-        "Mobile tap/active state provides a small tactile feedback (e.g., subtle scale-down/scale-up) and is disabled/reduced when prefers-reduced-motion is set.",
-        "Existing button functionality (navigation, mutations, form submits) remains unchanged."
+        "frontend/public/manifest.webmanifest includes a multi-size icon set (at least: 192x192 and 512x512) plus at least one maskable icon entry.",
+        "frontend/index.html includes an apple-touch-icon link that points to an existing generated PNG (180x180).",
+        "All referenced icon files exist in frontend/public/assets/generated/ and are served correctly at runtime (no 404s)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add a reusable button utility (or utilities) for primary CTAs that includes gradient fill, rounded corners, bold text, soft shadow, and motion-safe tap feedback with motion-reduce fallbacks."
+          "path": "frontend/public/assets/generated/pwa-icon.dim_72x72.png",
+          "operation": "create",
+          "description": "Add the generated PWA app icon asset (72x72) at frontend/public/assets/generated/pwa-icon.dim_72x72.png and ensure it is referenced by the manifest where appropriate."
         },
         {
-          "path": "frontend/src/components/buttons/PrimaryCtaButton.tsx",
-          "operation": "modify",
-          "description": "Update the primary CTA wrapper to consistently apply the shared gradient CTA + tap/active feedback classes (using motion-safe / motion-reduce variants) while preserving all props and behaviors."
+          "path": "frontend/public/assets/generated/pwa-icon.dim_96x96.png",
+          "operation": "create",
+          "description": "Add the generated PWA app icon asset (96x96) at frontend/public/assets/generated/pwa-icon.dim_96x96.png and ensure it is referenced by the manifest where appropriate."
         },
         {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Replace ad-hoc primary action button styling (e.g., login CTAs and key CTAs) with the standardized PrimaryCtaButton/shared CTA classes to ensure consistent gradient, rounded, bold, and mobile tap feedback across the page."
+          "path": "frontend/public/assets/generated/pwa-icon.dim_128x128.png",
+          "operation": "create",
+          "description": "Add the generated PWA app icon asset (128x128) at frontend/public/assets/generated/pwa-icon.dim_128x128.png and ensure it is referenced by the manifest where appropriate."
         },
         {
-          "path": "frontend/src/components/HeroBannerSlider.tsx",
+          "path": "frontend/public/assets/generated/pwa-icon.dim_144x144.png",
+          "operation": "create",
+          "description": "Add the generated PWA app icon asset (144x144) at frontend/public/assets/generated/pwa-icon.dim_144x144.png and ensure it is referenced by the manifest where appropriate."
+        },
+        {
+          "path": "frontend/public/assets/generated/pwa-icon.dim_152x152.png",
+          "operation": "create",
+          "description": "Add the generated PWA app icon asset (152x152) at frontend/public/assets/generated/pwa-icon.dim_152x152.png and ensure it is referenced by the manifest where appropriate."
+        },
+        {
+          "path": "frontend/public/assets/generated/pwa-icon.dim_384x384.png",
+          "operation": "create",
+          "description": "Add the generated PWA app icon asset (384x384) at frontend/public/assets/generated/pwa-icon.dim_384x384.png and ensure it is referenced by the manifest where appropriate."
+        },
+        {
+          "path": "frontend/public/assets/generated/pwa-maskable.dim_192x192.png",
+          "operation": "create",
+          "description": "Add the generated maskable PWA app icon asset (192x192) at frontend/public/assets/generated/pwa-maskable.dim_192x192.png and ensure it is referenced by the manifest with purpose:'maskable'."
+        },
+        {
+          "path": "frontend/public/manifest.webmanifest",
           "operation": "modify",
-          "description": "Update banner CTA button styling to use the standardized gradient primary button pattern and ensure mobile tap feedback respects reduced-motion preferences, without changing slider logic."
+          "description": "Expand the manifest icons array to include a multi-size set (including at least 192x192 and 512x512) and at least one maskable entry. Ensure all icon src values point to existing generated files under frontend/public/assets/generated/ and that sizes/type/purpose fields are correct."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Ensure the Apple touch metadata is correctly wired (keep/update the apple-touch-icon link to frontend/public/assets/generated/apple-touch-icon.dim_180x180.png) and verify the file is served correctly at runtime (no 404)."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Apply a consistent marketplace card design system across product, vendor, dashboard, and category cards using shared styling.",
+      "summary": "Keep the service worker enabled and implement offline behavior by caching the app shell for navigations and falling back to offline.html when needed, while avoiding caching authenticated/private responses.",
       "acceptanceCriteria": [
-        "Product, vendor, category, and dashboard cards consistently use rounded corners and soft shadows (no mixed sharp/flat card styles remain on major screens).",
-        "Card hover/tap interactions are consistent (lift/hover shadow on pointer devices; tap feedback on mobile).",
-        "Cards remain readable on light backgrounds with sufficient contrast for text and borders."
+        "The service worker is registered by the app in production builds (no console error; registration succeeds when supported).",
+        "When offline, a navigation to the app (e.g., '/') loads a cached app shell if available; otherwise it shows the existing offline fallback page (frontend/public/offline.html).",
+        "The service worker caches core static assets (icons + other critical assets already listed) and cleans up old caches on activate.",
+        "Offline behavior does not cache or store authenticated/private API responses (continue to avoid caching authenticated requests)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Introduce/standardize a shared marketplace card utility class (rounded white card, soft shadow, border, consistent hover/tap interaction) that can be reused across major card surfaces."
+          "description": "Adjust service worker registration so it runs for production builds (while still safely checking browser support), and keep registration error handling clean (no runtime crashes)."
         },
         {
-          "path": "frontend/src/components/ProductGrid.tsx",
+          "path": "frontend/public/sw.js",
           "operation": "modify",
-          "description": "Align product card container styling with the shared marketplace card utility (while keeping the current layout/logic intact) and ensure tap/hover interaction behavior is consistent with the global card system."
-        },
-        {
-          "path": "frontend/src/components/DealCard.tsx",
-          "operation": "modify",
-          "description": "Align deal card styling with the shared marketplace card utility and ensure consistent hover/tap interactions on pointer and mobile devices."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Update admin dashboard control-panel and quick-action cards to use the shared marketplace card styling (rounded, soft shadow, consistent border/hover/tap) while keeping navigation and content unchanged."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
-          "operation": "modify",
-          "description": "Update analytics stat cards to use the shared marketplace card styling and ensure all referenced surface/tint utilities exist and match the theme palette."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Standardize vendor stat cards to the shared marketplace card styling while preserving all existing data/logic and alert behavior."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorWalletPage.tsx",
-          "operation": "modify",
-          "description": "Standardize wallet/stat/info cards to the shared marketplace card styling while preserving all existing data/logic and alert behavior."
+          "description": "Update service worker caching logic to (1) precache the app shell for navigations, (2) serve cached app shell for navigations when offline if available, otherwise fall back to frontend/public/offline.html, (3) precache the full required icon set, and (4) continue avoiding caching authenticated/private requests and cleaning up old caches on activate."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Revise category cards (Categories page and Home page category grids) to colorful gradient square cards with large icons and mobile tap animation, preserving navigation and existing color mapping.",
+      "summary": "Implement a mobile-first Add to Home Screen (A2HS) install prompt UX by capturing beforeinstallprompt and showing a non-blocking install CTA that triggers the prompt and hides after installation.",
       "acceptanceCriteria": [
-        "Category cards are square (or near-square), show a colorful gradient background, and display the category icon prominently.",
-        "Category cards have a visible tap animation on mobile (e.g., scale/press feedback) and do not rely solely on hover.",
-        "Tapping a category still navigates to the correct category listing route as before."
+        "On supported Chrome mobile, when the app becomes installable, the UI shows a clear install call-to-action (English text) without blocking normal navigation.",
+        "Tapping the install call-to-action triggers the deferred beforeinstallprompt prompt and handles the user’s choice (accepted/dismissed) without errors.",
+        "After the app is installed (appinstalled event), the install UI no longer appears.",
+        "The install UI is mobile-first (fits small screens and does not overlap core navigation controls excessively, e.g., bottom nav)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/CategoriesPage.tsx",
-          "operation": "modify",
-          "description": "Redesign the category cards into square/near-square gradient tiles using the existing getCategoryColor() mapping and prominent icons; add mobile press/tap feedback while preserving the existing Link navigation behavior."
+          "path": "frontend/src/hooks/useA2HS.ts",
+          "operation": "create",
+          "description": "Create a hook to capture and manage the beforeinstallprompt and appinstalled events, expose whether the app is installable/installed, and provide an action to trigger the deferred install prompt (English-only UI text will be handled by the consuming component)."
         },
         {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Update the Home page category grid/cards to the same square gradient tile style with large icons and tap animation, while keeping the current navigation targets unchanged."
+          "path": "frontend/src/components/pwa/A2HSInstallBanner.tsx",
+          "operation": "create",
+          "description": "Create a mobile-first, non-blocking install banner/button component that uses the useA2HS hook and a standard Button component (do not modify frontend/src/components/ui). The component should fit small screens and avoid overlapping the bottom nav; hide itself when not installable or after installation."
         },
         {
-          "path": "frontend/src/utils/categoryColors.ts",
+          "path": "frontend/src/components/AppLayout.tsx",
           "operation": "modify",
-          "description": "Ensure the existing deterministic category color mapping continues to work for the new gradient square tile design (no behavior change; adjust/extend palette only if needed to better match the theme)."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add/standardize shared utilities for press/tap animation (motion-safe active scale) suitable for category tiles, ensuring reduced-motion users do not get transform animations."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Ensure product cards match the requested pattern (image top, bold price, clear discount display, full-width gradient add-to-cart) with compact mobile-first layout.",
-      "acceptanceCriteria": [
-        "Product cards show the main product image at the top and keep consistent rounded corners/shadows.",
-        "When a discount exists, the final price is visually emphasized and the original price is de-emphasized (e.g., muted + strikethrough).",
-        "Add-to-cart is a full-width gradient button on product cards where add-to-cart is present, and disabled styling is clear for out-of-stock states.",
-        "No regression to product navigation (card click to product detail still works where implemented)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProductGrid.tsx",
-          "operation": "modify",
-          "description": "Refine the product-card presentation to fully match the pattern (compact mobile-first spacing, clear discount emphasis, consistent image-top layout, and full-width standardized gradient add-to-cart button with clear disabled styling) while preserving navigation and add-to-cart behavior."
-        },
-        {
-          "path": "frontend/src/components/DealCard.tsx",
-          "operation": "modify",
-          "description": "Ensure deal/product mini-cards use the same pricing/discount visual rules (final price emphasized, original price muted/struck when applicable) and consistent marketplace card styling."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "If needed, add small reusable utilities for price emphasis/discount presentation and disabled CTA styling consistency across product cards (without altering shadcn ui component files)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Update hero/banner slider visuals to bright marketplace styling with gradient overlays, bold text, and standardized gradient CTA buttons with mobile tap feedback; keep gestures/rotation/images unchanged.",
-      "acceptanceCriteria": [
-        "Hero banner slides maintain gradient overlays and bold typography, with improved marketplace-style visual richness consistent with the global theme.",
-        "Banner CTA buttons use the same gradient rounded style as primary CTAs and provide tap feedback on mobile.",
-        "Swipe left/right and auto-slide timing continue to work as before, and banner images remain loaded from the existing static asset paths."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/HeroBannerSlider.tsx",
-          "operation": "modify",
-          "description": "Update slide overlay/typography and replace the current CTA styling with the standardized gradient primary CTA (including motion-safe tap feedback), while preserving swipe gestures, auto-rotation timing, and existing static image paths."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Adjust/standardize banner/hero overlay utility styling (e.g., gradient overlay helpers, bold heading defaults) to align hero visuals with the new marketplace theme."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Refresh vendor and admin dashboard visuals to themed colored stat cards (orange/purple/green/red) while keeping all dashboard data and logic unchanged.",
-      "acceptanceCriteria": [
-        "Dashboard stat cards use consistent rounded corners, soft shadows, and themed color accents that correspond to the requested palette.",
-        "Alert states (warnings/errors) clearly use the red alerts styling and warning styling remains visually distinct on light backgrounds.",
-        "No changes to what metrics are shown or how they are calculated; only UI presentation is updated."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Ensure theme palette supports dashboard accents (primary/orange, secondary/purple, success/green, destructive/red) and provide shared tinted-surface utilities needed by dashboard cards (including any missing tint helpers referenced by dashboard pages)."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Update vendor stat cards to consistently use the new themed palette accents and shared marketplace card utilities (rounded + soft shadow), keeping all computations and conditional alerts unchanged."
-        },
-        {
-          "path": "frontend/src/pages/vendor/VendorWalletPage.tsx",
-          "operation": "modify",
-          "description": "Update wallet/stat/info card visuals to align with the new palette accents and shared marketplace card utilities; keep all totals/threshold logic unchanged."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
-          "operation": "modify",
-          "description": "Update admin analytics stat cards to use the new palette accents (including success/green and destructive/red where applicable) and shared marketplace card utilities; keep data fetching and values unchanged."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Refresh admin dashboard control panel and quick actions to use the new palette accents and standardized CTA/button styling for primary actions, keeping navigation/behavior unchanged."
+          "description": "Wire the A2HSInstallBanner into the shared layout so it can appear across main customer pages without blocking navigation and without excessively overlapping the BottomNav on small screens."
         }
       ]
     }

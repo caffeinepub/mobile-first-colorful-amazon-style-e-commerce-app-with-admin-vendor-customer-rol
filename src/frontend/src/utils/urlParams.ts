@@ -86,19 +86,14 @@ export function getPersistedUrlParameter(paramName: string, storageKey?: string)
 }
 
 /**
- * Checks if a parameter exists in URL or sessionStorage
+ * Checks if a parameter exists in the URL or sessionStorage
  *
  * @param paramName - The name of the parameter to check
  * @returns True if the parameter exists, false otherwise
  */
 export function hasParameter(paramName: string): boolean {
-    const urlValue = getUrlParameter(paramName);
-    if (urlValue !== null) {
-        return true;
-    }
-
-    const sessionValue = getSessionParameter(paramName);
-    return sessionValue !== null;
+    const value = getPersistedUrlParameter(paramName);
+    return value !== null && value !== '';
 }
 
 /**

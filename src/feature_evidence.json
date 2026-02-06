@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-global-tailwind-theme-tokens-and-shared-utility-classes-to-match-the-requested-marketplace-palette-and-styling-rules-primary-orange-secondary-purple-success-green-destructive-red-alerts-and-light-backgrounds-rounded-corners-throughout-soft-card-shadows-bold-headings-mobile-friendly-spacing-and-gradient-filled-buttons",
-      "featureTitle": "Update the global Tailwind theme tokens and shared utility classes to match the requested marketplace palette and styling rules: primary orange, secondary purple, success green, destructive red alerts, and light backgrounds; rounded corners throughout; soft card shadows; bold headings; mobile-friendly spacing; and gradient-filled buttons.",
+      "featureId": "feature-ensure-the-pwa-manifest-is-complete-and-mobile-first-set-app-name-short-name-start-url-to-the-home-route-scope-to-root-display-mode-to-standalone-and-define-theme-color-background-color-that-match-the-app-s-current-orange-marketplace-theme",
+      "featureTitle": "Ensure the PWA manifest is complete and mobile-first: set app name + short name, start_url to the home route, scope to root, display mode to standalone, and define theme_color + background_color that match the app’s current orange marketplace theme.",
       "files": [
-        "frontend/src/index.css"
+        "frontend/public/manifest.webmanifest"
       ],
       "components": [
         "authorization@4.0.0",
@@ -22,13 +22,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-standardize-buttons-across-the-app-to-use-gradient-filled-rounded-buttons-with-bold-text-and-soft-shadow-for-primary-actions-including-banner-ctas-add-to-cart-actions-and-key-dashboard-actions-ensure-hover-active-tap-states-feel-responsive-on-mobile-scale-tap-animation-while-respecting-reduced-motion-preferences",
-      "featureTitle": "Standardize buttons across the app to use gradient-filled rounded buttons with bold text and soft shadow for primary actions, including banner CTAs, add-to-cart actions, and key dashboard actions; ensure hover/active/tap states feel responsive on mobile (scale/tap animation) while respecting reduced-motion preferences.",
+      "featureId": "feature-provide-a-complete-mobile-app-icon-set-for-installation-including-maskable-icons-and-wire-them-into-the-web-app-manifest-and-apple-touch-metadata-so-installable-experiences-work-on-chrome-android-and-ios-safari",
+      "featureTitle": "Provide a complete mobile app icon set for installation (including maskable icons) and wire them into the web app manifest and Apple touch metadata so installable experiences work on Chrome Android and iOS Safari.",
       "files": [
-        "frontend/src/components/HeroBannerSlider.tsx",
-        "frontend/src/components/buttons/PrimaryCtaButton.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/HomePage.tsx"
+        "frontend/public/manifest.webmanifest"
       ],
       "components": [
         "authorization@4.0.0",
@@ -45,16 +42,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-apply-a-consistent-card-design-system-across-the-app-for-products-vendors-dashboards-and-categories-rounded-white-cards-soft-shadow-and-clear-borders-update-pages-components-that-render-these-cards-to-use-the-shared-card-styling-consistently",
-      "featureTitle": "Apply a consistent card design system across the app for products, vendors, dashboards, and categories: rounded white cards, soft shadow, and clear borders; update pages/components that render these cards to use the shared card styling consistently.",
+      "featureId": "feature-keep-the-service-worker-enabled-and-ensure-it-provides-offline-behavior-for-the-app-s-main-pages-by-caching-the-app-shell-for-navigations-and-serving-a-cached-fallback-when-the-network-is-unavailable",
+      "featureTitle": "Keep the service worker enabled and ensure it provides offline behavior for the app’s main pages by caching the app shell for navigations and serving a cached fallback when the network is unavailable.",
       "files": [
-        "frontend/src/components/DealCard.tsx",
-        "frontend/src/components/ProductGrid.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
-        "frontend/src/pages/admin/AdminDashboardPage.tsx",
-        "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-        "frontend/src/pages/vendor/VendorWalletPage.tsx"
+        "frontend/public/sw.js",
+        "frontend/src/App.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -71,12 +63,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-revise-category-card-ui-including-the-main-categories-page-and-any-category-card-grids-on-the-home-page-to-use-colorful-gradient-square-cards-with-large-icons-and-a-tap-animation-while-preserving-the-existing-category-navigation-behavior-and-category-color-mapping",
-      "featureTitle": "Revise category card UI (including the main Categories page and any category-card grids on the Home page) to use colorful gradient square cards with large icons and a tap animation, while preserving the existing category navigation behavior and category color mapping.",
+      "featureId": "feature-enable-an-add-to-home-screen-a2hs-install-prompt-ux-for-chrome-on-mobile-by-capturing-the-browser-beforeinstallprompt-event-and-presenting-a-mobile-first-install-banner-button-that-triggers-the-prompt",
+      "featureTitle": "Enable an “Add to Home Screen” (A2HS) install prompt UX for Chrome on mobile by capturing the browser beforeinstallprompt event and presenting a mobile-first install banner/button that triggers the prompt.",
       "files": [
-        "frontend/src/index.css",
-        "frontend/src/pages/CategoriesPage.tsx",
-        "frontend/src/pages/HomePage.tsx"
+        "frontend/src/components/AppLayout.tsx",
+        "frontend/src/components/pwa/A2HSInstallBanner.tsx",
+        "frontend/src/hooks/useA2HS.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -89,73 +81,6 @@
       ],
       "testIds": [
         "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-product-cards-across-the-app-follow-the-requested-product-card-pattern-image-at-the-top-bold-price-discounted-offer-price-clearly-highlighted-with-strikethrough-original-when-applicable-and-a-full-width-add-to-cart-button-keep-the-layout-compact-and-mobile-first",
-      "featureTitle": "Ensure product cards across the app follow the requested product-card pattern: image at the top, bold price, discounted/offer price clearly highlighted (with strikethrough original when applicable), and a full-width add-to-cart button; keep the layout compact and mobile-first.",
-      "files": [
-        "frontend/src/components/DealCard.tsx",
-        "frontend/src/components/ProductGrid.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-hero-banner-slider-presentation-to-match-the-bright-marketplace-theme-gradient-slider-banners-with-bold-text-and-cta-buttons-styled-as-gradient-rounded-buttons-with-mobile-tap-animation-keep-swipe-gestures-auto-rotation-and-existing-banner-images-intact",
-      "featureTitle": "Update the hero/banner slider presentation to match the bright marketplace theme: gradient slider banners with bold text, and CTA buttons styled as gradient rounded buttons with mobile tap animation; keep swipe gestures, auto-rotation, and existing banner images intact.",
-      "files": [
-        "frontend/src/components/HeroBannerSlider.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-refresh-vendor-and-admin-dashboard-visuals-to-use-colored-stat-cards-sales-orders-wallet-alerts-aligned-with-the-new-theme-palette-orange-primary-purple-secondary-green-success-red-alerts-keeping-all-existing-dashboard-data-and-logic-unchanged",
-      "featureTitle": "Refresh vendor and admin dashboard visuals to use colored stat cards (sales, orders, wallet, alerts) aligned with the new theme palette (orange primary, purple secondary, green success, red alerts), keeping all existing dashboard data and logic unchanged.",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
-        "frontend/src/pages/admin/AdminDashboardPage.tsx",
-        "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-        "frontend/src/pages/vendor/VendorWalletPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
       ],
       "confidence": "high"
     }

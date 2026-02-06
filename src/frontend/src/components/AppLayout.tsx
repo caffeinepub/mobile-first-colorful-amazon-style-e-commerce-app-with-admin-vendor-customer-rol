@@ -4,6 +4,7 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useIsVendor } from '../hooks/useQueries';
 import TopNav from './TopNav';
 import BottomNav from './BottomNav';
+import A2HSInstallBanner from './pwa/A2HSInstallBanner';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -30,6 +31,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <TopNav />
       <main className="flex-1 pb-20 md:pb-8">{children}</main>
       <BottomNav />
+      <A2HSInstallBanner />
     </div>
   );
 }
