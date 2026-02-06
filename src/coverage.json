@@ -1,101 +1,64 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T03:24:45.566Z",
+  "generatedAt": "2026-02-06T03:55:32.738Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
+    "total": 3,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Rebuild backend role model and APIs to support exactly three roles: `admin`, `vendor`, and `customer` (replace/alias any existing `user` role to `customer`), and ensure all role checks and permission guards use the new roles consistently.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Remove `SafeAdminGate` and any role-based route guard logic from all `/admin` routes, and replace it with a new `AdminBypass` wrapper that only requires the user to be logged in.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the `admin` role automatically; subsequent new users default to `customer` unless explicitly assigned otherwise.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Implement `frontend/src/components/auth/AdminBypass.tsx` as a login-only wrapper: it must not check roles; it must redirect unauthenticated users to the login route; it must render children for authenticated users.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/auth/AdminBypass.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/auth/AdminBypass.tsx",
+          "frontend/src/App.tsx"
+        ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add backend behavior to ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as `admin` (without requiring any pre-shared token).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Fix admin role assignment flow end-to-end so that assigning the current Internet Identity principal as `admin` immediately enables access to `/admin` routes without requiring a page crash/reload, and without relying on a missing/invalid `caffeineAdminToken` URL parameter.",
+        "summary": "Rebuild `frontend/src/pages/admin/AdminDashboardPage.tsx` to use a minimal, safe, and stable layout (avoid complex/fragile UI patterns) while preserving core functionality (vendor list + wallet due + enable/disable outlet).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useActor.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/auth/AccessDeniedScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/auth/AccessDeniedScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Update the frontend route guards and role wrappers to use the new role names (`admin`, `vendor`, `customer`) and ensure all places that previously used `requiredRole=\"user\"` are migrated appropriately to `requiredRole=\"customer\"`.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/auth/RequireRole.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/components/TopNav.tsx",
-          "frontend/src/components/BottomNav.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/auth/RequireRole.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/components/TopNav.tsx",
-          "frontend/src/components/BottomNav.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Fix `RequireRole` to never crash when role or user data is missing/undefined: add safe checks so that if the authenticated user info, actor state, or role query results are not yet available (undefined/not fetched), the component renders a loading state (skeleton) instead of throwing or rendering an error.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/auth/RequireRole.tsx",
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
           "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/auth/RequireRole.tsx",
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
           "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/BottomNav.tsx",
-    "frontend/src/components/TopNav.tsx",
-    "frontend/src/components/auth/AccessDeniedScreen.tsx",
-    "frontend/src/components/auth/RequireRole.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/auth/AdminBypass.tsx",
+    "frontend/src/components/auth/SafeAdminGate.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/customer/CustomerProfilePage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
     "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",

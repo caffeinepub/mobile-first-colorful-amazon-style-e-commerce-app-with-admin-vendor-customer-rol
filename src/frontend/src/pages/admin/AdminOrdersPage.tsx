@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetAllOrders, useUpdateOrderStatus } from '../../hooks/useQueries';
+import { useGetAllOrders, useUpdateOrderStatus, useIsAdmin } from '../../hooks/useQueries';
 import { toast } from 'sonner';
 import OrderStatusBadge from '../../components/status/OrderStatusBadge';
 import { getOrderStatusText } from '../../utils/statusStyles';
 
 export default function AdminOrdersPage() {
+  const { data: isAdmin } = useIsAdmin();
   const { data: orders = [], isLoading } = useGetAllOrders();
   const updateStatus = useUpdateOrderStatus();
 

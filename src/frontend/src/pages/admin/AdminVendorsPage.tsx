@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useGetVendors } from '../../hooks/useQueries';
+import { useGetVendors, useIsAdmin } from '../../hooks/useQueries';
 import { useActor } from '../../hooks/useActor';
 import { toast } from 'sonner';
 import { Principal } from '@dfinity/principal';
@@ -15,6 +15,7 @@ import { OutletStatus } from '../../backend';
 import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
 
 export default function AdminVendorsPage() {
+  const { data: isAdmin } = useIsAdmin();
   const { data: vendors = [] } = useGetVendors();
   const { actor } = useActor();
 

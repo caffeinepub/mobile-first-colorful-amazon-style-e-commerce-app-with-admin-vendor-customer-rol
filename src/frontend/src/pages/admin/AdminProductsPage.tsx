@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetProducts, useAddProduct, useUpdateProduct, useDeleteProduct, useGetCategories } from '../../hooks/useQueries';
+import { useGetProducts, useAddProduct, useUpdateProduct, useDeleteProduct, useGetCategories, useIsAdmin } from '../../hooks/useQueries';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { toast } from 'sonner';
 import type { Product } from '../../backend';
@@ -15,6 +15,7 @@ import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
 
 export default function AdminProductsPage() {
   const { identity } = useInternetIdentity();
+  const { data: isAdmin } = useIsAdmin();
   const { data: products = [] } = useGetProducts('name');
   const { data: categories = [] } = useGetCategories();
   const addProduct = useAddProduct();

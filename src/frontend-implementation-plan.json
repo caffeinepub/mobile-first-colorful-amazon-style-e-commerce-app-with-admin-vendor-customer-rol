@@ -1,88 +1,65 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Internet Identity admin login and rebuild frontend role-based access (admin/vendor/customer) with safe guards",
+  "title": "Login-only admin gating with AdminBypass and stabilized Admin Dashboard",
   "requirements": [
     {
-      "id": "REQ-4",
-      "summary": "Make admin assignment enable /admin access immediately without reload and remove hard dependency on caffeineAdminToken for actor initialization.",
+      "id": "REQ-1",
+      "summary": "Replace SafeAdminGate/role-based guarding on all /admin routes with a login-only AdminBypass wrapper while keeping AdminErrorBoundary.",
       "acceptanceCriteria": [
-        "From an authenticated non-admin session, performing the “assign admin” action results in `isAdmin` becoming true after React Query refetch/invalidations and `/admin` content becomes accessible.",
-        "Admin dashboard loads successfully after assignment without requiring manual URL token manipulation.",
-        "If `?caffeineAdminToken=...` is absent, the app still initializes the backend actor successfully (no actor init hard-failure solely due to missing token)."
+        "`frontend/src/App.tsx` no longer imports or renders `SafeAdminGate` for `/admin`, `/admin/products`, `/admin/vendors`, and `/admin/orders`.",
+        "No admin route uses `RequireRole` (or any `useIsAdmin`/role-check gate) to guard rendering.",
+        "All admin pages still render inside `AdminErrorBoundary`."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useActor.ts",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update actor initialization to never hard-fail solely due to a missing/empty `caffeineAdminToken` param (e.g., only attempt secret-based initialization when a token is present and/or wrap secret initialization in safe error handling that falls back to a usable actor). Ensure identity changes still recreate the actor and invalidate dependent React Query data. Use patterns aligned with the selected \"authorization\" component for Internet Identity + RBAC flows. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Update the admin-assignment mutation flow so that after assigning admin it reliably flips the UI into an admin state without a crash/reload: invalidate/refetch the canonical role query (new role model), plus `isAdmin`, and avoid unnecessary actor invalidation loops unless required. Ensure the mutation uses the backend's intended admin-claim/assignment behavior once available. Use patterns aligned with the selected \"authorization\" component for cache clearing and role refetch after auth/role changes. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
-          "operation": "modify",
-          "description": "Adjust the admin diagnostics/CTA UI copy and logic to remove reliance on `caffeineAdminToken` as a required step for gaining admin access (keep diagnostics if helpful, but do not instruct users to add a token for normal operation). Ensure the “Assign Admin Role to My Account” action triggers the updated mutation and that the page updates automatically once role/admin queries refetch. Use patterns aligned with the selected \"authorization\" component for handling authorization failures gracefully. Verify the component's usage instructions before implementing."
+          "description": "Remove `SafeAdminGate` import/usage and wrap `/admin`, `/admin/products`, `/admin/vendors`, `/admin/orders` route components with the new `AdminBypass` (login-only) while keeping `AdminErrorBoundary` as the outer wrapper."
         }
       ]
     },
     {
-      "id": "REQ-5",
-      "summary": "Migrate frontend route guards and role-aware UI to canonical roles: admin, vendor, customer (replace requiredRole=\"user\" with requiredRole=\"customer\").",
+      "id": "REQ-2",
+      "summary": "Add AdminBypass component that only checks authentication and redirects unauthenticated users to /customer-login.",
       "acceptanceCriteria": [
-        "All guarded customer routes (e.g., profile/wishlist/orders) still function for authenticated customers and do not mistakenly deny access due to role renaming.",
-        "All vendor routes remain guarded by vendor access.",
-        "All admin routes remain guarded by admin access."
+        "`AdminBypass` does not import or call any role-checking hooks/utilities (e.g., `useIsAdmin`, `useGetCallerRole`, `RequireRole`, token checks).",
+        "When the user is not logged in, navigating to any `/admin*` route redirects to `/customer-login` (existing login page).",
+        "When the user is logged in, `AdminBypass` renders its `children` without additional gating.",
+        "If auth state is still initializing, `AdminBypass` shows a simple stable loading state (no role verification)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Introduce/standardize a single canonical role query hook backed by the backend's three-role model (admin/vendor/customer), and migrate call sites away from legacy `user` role assumptions. Keep anonymous/unauthenticated behavior treated as a separate UI state (e.g., guest) without using it as a persisted role. Use patterns aligned with the selected \"authorization\" component for role querying and guarding app data behind login. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/RequireRole.tsx",
-          "operation": "modify",
-          "description": "Update `requiredRole` to support exactly: 'admin' | 'vendor' | 'customer'. Replace the 'user' guard logic with 'customer' semantics, using the canonical role query. Ensure admin/vendor guards remain correct and consistent with the new role names. Use patterns aligned with the selected \"authorization\" component for access control UI and role checks. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/auth/AdminBypass.tsx",
+          "operation": "create",
+          "description": "Implement `AdminBypass` as a login-only wrapper using `useInternetIdentity` to determine (a) initializing state and (b) authenticated state; show a minimal, stable loading UI while initializing; redirect unauthenticated users to the `/customer-login` route using TanStack Router navigation; render `children` when authenticated."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update route wrappers so customer-only pages (e.g., /profile, /wishlist, /orders) use `RequireRole requiredRole=\"customer\"` instead of `\"user\"`. Keep vendor/admin routes guarded by their respective roles. This wiring ensures new guard behavior is actually applied across navigable routes."
-        },
-        {
-          "path": "frontend/src/components/TopNav.tsx",
-          "operation": "modify",
-          "description": "Update role-aware navigation logic to use the canonical three-role model (admin/vendor/customer), avoiding legacy `user` checks. Ensure customers still see customer navigation, vendors see vendor navigation, and admins see admin navigation. Use patterns aligned with the selected \"authorization\" component for hiding restricted navigation items when unauthorized. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/BottomNav.tsx",
-          "operation": "modify",
-          "description": "Update role-aware bottom navigation logic to use the canonical three-role model (admin/vendor/customer) and avoid treating 'not admin and not vendor' as implicitly customer unless authenticated and role is confirmed. Use patterns aligned with the selected \"authorization\" component for role-derived UI state. Verify the component's usage instructions before implementing."
+          "description": "Import and use `AdminBypass` for all `/admin*` routes to enforce login-only access and redirect unauthenticated users to `/customer-login`."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Harden RequireRole to never crash on missing/undefined actor, identity, or role data by rendering loading skeletons until data is ready.",
+      "id": "REQ-3",
+      "summary": "Simplify AdminDashboardPage UI to a minimal, stable layout while preserving vendor list, wallet due, and outlet enable/disable mutation behavior.",
       "acceptanceCriteria": [
-        "Navigating directly to `/admin` while role queries are still pending does not crash the app.",
-        "If `identity` exists but role queries return `undefined` transiently, `RequireRole` shows a loading UI rather than denying access or throwing.",
-        "The same defensive behavior applies to all supported requiredRole values (admin/vendor/customer)."
+        "`AdminDashboardPage` continues to: (1) fetch and display vendors, (2) show wallet due, and (3) allow enabling/disabling vendor outlet status via the existing mutation.",
+        "The page layout is simplified (no unnecessary gradients/animated/complex decorative wrappers that could contribute to instability); use basic container, headings, and cards/tables with predictable rendering.",
+        "No role verification logic is added to `AdminDashboardPage` (it must not check admin role before running).",
+        "The dashboard renders without crashing even when vendor list is empty, loading, or mutation errors occur (errors should be handled with existing `toast` messaging and overall `AdminErrorBoundary`)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/auth/RequireRole.tsx",
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
           "operation": "modify",
-          "description": "Add/ensure defensive checks for all guard branches so undefined transient states (identity present but role/admin/vendor queries not yet available; actor state still fetching; query results temporarily undefined) render a loading skeleton rather than denying access or causing errors. Apply consistently for requiredRole admin/vendor/customer. Use patterns aligned with the selected \"authorization\" component to prevent guard crashes during actor/role initialization. Verify the component's usage instructions before implementing."
+          "description": "Rebuild the dashboard layout to a minimal, predictable structure (simple container + headings + a basic table/list of vendors). Keep existing functionality: fetch vendors, display wallet due, and toggle outlet status via the existing `useUpdateVendor` mutation with `toast` success/error messaging. Ensure stable rendering for loading, empty, and error states; avoid decorative gradients/animations and avoid introducing any role checks."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure role-related queries return stable loading/fetched semantics when dependent on actor initialization (e.g., avoid returning misleading defaults that cause premature denial; align enabled/isLoading/isFetched with actor availability). This supports RequireRole's loading-first behavior. Use patterns aligned with the selected \"authorization\" component for preventing UI flashes and handling actor dependency correctly. Verify the component's usage instructions before implementing."
+          "description": "Remove the `isAdmin`-dependent `enabled` gating in `useGetVendors()` so the vendor list query can run for any authenticated session where an actor is available (no frontend role verification); rely on existing backend behavior for authorization failures and keep the hook’s safe fallback behavior (return empty array on errors)."
         }
       ]
     }

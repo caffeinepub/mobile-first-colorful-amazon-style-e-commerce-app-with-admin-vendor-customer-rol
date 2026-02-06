@@ -1,126 +1,74 @@
 {
   "kind": "build_request",
-  "title": "Fix Internet Identity admin login and rebuild role-based access (admin/vendor/customer) with safe guards",
+  "title": "Replace SafeAdminGate with login-only AdminBypass and stabilize admin routes/dashboard",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Rebuild backend role model and APIs to support exactly three roles: `admin`, `vendor`, and `customer` (replace/alias any existing `user` role to `customer`), and ensure all role checks and permission guards use the new roles consistently.",
-      "target": "backend",
+      "text": "Remove `SafeAdminGate` and any role-based route guard logic from all `/admin` routes, and replace it with a new `AdminBypass` wrapper that only requires the user to be logged in.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "Rebuild admin auth with three roles:\nadmin, vendor, customer"
+          "Remove SafeAdminGate and all role-based route guards from admin routes.\n\nReplace with a simple AdminBypass wrapper that:\n- does not check roles\n- only checks that user is logged in\n- if not logged in, redirect to login\n- if logged in, allow admin page to render"
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes a single canonical role model containing only: admin, vendor, customer (no runtime path depends on a legacy `user` role).",
-        "All existing backend authorization checks that previously relied on a `user` role are updated to use `customer` semantics (or an explicit backward-compatible mapping), so customer-only endpoints still work.",
-        "Vendor-only endpoints remain vendor-restricted; admin-only endpoints remain admin-restricted."
+        "`frontend/src/App.tsx` no longer imports or renders `SafeAdminGate` for `/admin`, `/admin/products`, `/admin/vendors`, and `/admin/orders`.",
+        "No admin route uses `RequireRole` (or any `useIsAdmin`/role-check gate) to guard rendering.",
+        "All admin pages still render inside `AdminErrorBoundary`."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the `admin` role automatically; subsequent new users default to `customer` unless explicitly assigned otherwise.",
-      "target": "backend",
+      "text": "Implement `frontend/src/components/auth/AdminBypass.tsx` as a login-only wrapper: it must not check roles; it must redirect unauthenticated users to the login route; it must render children for authenticated users.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "Set first registered user as admin by default."
+          "Replace with a simple AdminBypass wrapper that:\n- does not check roles\n- only checks that user is logged in\n- if not logged in, redirect to login\n- if logged in, allow admin page to render"
         ]
       },
       "acceptanceCriteria": [
-        "On a fresh canister with no prior users/roles, the first successfully registered principal becomes `admin`.",
-        "On the same canister, the next newly registered principal becomes `customer` by default.",
-        "The definition of “registered” is consistent and implemented server-side (not dependent on frontend state)."
+        "`AdminBypass` does not import or call any role-checking hooks/utilities (e.g., `useIsAdmin`, `useGetCallerRole`, `RequireRole`, token checks).",
+        "When the user is not logged in, navigating to any `/admin*` route redirects to `/customer-login` (existing login page).",
+        "When the user is logged in, `AdminBypass` renders its `children` without additional gating.",
+        "If auth state is still initializing, `AdminBypass` shows a simple stable loading state (no role verification)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add backend behavior to ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as `admin` (without requiring any pre-shared token).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Assign my current Internet Identity user as Admin.\n\nIf no admin role exists, automatically create one and set the current logged-in user as Admin."
-        ]
-      },
-      "acceptanceCriteria": [
-        "If the canister has zero admins, an authenticated caller can become admin via a single backend call path without providing an admin token.",
-        "If an admin already exists, the backend does not allow arbitrary callers to promote themselves to admin (promotion must follow the app’s intended admin-assignment rules).",
-        "After the auto-admin bootstrap executes, admin-only APIs (e.g., analytics) succeed for that caller."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Fix admin role assignment flow end-to-end so that assigning the current Internet Identity principal as `admin` immediately enables access to `/admin` routes without requiring a page crash/reload, and without relying on a missing/invalid `caffeineAdminToken` URL parameter.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Allow admin dashboard to open after admin role is assigned."
-        ]
-      },
-      "acceptanceCriteria": [
-        "From an authenticated non-admin session, performing the “assign admin” action results in `isAdmin` becoming true after React Query refetch/invalidations and `/admin` content becomes accessible.",
-        "Admin dashboard loads successfully after assignment without requiring manual URL token manipulation.",
-        "If `?caffeineAdminToken=...` is absent, the app still initializes the backend actor successfully (no actor init hard-failure solely due to missing token)."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Update the frontend route guards and role wrappers to use the new role names (`admin`, `vendor`, `customer`) and ensure all places that previously used `requiredRole=\"user\"` are migrated appropriately to `requiredRole=\"customer\"`.",
+      "text": "Rebuild `frontend/src/pages/admin/AdminDashboardPage.tsx` to use a minimal, safe, and stable layout (avoid complex/fragile UI patterns) while preserving core functionality (vendor list + wallet due + enable/disable outlet).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "Rebuild admin auth with three roles:\nadmin, vendor, customer"
+          "Rebuild admin dashboard with minimal safe components only.\nDo not include role verification logic for now.\n\nKeep layout simple and stable."
         ]
       },
       "acceptanceCriteria": [
-        "All guarded customer routes (e.g., profile/wishlist/orders) still function for authenticated customers and do not mistakenly deny access due to role renaming.",
-        "All vendor routes remain guarded by vendor access.",
-        "All admin routes remain guarded by admin access."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Fix `RequireRole` to never crash when role or user data is missing/undefined: add safe checks so that if the authenticated user info, actor state, or role query results are not yet available (undefined/not fetched), the component renders a loading state (skeleton) instead of throwing or rendering an error.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Fix RequireRole guard so it does not crash when role is missing.\nAdd safe check: if user or role is undefined, show loading instead of error."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Navigating directly to `/admin` while role queries are still pending does not crash the app.",
-        "If `identity` exists but role queries return `undefined` transiently, `RequireRole` shows a loading UI rather than denying access or throwing.",
-        "The same defensive behavior applies to all supported requiredRole values (admin/vendor/customer)."
+        "`AdminDashboardPage` continues to: (1) fetch and display vendors, (2) show wallet due, and (3) allow enabling/disabling vendor outlet status via the existing mutation.",
+        "The page layout is simplified (no unnecessary gradients/animated/complex decorative wrappers that could contribute to instability); use basic container, headings, and cards/tables with predictable rendering.",
+        "No role verification logic is added to `AdminDashboardPage` (it must not check admin role before running).",
+        "The dashboard renders without crashing even when vendor list is empty, loading, or mutation errors occur (errors should be handled with existing `toast` messaging and overall `AdminErrorBoundary`)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor (all logic in `backend/main.mo`; only add `backend/migration.mo` if persistent state upgrades are required).",
-    "Do not edit any files under `frontend/src/components/ui` or other immutable frontend paths listed in SYSTEM_CONTEXT.",
-    "Use English for all user-facing UI text."
+    "Do not add any role verification logic for admin routes/pages for now (no admin role checks, no RequireRole, no SafeAdminGate behavior reintroduced).",
+    "Redirect unauthenticated users attempting to access `/admin*` routes to the existing `/customer-login` route.",
+    "Do not modify files under `frontend/src/components/ui` or other frontend immutable paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Implement third-party authentication providers (only Internet Identity is used).",
-    "Add real-time features (WebSockets) or external databases/services.",
-    "Redesign unrelated pages outside role/auth flows beyond what is necessary to make role-based access work."
+    "Reintroducing admin role-based authorization/verification on frontend routes.",
+    "Changing backend authorization rules or backend data models.",
+    "Adding new admin features beyond stabilizing routing and simplifying the admin dashboard UI."
   ],
   "imageRequirements": {
     "required": [],

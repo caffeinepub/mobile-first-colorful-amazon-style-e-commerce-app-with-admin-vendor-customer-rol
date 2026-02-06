@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-admin-role-assignment-flow-end-to-end-so-that-assigning-the-current-internet-identity-principal-as-admin-immediately-enables-access-to-admin-routes-without-requiring-a-page-crash-reload-and-without-relying-on-a-missing-invalid-caffeineadmintoken-url-parameter",
-      "featureTitle": "Fix admin role assignment flow end-to-end so that assigning the current Internet Identity principal as `admin` immediately enables access to `/admin` routes without requiring a page crash/reload, and without relying on a missing/invalid `caffeineAdminToken` URL parameter.",
+      "featureId": "feature-remove-safeadmingate-and-any-role-based-route-guard-logic-from-all-admin-routes-and-replace-it-with-a-new-adminbypass-wrapper-that-only-requires-the-user-to-be-logged-in",
+      "featureTitle": "Remove `SafeAdminGate` and any role-based route guard logic from all `/admin` routes, and replace it with a new `AdminBypass` wrapper that only requires the user to be logged in.",
       "files": [
-        "frontend/src/components/auth/AccessDeniedScreen.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -18,19 +17,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-frontend-route-guards-and-role-wrappers-to-use-the-new-role-names-admin-vendor-customer-and-ensure-all-places-that-previously-used-requiredrole-user-are-migrated-appropriately-to-requiredrole-customer",
-      "featureTitle": "Update the frontend route guards and role wrappers to use the new role names (`admin`, `vendor`, `customer`) and ensure all places that previously used `requiredRole=\"user\"` are migrated appropriately to `requiredRole=\"customer\"`.",
+      "featureId": "feature-implement-frontend-src-components-auth-adminbypass-tsx-as-a-login-only-wrapper-it-must-not-check-roles-it-must-redirect-unauthenticated-users-to-the-login-route-it-must-render-children-for-authenticated-users",
+      "featureTitle": "Implement `frontend/src/components/auth/AdminBypass.tsx` as a login-only wrapper: it must not check roles; it must redirect unauthenticated users to the login route; it must render children for authenticated users.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/BottomNav.tsx",
-        "frontend/src/components/TopNav.tsx",
-        "frontend/src/components/auth/RequireRole.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/auth/AdminBypass.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,16 +38,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-5"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-requirerole-to-never-crash-when-role-or-user-data-is-missing-undefined-add-safe-checks-so-that-if-the-authenticated-user-info-actor-state-or-role-query-results-are-not-yet-available-undefined-not-fetched-the-component-renders-a-loading-state-skeleton-instead-of-throwing-or-rendering-an-error",
-      "featureTitle": "Fix `RequireRole` to never crash when role or user data is missing/undefined: add safe checks so that if the authenticated user info, actor state, or role query results are not yet available (undefined/not fetched), the component renders a loading state (skeleton) instead of throwing or rendering an error.",
+      "featureId": "feature-rebuild-frontend-src-pages-admin-admindashboardpage-tsx-to-use-a-minimal-safe-and-stable-layout-avoid-complex-fragile-ui-patterns-while-preserving-core-functionality-vendor-list-wallet-due-enable-disable-outlet",
+      "featureTitle": "Rebuild `frontend/src/pages/admin/AdminDashboardPage.tsx` to use a minimal, safe, and stable layout (avoid complex/fragile UI patterns) while preserving core functionality (vendor list + wallet due + enable/disable outlet).",
       "files": [
-        "frontend/src/components/auth/RequireRole.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/admin/AdminDashboardPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -63,7 +59,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-3"
       ],
       "confidence": "high"
     }

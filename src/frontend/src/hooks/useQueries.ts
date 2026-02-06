@@ -515,6 +515,21 @@ export function useGetVendors() {
   });
 }
 
+export function useUpdateVendor() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ vendorPrincipal, vendor }: { vendorPrincipal: Principal; vendor: Vendor }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateVendor(vendorPrincipal, vendor);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    },
+  });
+}
+
 export function useAddReview() {
   const { actor } = useActor();
   const queryClient = useQueryClient();

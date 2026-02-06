@@ -1,78 +1,53 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T03:24:45.563Z",
-  "summary": "Diff implements a three-role enum on the backend and updates several frontend guards/routes to use admin/vendor/customer with added defensive loading for admin routes. However, the backend bootstrap/admin-seeding behavior appears incomplete/non-persistent, and the frontend “assign admin” flow does not actually call a backend endpoint to perform/admin-bootstrap role assignment. Many additional UI/styling enhancements were introduced beyond the requested auth/role fixes.",
+  "generatedAt": "2026-02-06T03:55:32.734Z",
+  "summary": "AdminBypass login-only wrapper was added, and AdminDashboardPage appears simplified with vendor list, wallet due, and outlet enable/disable toggle plus loading/empty/error handling. However, the diff summary indicates role-based/admin verification logic was (re)introduced in other admin pages (via useIsAdmin), and SafeAdminGate/role-guard removal from admin routes plus AdminErrorBoundary wrapping is not clearly evidenced in the truncated App.tsx diff.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the admin role automatically; subsequent new users default to customer unless explicitly assigned otherwise.",
-      "reason": "The diff shows a non-persistent flag `hasInitializedAdmin` and an `ensureAdminExists` helper, but there is no clear server-side \"registration\" definition/path shown that assigns the *first registered user* as admin and defaults subsequent registrations to customer. No registration API changes are evidenced in the provided diff excerpt.",
+      "id": "REQ-1",
+      "requirement": "Remove SafeAdminGate and any role-based route guard logic from all /admin routes and replace it with AdminBypass; ensure admin pages still render inside AdminErrorBoundary.",
+      "reason": "The provided App.tsx diff is truncated before the /admin route definitions, so it does not show that SafeAdminGate and role-based guards were removed for /admin, /admin/products, /admin/vendors, /admin/orders, nor that those routes are wrapped with AdminErrorBoundary. Additionally, SafeAdminGate.tsx still exists and is listed as modified, not removed.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/SafeAdminGate.tsx"
       ]
     },
     {
-      "id": "REQ-3",
-      "requirement": "Ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as admin (without requiring any pre-shared token).",
-      "reason": "The shown bootstrap uses an in-memory `hasInitializedAdmin` flag and assigns admin to the caller if they are not admin, but it does not demonstrate checking whether *any admin exists in persistent state* (e.g., across upgrades/restarts) before promoting the caller. No migration/persistent-state upgrade file was added, and `hasInitializedAdmin` is not shown as stable/persistent.",
+      "id": "REQ-1",
+      "requirement": "No admin route uses RequireRole (or any useIsAdmin/role-check gate) to guard rendering.",
+      "reason": "The diff summary indicates AdminProductsPage/AdminVendorsPage/AdminOrdersPage now use an isAdmin check from the useIsAdmin hook (role verification), which violates the requirement to remove role-based guard logic for admin routes/pages.",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Fix admin role assignment flow end-to-end so assigning the current II principal as admin immediately enables access to /admin without reload and without relying on caffeineAdminToken.",
-      "reason": "`useAssignAdminRole` does not call any backend method to assign/admin-bootstrap; it only waits and refetches queries. That does not satisfy \"assign admin\" end-to-end unless another backend call path is triggered elsewhere (not evidenced). Also, token-related logic is still referenced in guard diagnostics/UI (`hasParameter('caffeineAdminToken')`, `hasAdminToken`).",
-      "evidence": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/components/auth/AccessDeniedScreen.tsx",
-        "frontend/src/components/auth/RequireRole.tsx"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "requirement": "Fix RequireRole to never crash when role or user data is missing/undefined for all requiredRole values (admin/vendor/customer) and render a loading state instead.",
-      "reason": "The provided excerpt shows a detailed state machine and skeleton loading for `requiredRole === 'admin'`, but the vendor/customer branches are not visible due to truncation, so it is not evidenced that the same defensive behavior applies to vendor and customer routes.",
-      "evidence": [
-        "frontend/src/components/auth/RequireRole.tsx"
+        "frontend-file-summaries.txt",
+        "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Large-scale UI/styling revamp across multiple pages (gradients, shadows, tinted headers, new PrimaryCtaButton usage, extensive visual changes) unrelated to role/auth flow fixes.",
-      "reason": "BuildRequest explicitly avoids redesigning unrelated pages outside role/auth flows beyond what is necessary; these changes appear to be broad styling/UX enhancements not required to fix RBAC/admin login.",
+      "description": "Reintroduced admin-role verification gates on admin pages (AdminProductsPage/AdminVendorsPage/AdminOrdersPage) using useIsAdmin to prevent queries until admin is verified.",
+      "reason": "BuildRequest explicitly forbids adding/reintroducing any role verification logic for admin routes/pages for now (no admin role checks, no RequireRole, no SafeAdminGate behavior).",
       "evidence": [
         "frontend-file-summaries.txt",
-        "frontend/src/index.css",
-        "frontend/src/components/buttons/PrimaryCtaButton.tsx",
-        "frontend/src/pages/admin/AdminProductsPage.tsx",
-        "frontend/src/pages/CartPage.tsx",
-        "frontend/src/pages/CheckoutPage.tsx",
-        "frontend/src/pages/ProductPage.tsx",
-        "frontend/src/components/ProductGrid.tsx"
+        "frontend/src/hooks/useQueries.ts"
       ]
     },
     {
-      "description": "SessionStorage-backed URL parameter persistence utilities (store/get persisted parameters), implying token persistence support.",
-      "reason": "Not requested; the BuildRequest specifically says not to rely on caffeineAdminToken, and does not ask for token persistence utilities.",
+      "description": "Added/extended URL/session parameter utilities explicitly mentioning “admin tokens” persistence in sessionStorage.",
+      "reason": "BuildRequest did not request any admin-token URL/session persistence; it also emphasizes avoiding reintroducing SafeAdminGate-like behaviors and keeping admin access login-only without extra token mechanisms.",
       "evidence": [
         "frontend/src/utils/urlParams.ts"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/BottomNav.tsx",
-    "frontend/src/components/TopNav.tsx",
-    "frontend/src/components/auth/AccessDeniedScreen.tsx",
-    "frontend/src/components/auth/RequireRole.tsx",
+    "frontend/src/components/auth/AdminBypass.tsx",
+    "frontend/src/components/auth/SafeAdminGate.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/customer/CustomerProfilePage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
     "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]

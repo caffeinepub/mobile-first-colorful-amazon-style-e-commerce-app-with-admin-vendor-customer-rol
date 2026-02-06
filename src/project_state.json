@@ -1,39 +1,37 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Implement and fix admin authentication/authorization for an Internet Identity-based app, including robust role handling and an admin dashboard that loads correctly.",
+  "summary": "Admin dashboard rebuild to remove role-based guards and use a login-only AdminBypass wrapper for stable rendering.",
   "architectural_notes": [
-    "Role-based access control (RBAC) with three roles: admin, vendor, customer",
-    "Bootstrap/admin seeding: first registered user becomes admin; if no admin role exists, create it and assign to current user",
-    "RequireRole guard must be resilient to undefined user/role state and render loading instead of throwing"
+    "Admin routes must not use role-based guards for now; use a single AdminBypass that only checks authentication (logged-in) and redirects to login otherwise.",
+    "Admin dashboard UI should prioritize minimal, stable components and a simple layout during this rebuild."
   ],
   "known_issues": [
-    "Admin login/role access is currently broken; admin dashboard may not open",
-    "RequireRole guard can crash when user or role is missing/undefined"
+    "Admin dashboard crashes due to SafeAdminGate role guard."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-admin-role-assignment-flow-end-to-end-so-that-assigning-the-current-internet-identity-principal-as-admin-immediately-enables-access-to-admin-routes-without-requiring-a-page-crash-reload-and-without-relying-on-a-missing-invalid-caffeineadmintoken-url-parameter",
-      "title": "Fix admin role assignment flow end-to-end so that assigning the current Internet Identity principal as `admin` immediately enables access to `/admin` routes without requiring a page crash/reload, and without relying on a missing/invalid `caffeineAdminToken` URL parameter.",
+      "id": "feature-remove-safeadmingate-and-any-role-based-route-guard-logic-from-all-admin-routes-and-replace-it-with-a-new-adminbypass-wrapper-that-only-requires-the-user-to-be-logged-in",
+      "title": "Remove `SafeAdminGate` and any role-based route guard logic from all `/admin` routes, and replace it with a new `AdminBypass` wrapper that only requires the user to be logged in.",
       "reqIds": [
-        "REQ-4"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-frontend-route-guards-and-role-wrappers-to-use-the-new-role-names-admin-vendor-customer-and-ensure-all-places-that-previously-used-requiredrole-user-are-migrated-appropriately-to-requiredrole-customer",
-      "title": "Update the frontend route guards and role wrappers to use the new role names (`admin`, `vendor`, `customer`) and ensure all places that previously used `requiredRole=\"user\"` are migrated appropriately to `requiredRole=\"customer\"`.",
+      "id": "feature-implement-frontend-src-components-auth-adminbypass-tsx-as-a-login-only-wrapper-it-must-not-check-roles-it-must-redirect-unauthenticated-users-to-the-login-route-it-must-render-children-for-authenticated-users",
+      "title": "Implement `frontend/src/components/auth/AdminBypass.tsx` as a login-only wrapper: it must not check roles; it must redirect unauthenticated users to the login route; it must render children for authenticated users.",
       "reqIds": [
-        "REQ-5"
+        "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-requirerole-to-never-crash-when-role-or-user-data-is-missing-undefined-add-safe-checks-so-that-if-the-authenticated-user-info-actor-state-or-role-query-results-are-not-yet-available-undefined-not-fetched-the-component-renders-a-loading-state-skeleton-instead-of-throwing-or-rendering-an-error",
-      "title": "Fix `RequireRole` to never crash when role or user data is missing/undefined: add safe checks so that if the authenticated user info, actor state, or role query results are not yet available (undefined/not fetched), the component renders a loading state (skeleton) instead of throwing or rendering an error.",
+      "id": "feature-rebuild-frontend-src-pages-admin-admindashboardpage-tsx-to-use-a-minimal-safe-and-stable-layout-avoid-complex-fragile-ui-patterns-while-preserving-core-functionality-vendor-list-wallet-due-enable-disable-outlet",
+      "title": "Rebuild `frontend/src/pages/admin/AdminDashboardPage.tsx` to use a minimal, safe, and stable layout (avoid complex/fragile UI patterns) while preserving core functionality (vendor list + wallet due + enable/disable outlet).",
       "reqIds": [
-        "REQ-6"
+        "REQ-3"
       ],
       "version": 1
     }
@@ -41,60 +39,24 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Fix admin login and role-based access; ensure admin dashboard loads after role assignment",
+      "summary": "Remove SafeAdminGate and all role-based route guards from admin routes",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Assign current Internet Identity user as Admin; auto-create admin role if missing",
+      "summary": "Implement AdminBypass wrapper: require logged-in user, redirect to login if not logged in, otherwise render admin pages (no role checks)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Fix RequireRole guard to avoid crashes when role/user missing; show loading when undefined",
+      "summary": "Rebuild admin dashboard using minimal safe components with a simple, stable layout (no role verification logic for now)",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Rebuild admin auth with three roles (admin, vendor, customer)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Set first registered user as admin by default",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Rebuild backend role model and APIs to support exactly three roles: `admin`, `vendor`, and `customer` (replace/alias any existing `user` role to `customer`), and ensure all role checks and permission guards use the new roles consistently.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the `admin` role automatically; subsequent new users default to `customer` unless explicitly assigned otherwise.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Add backend behavior to ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as `admin` (without requiring any pre-shared token).",
-      "reqIds": [
-        "REQ-3"
-      ],
       "status": "pending"
     }
   ],
-  "projectName": "Fix Internet Identity admin login and rebuild role-based access (admin/vendor/customer) with safe guards",
+  "projectName": "Replace SafeAdminGate with login-only AdminBypass and stabilize admin routes/dashboard",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
