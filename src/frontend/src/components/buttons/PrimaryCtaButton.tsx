@@ -9,7 +9,7 @@ export default function PrimaryCtaButton({
 }: React.ComponentPropsWithoutRef<typeof Button>) {
   return (
     <Button
-      className={cn('gradient-primary-cta', className)}
+      className={cn('gradient-primary-cta tap-scale', className)}
       {...props}
     >
       {children}

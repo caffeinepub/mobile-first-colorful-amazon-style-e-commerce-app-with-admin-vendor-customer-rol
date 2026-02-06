@@ -1,95 +1,148 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T09:55:59.107Z",
+  "generatedAt": "2026-02-06T11:07:15.969Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 4,
+    "total": 7,
+    "implemented": 7,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the commission logic so that a 10% commission is added to a vendor’s wallet due only when an order transitions to status \"delivered\" (not when the order is created). Ensure the commission is applied exactly once per order (i.e., changing status to \"delivered\" multiple times must not keep increasing wallet due).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Update the global Tailwind theme tokens and shared utility classes to match the requested marketplace palette and styling rules: primary orange, secondary purple, success green, destructive red alerts, and light backgrounds; rounded corners throughout; soft card shadows; bold headings; mobile-friendly spacing; and gradient-filled buttons.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Enforce the wallet limit rule: when vendor.walletDue becomes >= 1000 due to commission accrual, automatically set the vendor’s outletStatus to \"disabled\" in the backend. When the outlet is disabled, customer-facing product listings must not include products belonging to that vendor (i.e., hide disabled-outlet products from customers).",
+        "summary": "Standardize buttons across the app to use gradient-filled rounded buttons with bold text and soft shadow for primary actions, including banner CTAs, add-to-cart actions, and key dashboard actions; ensure hover/active/tap states feel responsive on mobile (scale/tap animation) while respecting reduced-motion preferences.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/index.css",
+          "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/HeroBannerSlider.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/index.css",
+          "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/HeroBannerSlider.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Update vendor-facing UI to show a wallet panel that includes: Wallet Due, Commission Rate (fixed at 10%), and Limit (fixed at 1000). When walletDue >= 1000 and/or outletStatus is disabled, show a prominent red warning banner on vendor dashboard and vendor wallet pages.",
+        "summary": "Apply a consistent card design system across the app for products, vendors, dashboards, and categories: rounded white cards, soft shadow, and clear borders; update pages/components that render these cards to use the shared card styling consistently.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/ProductGrid.tsx",
+          "frontend/src/components/DealCard.tsx",
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
           "frontend/src/pages/vendor/VendorDashboardPage.tsx",
           "frontend/src/pages/vendor/VendorWalletPage.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/ProductGrid.tsx",
+          "frontend/src/components/DealCard.tsx",
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
           "frontend/src/pages/vendor/VendorDashboardPage.tsx",
           "frontend/src/pages/vendor/VendorWalletPage.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Add an \"Outlet Profile\" section for vendors that displays: Outlet Name, Photo, Mobile, City, Area, Aadhaar (masked), and GST (optional). Aadhaar must be displayed in a masked form (do not show the full Aadhaar value in the UI).",
+        "summary": "Revise category card UI (including the main Categories page and any category-card grids on the Home page) to use colorful gradient square cards with large icons and a tap animation, while preserving the existing category navigation behavior and category color mapping.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/maskAadhaar.ts",
-          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+          "frontend/src/pages/CategoriesPage.tsx",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/utils/categoryColors.ts",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/utils/maskAadhaar.ts",
-          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+          "frontend/src/pages/CategoriesPage.tsx",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/index.css"
         ]
       },
       {
         "id": "REQ-5",
-        "summary": "Add an \"Edit Outlet\" button in the vendor profile area that allows the vendor to update Outlet Profile fields (including changing the outlet photo). Persist the changes to the backend and refresh relevant vendor queries so the updated profile appears immediately after saving.",
+        "summary": "Ensure product cards across the app follow the requested product-card pattern: image at the top, bold price, discounted/offer price clearly highlighted (with strikethrough original when applicable), and a full-width add-to-cart button; keep the layout compact and mobile-first.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/vendor/EditOutletDialog.tsx",
-          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+          "frontend/src/components/ProductGrid.tsx",
+          "frontend/src/components/DealCard.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/vendor/EditOutletDialog.tsx",
-          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+          "frontend/src/components/ProductGrid.tsx",
+          "frontend/src/components/DealCard.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Update the hero/banner slider presentation to match the bright marketplace theme: gradient slider banners with bold text, and CTA buttons styled as gradient rounded buttons with mobile tap animation; keep swipe gestures, auto-rotation, and existing banner images intact.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/HeroBannerSlider.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/HeroBannerSlider.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Refresh vendor and admin dashboard visuals to use colored stat cards (sales, orders, wallet, alerts) aligned with the new theme palette (orange primary, purple secondary, green success, red alerts), keeping all existing dashboard data and logic unchanged.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "frontend/src/pages/vendor/VendorWalletPage.tsx",
+          "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
+          "frontend/src/pages/admin/AdminDashboardPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "frontend/src/pages/vendor/VendorWalletPage.tsx",
+          "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
+          "frontend/src/pages/admin/AdminDashboardPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/vendor/EditOutletDialog.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/CheckoutPage.tsx",
-    "frontend/src/pages/ProductPage.tsx",
+    "frontend/src/components/DealCard.tsx",
+    "frontend/src/components/HeroBannerSlider.tsx",
+    "frontend/src/components/ProductGrid.tsx",
+    "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/CategoriesPage.tsx",
+    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
     "frontend/src/pages/vendor/VendorDashboardPage.tsx",
-    "frontend/src/pages/vendor/VendorProfilePage.tsx",
     "frontend/src/pages/vendor/VendorWalletPage.tsx",
-    "frontend/src/utils/maskAadhaar.ts",
     "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",

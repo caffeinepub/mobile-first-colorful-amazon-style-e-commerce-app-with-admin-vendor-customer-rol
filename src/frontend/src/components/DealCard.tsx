@@ -17,7 +17,7 @@ export default function DealCard({ product, dealType = 'hot', offerText }: DealC
 
   return (
     <Link to="/product/$productId" params={{ productId: product.id }}>
-      <Card className="card-lift cursor-pointer border-2 rounded-2xl shadow-soft hover:shadow-soft-xl bg-card relative overflow-hidden">
+      <Card className="marketplace-card cursor-pointer relative overflow-hidden tap-scale">
         {offerText && (
           <div className="offer-ribbon">
             {offerText}
@@ -32,7 +32,7 @@ export default function DealCard({ product, dealType = 'hot', offerText }: DealC
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-              <span className="text-muted-foreground">No image</span>
+              <span className="text-muted-foreground font-semibold">No image</span>
             </div>
           )}
         </div>
@@ -42,11 +42,11 @@ export default function DealCard({ product, dealType = 'hot', offerText }: DealC
               {dealType === 'hot' ? '🔥 HOT' : dealType === 'new' ? '✨ NEW' : '💰 SALE'}
             </Badge>
           </div>
-          <h3 className="font-bold text-base line-clamp-2 mb-2">{product.name}</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">₹{finalPrice.toFixed(2)}</span>
+          <h3 className="font-extrabold text-sm line-clamp-2 mb-2">{product.name}</h3>
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg font-extrabold text-primary">₹{finalPrice.toFixed(2)}</span>
             {discount > 0 && (
-              <span className="text-sm text-muted-foreground line-through">₹{price.toFixed(2)}</span>
+              <span className="text-xs text-muted-foreground line-through font-medium">₹{price.toFixed(2)}</span>
             )}
           </div>
         </CardContent>

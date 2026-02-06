@@ -1,123 +1,149 @@
 {
   "kind": "build_request",
-  "title": "Add vendor wallet commission enforcement and outlet profile management",
+  "title": "Apply colorful Amazon-style mobile-first marketplace UI theme across the entire app",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the commission logic so that a 10% commission is added to a vendor’s wallet due only when an order transitions to status \"delivered\" (not when the order is created). Ensure the commission is applied exactly once per order (i.e., changing status to \"delivered\" multiple times must not keep increasing wallet due).",
-      "target": "backend",
+      "text": "Update the global Tailwind theme tokens and shared utility classes to match the requested marketplace palette and styling rules: primary orange, secondary purple, success green, destructive red alerts, and light backgrounds; rounded corners throughout; soft card shadows; bold headings; mobile-friendly spacing; and gradient-filled buttons.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-1"
         ],
         "quotes": [
-          "Auto add 10% commission per delivered order."
+          "Apply a full colorful mobile-first marketplace UI theme across the entire app.\n\nUse bright Amazon-style design.\n\nCOLORS:\nPrimary orange, purple secondary, green success, red alerts, light backgrounds.\n\nGLOBAL STYLES:\n- Rounded corners everywhere\n- Soft shadows on cards\n- Gradient buttons\n- Bold headings\n- Large mobile-friendly spacing"
         ]
       },
       "acceptanceCriteria": [
-        "Creating an order does not change vendor.walletDue.",
-        "Updating an order from any non-delivered status to delivered increases vendor.walletDue by floor(order.total * 0.10).",
-        "Updating an already-delivered order to delivered again does not change vendor.walletDue.",
-        "If an order is updated to delivered by an admin or the vendor, the same delivered-transition behavior applies."
+        "Global theme variables in frontend/src/index.css reflect: primary=orange, secondary=purple, success=green, destructive=red, and a light background surface scheme.",
+        "Tailwind config continues to map Tailwind color tokens (primary/secondary/success/destructive/background/card/etc.) to the CSS variables without breaking existing builds.",
+        "A consistent set of reusable utility classes exists for: (a) primary gradient buttons and (b) standard marketplace cards (rounded + soft shadow + hover/tap interactions) that can be applied across pages.",
+        "All changes remain mobile-first (spacing and typography scale appropriately on small screens first)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Enforce the wallet limit rule: when vendor.walletDue becomes >= 1000 due to commission accrual, automatically set the vendor’s outletStatus to \"disabled\" in the backend. When the outlet is disabled, customer-facing product listings must not include products belonging to that vendor (i.e., hide disabled-outlet products from customers).",
-      "target": "both",
+      "text": "Standardize buttons across the app to use gradient-filled rounded buttons with bold text and soft shadow for primary actions, including banner CTAs, add-to-cart actions, and key dashboard actions; ensure hover/active/tap states feel responsive on mobile (scale/tap animation) while respecting reduced-motion preferences.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-1"
         ],
         "quotes": [
-          "If wallet_due >= 1000:\n- Auto disable vendor outlet\n- Hide products from customers\n- Show red warning banner"
+          "BUTTONS:\nUse gradient filled rounded buttons with bold text and shadow."
         ]
       },
       "acceptanceCriteria": [
-        "After a delivered order causes walletDue to reach or exceed 1000, getCallerVendor() returns outletStatus = disabled for that vendor.",
-        "Customer-facing product feeds returned by the backend (e.g., getAllProducts()) do not include products whose vendor outletStatus is disabled.",
-        "Vendor-facing product feeds (e.g., getVendorProducts()) still return the vendor’s own products regardless of outletStatus."
+        "Primary action buttons visually match: gradient fill, rounded corners, bold label, and shadow.",
+        "Mobile tap/active state provides a small tactile feedback (e.g., subtle scale-down/scale-up) and is disabled/reduced when prefers-reduced-motion is set.",
+        "Existing button functionality (navigation, mutations, form submits) remains unchanged."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Update vendor-facing UI to show a wallet panel that includes: Wallet Due, Commission Rate (fixed at 10%), and Limit (fixed at 1000). When walletDue >= 1000 and/or outletStatus is disabled, show a prominent red warning banner on vendor dashboard and vendor wallet pages.",
+      "text": "Apply a consistent card design system across the app for products, vendors, dashboards, and categories: rounded white cards, soft shadow, and clear borders; update pages/components that render these cards to use the shared card styling consistently.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-1"
         ],
         "quotes": [
-          "Show wallet panel:\n- Wallet due\n- Commission rate = 10%\n- Limit = 1000\n\nIf wallet_due >= 1000:\n- Auto disable vendor outlet\n- Hide products from customers\n- Show red warning banner"
+          "CARDS:\nUse rounded white cards with shadow for:\nproducts, vendors, dashboards, categories."
         ]
       },
       "acceptanceCriteria": [
-        "Vendor wallet page displays Wallet Due, Commission Rate: 10%, and Limit: ₹1,000.",
-        "Vendor dashboard page shows a destructive (red) warning banner when walletDue >= 1000 or outletStatus is disabled.",
-        "All user-facing warning/banner text is in English."
+        "Product, vendor, category, and dashboard cards consistently use rounded corners and soft shadows (no mixed sharp/flat card styles remain on major screens).",
+        "Card hover/tap interactions are consistent (lift/hover shadow on pointer devices; tap feedback on mobile).",
+        "Cards remain readable on light backgrounds with sufficient contrast for text and borders."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Add an \"Outlet Profile\" section for vendors that displays: Outlet Name, Photo, Mobile, City, Area, Aadhaar (masked), and GST (optional). Aadhaar must be displayed in a masked form (do not show the full Aadhaar value in the UI).",
-      "target": "both",
+      "text": "Revise category card UI (including the main Categories page and any category-card grids on the Home page) to use colorful gradient square cards with large icons and a tap animation, while preserving the existing category navigation behavior and category color mapping.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-1"
         ],
         "quotes": [
-          "Add Outlet Profile section:\n- Outlet name\n- Photo\n- Mobile\n- City\n- Area\n- Aadhaar masked\n- GST optional"
+          "CATEGORY CARDS:\nColorful gradient square cards with big icons and tap animation."
         ]
       },
       "acceptanceCriteria": [
-        "Backend vendor record includes fields necessary to persist Outlet Profile information (including an optional GST field).",
-        "Vendor profile page displays all requested outlet profile fields when present.",
-        "Aadhaar is shown masked in the vendor profile UI (e.g., only last digits visible; exact masking format is consistent)."
+        "Category cards are square (or near-square), show a colorful gradient background, and display the category icon prominently.",
+        "Category cards have a visible tap animation on mobile (e.g., scale/press feedback) and do not rely solely on hover.",
+        "Tapping a category still navigates to the correct category listing route as before."
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Add an \"Edit Outlet\" button in the vendor profile area that allows the vendor to update Outlet Profile fields (including changing the outlet photo). Persist the changes to the backend and refresh relevant vendor queries so the updated profile appears immediately after saving.",
-      "target": "both",
+      "text": "Ensure product cards across the app follow the requested product-card pattern: image at the top, bold price, discounted/offer price clearly highlighted (with strikethrough original when applicable), and a full-width add-to-cart button; keep the layout compact and mobile-first.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-4"
+          "msg-1"
         ],
         "quotes": [
-          "Add Edit Outlet button."
+          "PRODUCT CARDS:\nImage top, bold price, offer price highlight, add-to-cart full button."
         ]
       },
       "acceptanceCriteria": [
-        "An \"Edit Outlet\" button is visible on the vendor profile page.",
-        "Saving edits persists the updated outlet profile to the backend and the vendor profile UI reflects changes without a full page reload.",
-        "GST can be left empty/cleared and remains optional.",
-        "Aadhaar is not stored/displayed as an unmasked full number via the vendor profile UI."
+        "Product cards show the main product image at the top and keep consistent rounded corners/shadows.",
+        "When a discount exists, the final price is visually emphasized and the original price is de-emphasized (e.g., muted + strikethrough).",
+        "Add-to-cart is a full-width gradient button on product cards where add-to-cart is present, and disabled styling is clear for out-of-stock states.",
+        "No regression to product navigation (card click to product detail still works where implemented)."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Update the hero/banner slider presentation to match the bright marketplace theme: gradient slider banners with bold text, and CTA buttons styled as gradient rounded buttons with mobile tap animation; keep swipe gestures, auto-rotation, and existing banner images intact.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "BANNERS:\nCreate gradient slider banners with bold text and CTA buttons."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Hero banner slides maintain gradient overlays and bold typography, with improved marketplace-style visual richness consistent with the global theme.",
+        "Banner CTA buttons use the same gradient rounded style as primary CTAs and provide tap feedback on mobile.",
+        "Swipe left/right and auto-slide timing continue to work as before, and banner images remain loaded from the existing static asset paths."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Refresh vendor and admin dashboard visuals to use colored stat cards (sales, orders, wallet, alerts) aligned with the new theme palette (orange primary, purple secondary, green success, red alerts), keeping all existing dashboard data and logic unchanged.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "DASHBOARDS:\nUse colored stat cards for sales, orders, wallet, alerts."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard stat cards use consistent rounded corners, soft shadows, and themed color accents that correspond to the requested palette.",
+        "Alert states (warnings/errors) clearly use the red alerts styling and warning styling remains visually distinct on light backgrounds.",
+        "No changes to what metrics are shown or how they are calculated; only UI presentation is updated."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/*.",
-    "Use English for all user-facing UI text."
+    "Frontend must remain React + TypeScript + Tailwind + shadcn + React Query.",
+    "Do not edit any files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Do not introduce new backend canisters/services; keep the backend unchanged for this request."
   ],
   "nonGoals": [
-    "Adding external payment gateways or automated commission settlement.",
-    "Adding third-party authentication providers (only Internet Identity is supported).",
-    "Implementing real-time updates via WebSockets."
+    "Adding new marketplace features (payments, messaging, recommendations, real-time updates).",
+    "Changing backend data models, authorization rules, or storage.",
+    "Replacing existing banner/category/product images unless explicitly requested."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

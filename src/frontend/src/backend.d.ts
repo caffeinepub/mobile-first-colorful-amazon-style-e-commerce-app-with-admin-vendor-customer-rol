@@ -53,6 +53,32 @@ export interface Order {
     timestamp: Time;
     items: Array<OrderItem>;
 }
+export interface PublicVendorProfile {
+    principal: Principal;
+    verified: boolean;
+    outletStatus: OutletStatus;
+    area: string;
+    city: City;
+    name: string;
+    storeCategory: StoreCategory;
+    outletPhoto: ExternalBlob;
+    outletName: string;
+    mobile: string;
+}
+export interface VendorApplication {
+    gst?: string;
+    principal: Principal;
+    documents: Array<ExternalBlob>;
+    area: string;
+    city: City;
+    name: string;
+    storeCategory: StoreCategory;
+    aadhaar: string;
+    outletPhoto: ExternalBlob;
+    outletName: string;
+    timestamp: Time;
+    mobile: string;
+}
 export interface CartItem {
     productId: string;
     quantity: bigint;
@@ -66,6 +92,7 @@ export interface Vendor {
     area: string;
     city: City;
     name: string;
+    storeCategory: StoreCategory;
     aadhaar: string;
     outletPhoto: ExternalBlob;
     outletName: string;
@@ -106,6 +133,11 @@ export enum OutletStatus {
     disabled = "disabled",
     enabled = "enabled"
 }
+export enum StoreCategory {
+    cosmeticStore = "cosmeticStore",
+    groceryStore = "groceryStore",
+    clothStore = "clothStore"
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -124,6 +156,7 @@ export interface backendInterface {
     addReview(productId: string, review: Review): Promise<void>;
     addToCart(item: CartItem): Promise<void>;
     addToWishlist(productId: string): Promise<void>;
+    applyAsVendor(application: VendorApplication): Promise<void>;
     approveVendor(vendorPrincipal: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     clearCart(): Promise<void>;
@@ -144,9 +177,12 @@ export interface backendInterface {
     getOrdersByCity(city: City): Promise<Array<Order>>;
     getOrdersByStatus(status: OrderStatus): Promise<Array<Order>>;
     getOutletProfile(): Promise<Vendor>;
-    getOutletsByCity(city: City): Promise<Array<Vendor>>;
-    getOutletsByName(name: string): Promise<Array<Vendor>>;
+    getOutletsByCity(city: City): Promise<Array<PublicVendorProfile>>;
+    getOutletsByName(name: string): Promise<Array<PublicVendorProfile>>;
+    getOutletsByStoreCategory(category: StoreCategory): Promise<Array<PublicVendorProfile>>;
+    getProduct(productId: string): Promise<Product | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getVendorApplications(): Promise<Array<VendorApplication>>;
     getVendorDocuments(vendorPrincipal: Principal): Promise<Array<ExternalBlob>>;
     getVendorOrders(): Promise<Array<Order>>;
     getVendorProducts(): Promise<Array<Product>>;
@@ -155,9 +191,11 @@ export interface backendInterface {
     isVendor(): Promise<boolean>;
     markVendorAsPaid(vendorPrincipal: Principal): Promise<void>;
     rejectVendor(vendorPrincipal: Principal): Promise<void>;
+    removeFromCart(productId: string): Promise<void>;
+    removeFromWishlist(productId: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setVendorOutletStatus(vendorPrincipal: Principal, status: OutletStatus): Promise<void>;
     updateOrderStatus(orderId: string, status: OrderStatus): Promise<void>;
-    updateOutletProfile(name: string, outletName: string, mobile: string, area: string, outletPhoto: ExternalBlob, city: City, gst: string | null): Promise<void>;
+    updateOutletProfile(name: string, outletName: string, mobile: string, area: string, outletPhoto: ExternalBlob, city: City, gst: string | null, storeCategory: StoreCategory): Promise<void>;
     updateProduct(productId: string, product: Product): Promise<void>;
 }

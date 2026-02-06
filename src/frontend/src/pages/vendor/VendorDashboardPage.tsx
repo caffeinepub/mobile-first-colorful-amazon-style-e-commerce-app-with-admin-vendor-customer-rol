@@ -24,34 +24,34 @@ export default function VendorDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+      <h1 className="text-3xl font-extrabold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
         Vendor Dashboard
       </h1>
 
       <VendorTabs />
 
       {isAtLimit && (
-        <Alert variant="destructive" className="mb-6 rounded-xl">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert variant="destructive" className="mb-6 rounded-2xl shadow-soft">
+          <AlertCircle className="h-5 w-5" />
+          <AlertDescription className="font-semibold">
             Your outlet has been disabled. Wallet Due: {formatInr(walletDue)} has reached the limit of {formatInr(1000)}. Please contact admin to settle payment and reactivate your outlet.
           </AlertDescription>
         </Alert>
       )}
 
       {isOutletDisabled && !isAtLimit && (
-        <Alert variant="destructive" className="mb-6 rounded-xl">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert variant="destructive" className="mb-6 rounded-2xl shadow-soft">
+          <AlertCircle className="h-5 w-5" />
+          <AlertDescription className="font-semibold">
             Your outlet is currently disabled. Please contact admin to resolve this issue.
           </AlertDescription>
         </Alert>
       )}
 
       {isNearLimit && !isAtLimit && (
-        <Alert className="mb-6 rounded-xl border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
-          <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
-          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+        <Alert className="mb-6 rounded-2xl border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20 shadow-soft">
+          <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200 font-semibold">
             Warning: Your commission balance is {formatInr(walletDue)}. Your outlet will be automatically disabled when it reaches {formatInr(1000)}.
           </AlertDescription>
         </Alert>
@@ -59,73 +59,73 @@ export default function VendorDashboardPage() {
 
       {isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
+          <Skeleton className="h-36 w-full rounded-2xl" />
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {/* Total Products */}
-          <Card className="shadow-soft-lg rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5">
+          <Card className="marketplace-card bg-gradient-to-br from-primary/15 to-primary/5 border-primary/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-primary">Total Products</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/20 border border-primary/30">
+              <CardTitle className="text-sm font-bold text-primary">Total Products</CardTitle>
+              <div className="p-2.5 rounded-xl bg-primary/20 border-2 border-primary/40 shadow-soft">
                 <Package className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{products.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">Active listings</p>
+              <div className="text-4xl font-extrabold text-primary">{products.length}</div>
+              <p className="text-xs text-muted-foreground mt-1 font-semibold">Active listings</p>
             </CardContent>
           </Card>
 
           {/* Total Orders */}
-          <Card className="shadow-soft-lg rounded-2xl border-2 border-secondary/20 bg-gradient-to-br from-secondary/10 to-secondary/5">
+          <Card className="marketplace-card bg-gradient-to-br from-secondary/15 to-secondary/5 border-secondary/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-secondary">Total Orders</CardTitle>
-              <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
+              <CardTitle className="text-sm font-bold text-secondary">Total Orders</CardTitle>
+              <div className="p-2.5 rounded-xl bg-secondary/20 border-2 border-secondary/40 shadow-soft">
                 <ShoppingBag className="h-5 w-5 text-secondary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-secondary">{orders.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">All time</p>
+              <div className="text-4xl font-extrabold text-secondary">{orders.length}</div>
+              <p className="text-xs text-muted-foreground mt-1 font-semibold">All time</p>
             </CardContent>
           </Card>
 
           {/* Total Sales */}
-          <Card className="shadow-soft-lg rounded-2xl border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5">
+          <Card className="marketplace-card bg-gradient-to-br from-accent/15 to-accent/5 border-accent/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-accent">Total Sales</CardTitle>
-              <div className="p-2 rounded-lg bg-accent/20 border border-accent/30">
+              <CardTitle className="text-sm font-bold text-accent">Total Sales</CardTitle>
+              <div className="p-2.5 rounded-xl bg-accent/20 border-2 border-accent/40 shadow-soft">
                 <TrendingUp className="h-5 w-5 text-accent" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-accent">{formatInr(totalSales)}</div>
-              <p className="text-xs text-muted-foreground mt-1">Revenue earned</p>
+              <div className="text-4xl font-extrabold text-accent">{formatInr(totalSales)}</div>
+              <p className="text-xs text-muted-foreground mt-1 font-semibold">Revenue earned</p>
             </CardContent>
           </Card>
 
           {/* Wallet Due */}
-          <Card className={`shadow-soft-lg rounded-2xl border-2 ${
+          <Card className={`marketplace-card ${
             isAtLimit 
-              ? 'border-destructive bg-gradient-to-br from-destructive/10 to-destructive/5' 
+              ? 'bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/30' 
               : isNearLimit 
-              ? 'border-yellow-500 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5'
-              : 'border-highlight/20 bg-gradient-to-br from-highlight/10 to-highlight/5'
+              ? 'bg-gradient-to-br from-yellow-500/15 to-yellow-500/5 border-yellow-500/30'
+              : 'bg-gradient-to-br from-highlight/15 to-highlight/5 border-highlight/30'
           }`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className={`text-sm font-medium ${
+              <CardTitle className={`text-sm font-bold ${
                 isAtLimit ? 'text-destructive' : isNearLimit ? 'text-yellow-600 dark:text-yellow-500' : 'text-highlight'
               }`}>
                 Wallet Due
               </CardTitle>
-              <div className={`p-2 rounded-lg ${
-                isAtLimit ? 'bg-destructive/20 border border-destructive/30' :
-                isNearLimit ? 'bg-yellow-500/20 border border-yellow-500/30' :
-                'bg-highlight/20 border border-highlight/30'
+              <div className={`p-2.5 rounded-xl shadow-soft border-2 ${
+                isAtLimit ? 'bg-destructive/20 border-destructive/40' :
+                isNearLimit ? 'bg-yellow-500/20 border-yellow-500/40' :
+                'bg-highlight/20 border-highlight/40'
               }`}>
                 <WalletIcon className={`h-5 w-5 ${
                   isAtLimit ? 'text-destructive' :
@@ -135,14 +135,14 @@ export default function VendorDashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${
+              <div className={`text-4xl font-extrabold ${
                 isAtLimit ? 'text-destructive' :
                 isNearLimit ? 'text-yellow-600 dark:text-yellow-500' :
                 'text-highlight'
               }`}>
                 {formatInr(walletDue)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 font-semibold">
                 Commission Rate: 10% • Limit: {formatInr(1000)}
               </p>
             </CardContent>

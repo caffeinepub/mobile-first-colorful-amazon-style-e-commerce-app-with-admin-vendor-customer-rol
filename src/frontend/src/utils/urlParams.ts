@@ -33,16 +33,6 @@ export function getUrlParameter(paramName: string): string | null {
 }
 
 /**
- * Checks if a parameter exists in the URL (query string or hash)
- *
- * @param paramName - The name of the parameter to check
- * @returns true if the parameter exists, false otherwise
- */
-export function hasParameter(paramName: string): boolean {
-    return getUrlParameter(paramName) !== null;
-}
-
-/**
  * Stores a parameter in sessionStorage for persistence across navigation
  * Useful for maintaining state like admin tokens throughout the session
  *
@@ -93,6 +83,22 @@ export function getPersistedUrlParameter(paramName: string, storageKey?: string)
 
     // Fall back to session storage
     return getSessionParameter(key);
+}
+
+/**
+ * Checks if a parameter exists in URL or sessionStorage
+ *
+ * @param paramName - The name of the parameter to check
+ * @returns True if the parameter exists, false otherwise
+ */
+export function hasParameter(paramName: string): boolean {
+    const urlValue = getUrlParameter(paramName);
+    if (urlValue !== null) {
+        return true;
+    }
+
+    const sessionValue = getSessionParameter(paramName);
+    return sessionValue !== null;
 }
 
 /**

@@ -21,8 +21,9 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { useUpdateOutletProfile } from '../../hooks/useQueries';
-import { City, ExternalBlob } from '../../backend';
+import { City, ExternalBlob, StoreCategory } from '../../backend';
 import type { Vendor } from '../../backend';
+import { STORE_CATEGORIES } from '../../constants/storeCategories';
 
 interface EditOutletDialogProps {
   vendor: Vendor;
@@ -36,6 +37,7 @@ export default function EditOutletDialog({ vendor }: EditOutletDialogProps) {
   const [city, setCity] = useState<City>(vendor.city);
   const [area, setArea] = useState(vendor.area);
   const [gst, setGst] = useState(vendor.gst || '');
+  const [storeCategory, setStoreCategory] = useState<StoreCategory>(vendor.storeCategory);
   const [outletPhoto, setOutletPhoto] = useState<ExternalBlob | null>(vendor.outletPhoto);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(
@@ -96,6 +98,7 @@ export default function EditOutletDialog({ vendor }: EditOutletDialogProps) {
         outletPhoto: finalPhoto,
         city,
         gst: gst.trim() || null,
+        storeCategory,
       });
 
       toast.success('Outlet profile updated successfully');
@@ -148,6 +151,26 @@ export default function EditOutletDialog({ vendor }: EditOutletDialogProps) {
                 className="rounded-xl"
                 required
               />
+            </div>
+
+            {/* Store Category */}
+            <div className="space-y-2">
+              <Label htmlFor="storeCategory">Store Category *</Label>
+              <Select
+                value={storeCategory}
+                onValueChange={(value) => setStoreCategory(value as StoreCategory)}
+              >
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Select store category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STORE_CATEGORIES.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Mobile */}

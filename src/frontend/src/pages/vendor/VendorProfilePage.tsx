@@ -8,6 +8,7 @@ import { OutletStatus, City } from '../../backend';
 import VendorTabs from '../../components/vendor/VendorTabs';
 import EditOutletDialog from '../../components/vendor/EditOutletDialog';
 import { maskAadhaar } from '../../utils/maskAadhaar';
+import { getStoreCategoryLabel } from '../../constants/storeCategories';
 
 export default function VendorProfilePage() {
   const { identity } = useInternetIdentity();
@@ -114,6 +115,16 @@ export default function VendorProfilePage() {
                 <p className="text-sm text-muted-foreground mb-1">Outlet Name</p>
                 <p className="text-xl font-bold">{vendor?.outletName || 'Not Set'}</p>
               </div>
+
+              {/* Store Category */}
+              {vendor?.storeCategory && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Store Category</p>
+                  <Badge className="bg-primary text-primary-foreground text-base px-3 py-1">
+                    {getStoreCategoryLabel(vendor.storeCategory)}
+                  </Badge>
+                </div>
+              )}
 
               {/* Mobile */}
               <div>

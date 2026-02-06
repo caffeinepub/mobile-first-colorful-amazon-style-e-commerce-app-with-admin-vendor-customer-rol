@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, UserRole__1, City, AnalyticsData } from '../backend';
+import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, UserRole__1, City, AnalyticsData, PublicVendorProfile, StoreCategory } from '../backend';
 import { OutletStatus, ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
 
@@ -414,6 +414,7 @@ export function useUpdateOutletProfile() {
       outletPhoto,
       city,
       gst,
+      storeCategory,
     }: {
       name: string;
       outletName: string;
@@ -422,13 +423,32 @@ export function useUpdateOutletProfile() {
       outletPhoto: ExternalBlob;
       city: City;
       gst: string | null;
+      storeCategory: StoreCategory;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateOutletProfile(name, outletName, mobile, area, outletPhoto, city, gst);
+      return actor.updateOutletProfile(name, outletName, mobile, area, outletPhoto, city, gst, storeCategory);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['callerVendor'] });
     },
+  });
+}
+
+// Store Category Queries - Customer-facing browsing by category
+export function useGetOutletsByStoreCategory(category: StoreCategory) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<PublicVendorProfile[]>({
+    queryKey: ['outletsByCategory', category],
+    queryFn: async () => {
+      if (!actor) return [];
+      try {
+        return await actor.getOutletsByStoreCategory(category);
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching,
   });
 }
 

@@ -33,6 +33,8 @@ import VendorListPage from './pages/onboarding/VendorListPage';
 import VendorShopPage from './pages/onboarding/VendorShopPage';
 import OutletDetailsPage from './pages/onboarding/OutletDetailsPage';
 import SimpleVendorDashboardPage from './pages/onboarding/SimpleVendorDashboardPage';
+import StoreCategoryVendorsPage from './pages/store/StoreCategoryVendorsPage';
+import VendorShopPageNew from './pages/store/VendorShopPage';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -266,6 +268,18 @@ const simpleVendorDashboardRoute = createRoute({
   component: SimpleVendorDashboardPage,
 });
 
+const storeCategoryVendorsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/store-category/$storeCategory',
+  component: StoreCategoryVendorsPage,
+});
+
+const vendorShopNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/store-category/$storeCategory/shop/$vendorId',
+  component: VendorShopPageNew,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   categoriesRoute,
@@ -294,6 +308,8 @@ const routeTree = rootRoute.addChildren([
   vendorShopRoute,
   outletDetailsRoute,
   simpleVendorDashboardRoute,
+  storeCategoryVendorsRoute,
+  vendorShopNewRoute,
 ]);
 
 const router = createRouter({ routeTree });

@@ -67,11 +67,26 @@ export interface Product {
   'price' : bigint,
   'images' : Array<ExternalBlob>,
 }
+export interface PublicVendorProfile {
+  'principal' : Principal,
+  'verified' : boolean,
+  'outletStatus' : OutletStatus,
+  'area' : string,
+  'city' : City,
+  'name' : string,
+  'storeCategory' : StoreCategory,
+  'outletPhoto' : ExternalBlob,
+  'outletName' : string,
+  'mobile' : string,
+}
 export interface Review {
   'comment' : string,
   'rating' : bigint,
   'reviewer' : Principal,
 }
+export type StoreCategory = { 'cosmeticStore' : null } |
+  { 'groceryStore' : null } |
+  { 'clothStore' : null };
 export type Time = bigint;
 export interface UserProfile {
   'name' : string,
@@ -94,11 +109,26 @@ export interface Vendor {
   'area' : string,
   'city' : City,
   'name' : string,
+  'storeCategory' : StoreCategory,
   'aadhaar' : string,
   'outletPhoto' : ExternalBlob,
   'outletName' : string,
   'mobile' : string,
   'walletDue' : bigint,
+}
+export interface VendorApplication {
+  'gst' : [] | [string],
+  'principal' : Principal,
+  'documents' : Array<ExternalBlob>,
+  'area' : string,
+  'city' : City,
+  'name' : string,
+  'storeCategory' : StoreCategory,
+  'aadhaar' : string,
+  'outletPhoto' : ExternalBlob,
+  'outletName' : string,
+  'timestamp' : Time,
+  'mobile' : string,
 }
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
@@ -135,6 +165,7 @@ export interface _SERVICE {
   'addReview' : ActorMethod<[string, Review], undefined>,
   'addToCart' : ActorMethod<[CartItem], undefined>,
   'addToWishlist' : ActorMethod<[string], undefined>,
+  'applyAsVendor' : ActorMethod<[VendorApplication], undefined>,
   'approveVendor' : ActorMethod<[Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'clearCart' : ActorMethod<[], undefined>,
@@ -155,9 +186,15 @@ export interface _SERVICE {
   'getOrdersByCity' : ActorMethod<[City], Array<Order>>,
   'getOrdersByStatus' : ActorMethod<[OrderStatus], Array<Order>>,
   'getOutletProfile' : ActorMethod<[], Vendor>,
-  'getOutletsByCity' : ActorMethod<[City], Array<Vendor>>,
-  'getOutletsByName' : ActorMethod<[string], Array<Vendor>>,
+  'getOutletsByCity' : ActorMethod<[City], Array<PublicVendorProfile>>,
+  'getOutletsByName' : ActorMethod<[string], Array<PublicVendorProfile>>,
+  'getOutletsByStoreCategory' : ActorMethod<
+    [StoreCategory],
+    Array<PublicVendorProfile>
+  >,
+  'getProduct' : ActorMethod<[string], [] | [Product]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getVendorApplications' : ActorMethod<[], Array<VendorApplication>>,
   'getVendorDocuments' : ActorMethod<[Principal], Array<ExternalBlob>>,
   'getVendorOrders' : ActorMethod<[], Array<Order>>,
   'getVendorProducts' : ActorMethod<[], Array<Product>>,
@@ -166,11 +203,22 @@ export interface _SERVICE {
   'isVendor' : ActorMethod<[], boolean>,
   'markVendorAsPaid' : ActorMethod<[Principal], undefined>,
   'rejectVendor' : ActorMethod<[Principal], undefined>,
+  'removeFromCart' : ActorMethod<[string], undefined>,
+  'removeFromWishlist' : ActorMethod<[string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setVendorOutletStatus' : ActorMethod<[Principal, OutletStatus], undefined>,
   'updateOrderStatus' : ActorMethod<[string, OrderStatus], undefined>,
   'updateOutletProfile' : ActorMethod<
-    [string, string, string, string, ExternalBlob, City, [] | [string]],
+    [
+      string,
+      string,
+      string,
+      string,
+      ExternalBlob,
+      City,
+      [] | [string],
+      StoreCategory,
+    ],
     undefined
   >,
   'updateProduct' : ActorMethod<[string, Product], undefined>,

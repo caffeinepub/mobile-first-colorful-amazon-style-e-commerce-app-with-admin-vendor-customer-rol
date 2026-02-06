@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Store } from 'lucide-react';
 import { saveVendorLoginData } from '@/utils/onboardingStorage';
 import FloatingLabelInput from '@/components/forms/FloatingLabelInput';
+import { STORE_CATEGORIES } from '@/constants/storeCategories';
+import { StoreCategory } from '@/backend';
 
 export default function VendorLoginPage() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function VendorLoginPage() {
     city: '',
     area: '',
     pinCode: '',
+    storeCategory: '' as StoreCategory | '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -41,6 +44,9 @@ export default function VendorLoginPage() {
     } else if (!/^\d{6}$/.test(formData.pinCode)) {
       newErrors.pinCode = 'Pin code must be 6 digits';
     }
+    if (!formData.storeCategory) {
+      newErrors.storeCategory = 'Store Category is required';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -49,7 +55,14 @@ export default function VendorLoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      saveVendorLoginData(formData);
+      saveVendorLoginData({
+        name: formData.name,
+        mobile: formData.mobile,
+        city: formData.city,
+        area: formData.area,
+        pinCode: formData.pinCode,
+        storeCategory: formData.storeCategory as StoreCategory,
+      });
       navigate({ to: '/outlet-details' });
     }
   };
@@ -130,6 +143,26 @@ export default function VendorLoginPage() {
                   onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
                 />
                 {errors.pinCode && <p className="text-sm text-destructive">{errors.pinCode}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="storeCategory" className="text-base">Store Category</Label>
+                <Select 
+                  value={formData.storeCategory} 
+                  onValueChange={(value) => setFormData({ ...formData, storeCategory: value as StoreCategory })}
+                >
+                  <SelectTrigger id="storeCategory" className="h-14 text-base rounded-xl border-2 focus:border-secondary focus:ring-2 focus:ring-secondary/20">
+                    <SelectValue placeholder="Select store category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STORE_CATEGORIES.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.storeCategory && <p className="text-sm text-destructive">{errors.storeCategory}</p>}
               </div>
 
               <Button type="submit" className="w-full h-14 text-base gradient-primary-cta rounded-xl">

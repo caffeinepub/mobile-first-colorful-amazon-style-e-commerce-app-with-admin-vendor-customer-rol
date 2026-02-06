@@ -1,3 +1,5 @@
+import { StoreCategory } from '../backend';
+
 interface CustomerLoginData {
   name: string;
   mobile: string;
@@ -12,6 +14,7 @@ interface VendorLoginData {
   city: string;
   area: string;
   pinCode: string;
+  storeCategory: StoreCategory;
 }
 
 interface OutletDetailsData {

@@ -1,89 +1,219 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Vendor wallet limit UX, customer product filtering, and vendor outlet profile editing",
+  "title": "Colorful Amazon-style mobile-first marketplace theme (Tailwind + shared UI polish)",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Ensure customer-facing product feeds in the UI rely on the backend’s customer product feed so disabled-outlet products are hidden from customers.",
+      "id": "REQ-1",
+      "summary": "Update global Tailwind theme tokens, CSS variables, and shared utility classes to the requested marketplace palette and styling rules.",
       "acceptanceCriteria": [
-        "Customer-facing product lists in the UI (home, categories, wishlist, etc.) use the backend customer product feed so products from disabled outlets are not shown.",
-        "Vendor-facing product pages continue to use vendor product feeds and remain unaffected."
+        "Global theme variables in frontend/src/index.css reflect: primary=orange, secondary=purple, success=green, destructive=red, and a light background surface scheme.",
+        "Tailwind config continues to map Tailwind color tokens (primary/secondary/success/destructive/background/card/etc.) to the CSS variables without breaking existing builds.",
+        "A consistent set of reusable utility classes exists for: (a) primary gradient buttons and (b) standard marketplace cards (rounded + soft shadow + hover/tap interactions) that can be applied across pages.",
+        "All changes remain mobile-first (spacing and typography scale appropriately on small screens first)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Update the customer-facing product query hook to call the backend capability that returns customer-filtered products (e.g., getCustomerProducts()) instead of the unfiltered feed, keeping vendor/admin product queries unchanged."
+          "description": "Adjust :root theme tokens to match the requested palette (primary orange, secondary purple, success green, destructive red, light background surfaces), ensure rounded-corners defaults, and add/standardize reusable utilities for marketplace cards and gradient primary buttons (including consistent hover/tap interactions and typography defaults)."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Verify Tailwind token mappings remain correctly wired to the updated CSS variables (primary/secondary/success/destructive/background/card/etc.) and extend theme as needed (e.g., ensure highlight/warning tokens used by pages have matching utilities) without breaking the build."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Standardize primary action buttons across the app to use gradient-filled rounded buttons with responsive mobile tap feedback and reduced-motion support.",
+      "acceptanceCriteria": [
+        "Primary action buttons visually match: gradient fill, rounded corners, bold label, and shadow.",
+        "Mobile tap/active state provides a small tactile feedback (e.g., subtle scale-down/scale-up) and is disabled/reduced when prefers-reduced-motion is set.",
+        "Existing button functionality (navigation, mutations, form submits) remains unchanged."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add a reusable button utility (or utilities) for primary CTAs that includes gradient fill, rounded corners, bold text, soft shadow, and motion-safe tap feedback with motion-reduce fallbacks."
+        },
+        {
+          "path": "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+          "operation": "modify",
+          "description": "Update the primary CTA wrapper to consistently apply the shared gradient CTA + tap/active feedback classes (using motion-safe / motion-reduce variants) while preserving all props and behaviors."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Replace ad-hoc primary action button styling (e.g., login CTAs and key CTAs) with the standardized PrimaryCtaButton/shared CTA classes to ensure consistent gradient, rounded, bold, and mobile tap feedback across the page."
+        },
+        {
+          "path": "frontend/src/components/HeroBannerSlider.tsx",
+          "operation": "modify",
+          "description": "Update banner CTA button styling to use the standardized gradient primary button pattern and ensure mobile tap feedback respects reduced-motion preferences, without changing slider logic."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Update vendor dashboard and wallet UI to show a wallet panel (Wallet Due, 10% commission rate, ₹1,000 limit) and show a prominent red warning banner when walletDue >= 1000 and/or outlet is disabled.",
+      "summary": "Apply a consistent marketplace card design system across product, vendor, dashboard, and category cards using shared styling.",
       "acceptanceCriteria": [
-        "Vendor wallet page displays Wallet Due, Commission Rate: 10%, and Limit: ₹1,000.",
-        "Vendor dashboard page shows a destructive (red) warning banner when walletDue >= 1000 or outletStatus is disabled.",
-        "All user-facing warning/banner text is in English."
+        "Product, vendor, category, and dashboard cards consistently use rounded corners and soft shadows (no mixed sharp/flat card styles remain on major screens).",
+        "Card hover/tap interactions are consistent (lift/hover shadow on pointer devices; tap feedback on mobile).",
+        "Cards remain readable on light backgrounds with sufficient contrast for text and borders."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Introduce/standardize a shared marketplace card utility class (rounded white card, soft shadow, border, consistent hover/tap interaction) that can be reused across major card surfaces."
+        },
+        {
+          "path": "frontend/src/components/ProductGrid.tsx",
+          "operation": "modify",
+          "description": "Align product card container styling with the shared marketplace card utility (while keeping the current layout/logic intact) and ensure tap/hover interaction behavior is consistent with the global card system."
+        },
+        {
+          "path": "frontend/src/components/DealCard.tsx",
+          "operation": "modify",
+          "description": "Align deal card styling with the shared marketplace card utility and ensure consistent hover/tap interactions on pointer and mobile devices."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Update admin dashboard control-panel and quick-action cards to use the shared marketplace card styling (rounded, soft shadow, consistent border/hover/tap) while keeping navigation and content unchanged."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
+          "operation": "modify",
+          "description": "Update analytics stat cards to use the shared marketplace card styling and ensure all referenced surface/tint utilities exist and match the theme palette."
+        },
+        {
           "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
           "operation": "modify",
-          "description": "Adjust vendor dashboard wallet UI to explicitly communicate Wallet Due (not just styling) and add a destructive warning banner when walletDue >= 1000 even if outletStatus has not yet refreshed to disabled; keep all banner text in English."
+          "description": "Standardize vendor stat cards to the shared marketplace card styling while preserving all existing data/logic and alert behavior."
         },
         {
           "path": "frontend/src/pages/vendor/VendorWalletPage.tsx",
           "operation": "modify",
-          "description": "Add a destructive warning banner when walletDue >= 1000 (in addition to outletStatus disabled) and ensure the wallet panel clearly presents Wallet Due, Commission Rate = 10%, and Limit = ₹1,000 with English text."
+          "description": "Standardize wallet/stat/info cards to the shared marketplace card styling while preserving all existing data/logic and alert behavior."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Display an Outlet Profile section on the vendor profile page including outlet fields, outlet photo, and masked Aadhaar (GST optional).",
+      "summary": "Revise category cards (Categories page and Home page category grids) to colorful gradient square cards with large icons and mobile tap animation, preserving navigation and existing color mapping.",
       "acceptanceCriteria": [
-        "Backend vendor record includes fields necessary to persist Outlet Profile information (including an optional GST field).",
-        "Vendor profile page displays all requested outlet profile fields when present.",
-        "Aadhaar is shown masked in the vendor profile UI (e.g., only last digits visible; exact masking format is consistent)."
+        "Category cards are square (or near-square), show a colorful gradient background, and display the category icon prominently.",
+        "Category cards have a visible tap animation on mobile (e.g., scale/press feedback) and do not rely solely on hover.",
+        "Tapping a category still navigates to the correct category listing route as before."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/maskAadhaar.ts",
-          "operation": "create",
-          "description": "Add a small utility to consistently mask Aadhaar for display (e.g., show only last 4 digits) and ensure no UI code ever renders the full Aadhaar value."
+          "path": "frontend/src/pages/CategoriesPage.tsx",
+          "operation": "modify",
+          "description": "Redesign the category cards into square/near-square gradient tiles using the existing getCategoryColor() mapping and prominent icons; add mobile press/tap feedback while preserving the existing Link navigation behavior."
         },
         {
-          "path": "frontend/src/pages/vendor/VendorProfilePage.tsx",
+          "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Extend the vendor profile UI to include an 'Outlet Profile' section showing Outlet Name, Photo (render via ExternalBlob direct URL), Mobile, City, Area, masked Aadhaar (using the new utility), and GST when present; keep all labels in English."
+          "description": "Update the Home page category grid/cards to the same square gradient tile style with large icons and tap animation, while keeping the current navigation targets unchanged."
+        },
+        {
+          "path": "frontend/src/utils/categoryColors.ts",
+          "operation": "modify",
+          "description": "Ensure the existing deterministic category color mapping continues to work for the new gradient square tile design (no behavior change; adjust/extend palette only if needed to better match the theme)."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add/standardize shared utilities for press/tap animation (motion-safe active scale) suitable for category tiles, ensuring reduced-motion users do not get transform animations."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Add an Edit Outlet flow on the vendor profile page to update outlet profile fields (including outlet photo), persist changes to the backend, and refresh vendor data immediately after saving.",
+      "summary": "Ensure product cards match the requested pattern (image top, bold price, clear discount display, full-width gradient add-to-cart) with compact mobile-first layout.",
       "acceptanceCriteria": [
-        "An \"Edit Outlet\" button is visible on the vendor profile page.",
-        "Saving edits persists the updated outlet profile to the backend and the vendor profile UI reflects changes without a full page reload.",
-        "GST can be left empty/cleared and remains optional.",
-        "Aadhaar is not stored/displayed as an unmasked full number via the vendor profile UI."
+        "Product cards show the main product image at the top and keep consistent rounded corners/shadows.",
+        "When a discount exists, the final price is visually emphasized and the original price is de-emphasized (e.g., muted + strikethrough).",
+        "Add-to-cart is a full-width gradient button on product cards where add-to-cart is present, and disabled styling is clear for out-of-stock states.",
+        "No regression to product navigation (card click to product detail still works where implemented)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/ProductGrid.tsx",
           "operation": "modify",
-          "description": "Add a mutation hook for updating the outlet profile via the existing backend capability (updateOutletProfile), ensuring successful saves invalidate/refetch relevant vendor queries (at minimum: callerVendor; optionally any views that depend on outlet profile)."
+          "description": "Refine the product-card presentation to fully match the pattern (compact mobile-first spacing, clear discount emphasis, consistent image-top layout, and full-width standardized gradient add-to-cart button with clear disabled styling) while preserving navigation and add-to-cart behavior."
         },
         {
-          "path": "frontend/src/components/vendor/EditOutletDialog.tsx",
-          "operation": "create",
-          "description": "Create an Edit Outlet dialog/form component (using existing shadcn-ui components) for editing Outlet Name, Mobile, City, Area, optional GST, and outlet photo upload; for the photo use the blob-storage ExternalBlob type to upload/represent the new image. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/DealCard.tsx",
+          "operation": "modify",
+          "description": "Ensure deal/product mini-cards use the same pricing/discount visual rules (final price emphasized, original price muted/struck when applicable) and consistent marketplace card styling."
         },
         {
-          "path": "frontend/src/pages/vendor/VendorProfilePage.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Wire the new Edit Outlet dialog into the vendor profile page with an \"Edit Outlet\" button, prefill current values from callerVendor, allow clearing GST (send null), and ensure Aadhaar is never editable or displayed unmasked; refresh UI via react-query invalidation after save (no full page reload)."
+          "description": "If needed, add small reusable utilities for price emphasis/discount presentation and disabled CTA styling consistency across product cards (without altering shadcn ui component files)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Update hero/banner slider visuals to bright marketplace styling with gradient overlays, bold text, and standardized gradient CTA buttons with mobile tap feedback; keep gestures/rotation/images unchanged.",
+      "acceptanceCriteria": [
+        "Hero banner slides maintain gradient overlays and bold typography, with improved marketplace-style visual richness consistent with the global theme.",
+        "Banner CTA buttons use the same gradient rounded style as primary CTAs and provide tap feedback on mobile.",
+        "Swipe left/right and auto-slide timing continue to work as before, and banner images remain loaded from the existing static asset paths."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/HeroBannerSlider.tsx",
+          "operation": "modify",
+          "description": "Update slide overlay/typography and replace the current CTA styling with the standardized gradient primary CTA (including motion-safe tap feedback), while preserving swipe gestures, auto-rotation timing, and existing static image paths."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Adjust/standardize banner/hero overlay utility styling (e.g., gradient overlay helpers, bold heading defaults) to align hero visuals with the new marketplace theme."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Refresh vendor and admin dashboard visuals to themed colored stat cards (orange/purple/green/red) while keeping all dashboard data and logic unchanged.",
+      "acceptanceCriteria": [
+        "Dashboard stat cards use consistent rounded corners, soft shadows, and themed color accents that correspond to the requested palette.",
+        "Alert states (warnings/errors) clearly use the red alerts styling and warning styling remains visually distinct on light backgrounds.",
+        "No changes to what metrics are shown or how they are calculated; only UI presentation is updated."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Ensure theme palette supports dashboard accents (primary/orange, secondary/purple, success/green, destructive/red) and provide shared tinted-surface utilities needed by dashboard cards (including any missing tint helpers referenced by dashboard pages)."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Update vendor stat cards to consistently use the new themed palette accents and shared marketplace card utilities (rounded + soft shadow), keeping all computations and conditional alerts unchanged."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorWalletPage.tsx",
+          "operation": "modify",
+          "description": "Update wallet/stat/info card visuals to align with the new palette accents and shared marketplace card utilities; keep all totals/threshold logic unchanged."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminAnalyticsPage.tsx",
+          "operation": "modify",
+          "description": "Update admin analytics stat cards to use the new palette accents (including success/green and destructive/red where applicable) and shared marketplace card utilities; keep data fetching and values unchanged."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Refresh admin dashboard control panel and quick actions to use the new palette accents and standardized CTA/button styling for primary actions, keeping navigation/behavior unchanged."
         }
       ]
     }

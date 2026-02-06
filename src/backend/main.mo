@@ -10,9 +10,10 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+// use migration on actor for state migration between different versions
+
 actor {
   include MixinStorage();
 
@@ -33,6 +34,12 @@ actor {
     #admin;
     #vendor;
     #customer;
+  };
+
+  public type StoreCategory = {
+    #clothStore;
+    #cosmeticStore;
+    #groceryStore;
   };
 
   public type Product = {
@@ -86,6 +93,21 @@ actor {
     aadhaar : Text;
     gst : ?Text;
     outletPhoto : Storage.ExternalBlob;
+    storeCategory : StoreCategory;
+  };
+
+  // Safe public vendor profile for customer browsing - excludes sensitive fields
+  public type PublicVendorProfile = {
+    principal : Principal;
+    name : Text;
+    verified : Bool;
+    outletName : Text;
+    outletStatus : OutletStatus;
+    mobile : Text;
+    city : City;
+    area : Text;
+    outletPhoto : Storage.ExternalBlob;
+    storeCategory : StoreCategory;
   };
 
   public type OutletStatus = {
@@ -126,6 +148,21 @@ actor {
     address : Text;
   };
 
+  public type VendorApplication = {
+    principal : Principal;
+    name : Text;
+    outletName : Text;
+    mobile : Text;
+    city : City;
+    area : Text;
+    aadhaar : Text;
+    gst : ?Text;
+    outletPhoto : Storage.ExternalBlob;
+    storeCategory : StoreCategory;
+    documents : [Storage.ExternalBlob];
+    timestamp : Time.Time;
+  };
+
   let products = Map.empty<Text, Product>();
   let categories = Map.empty<Text, Category>();
   let carts = Map.empty<Principal, [CartItem]>();
@@ -134,6 +171,7 @@ actor {
   let orders = Map.empty<Text, Order>();
   let wishlists = Map.empty<Principal, [Text]>();
   let userProfiles = Map.empty<Principal, UserProfile>();
+  let vendorApplications = Map.empty<Principal, VendorApplication>();
 
   let vendorPrincipals = Map.empty<Principal, Bool>();
 
@@ -144,6 +182,35 @@ actor {
     switch (vendorPrincipals.get(caller)) {
       case (null) { false };
       case (?isVendor) { isVendor };
+    };
+  };
+
+  func hasCustomerPurchasedProduct(customer : Principal, productId : Text) : Bool {
+    let allOrders = orders.values().toArray();
+    let customerOrders = allOrders.filter(func(order) { order.customer == customer });
+    for (order in customerOrders.vals()) {
+      for (item in order.items.vals()) {
+        if (item.productId == productId) {
+          return true;
+        };
+      };
+    };
+    false;
+  };
+
+  // Helper function to convert Vendor to PublicVendorProfile (safe for customer browsing)
+  func toPublicVendorProfile(vendor : Vendor) : PublicVendorProfile {
+    {
+      principal = vendor.principal;
+      name = vendor.name;
+      verified = vendor.verified;
+      outletName = vendor.outletName;
+      outletStatus = vendor.outletStatus;
+      mobile = vendor.mobile;
+      city = vendor.city;
+      area = vendor.area;
+      outletPhoto = vendor.outletPhoto;
+      storeCategory = vendor.storeCategory;
     };
   };
 
@@ -186,7 +253,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func updateOutletProfile(name : Text, outletName : Text, mobile : Text, area : Text, outletPhoto : Storage.ExternalBlob, city : City, gst : ?Text) : async () {
+  public shared ({ caller }) func updateOutletProfile(name : Text, outletName : Text, mobile : Text, area : Text, outletPhoto : Storage.ExternalBlob, city : City, gst : ?Text, storeCategory : StoreCategory) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can update outlet profiles");
     };
@@ -211,6 +278,7 @@ actor {
       aadhaar = oldVendor.aadhaar;
       gst = gst;
       outletPhoto = outletPhoto;
+      storeCategory = storeCategory;
     };
     vendors.add(caller, updatedVendor);
   };
@@ -221,29 +289,65 @@ actor {
     #customer;
   };
 
-  // Allows all users (including guests) to get outlets by name or city
-  public query func getOutletsByName(name : Text) : async [Vendor] {
+  // Customer-facing: Returns safe public vendor profiles (no sensitive data)
+  // Accessible to all users including guests
+  public query func getOutletsByName(name : Text) : async [PublicVendorProfile] {
     let outletValues = vendors.values().toArray();
     let filtered = outletValues.filter(
       func(v) {
         v.outletName.toLower().contains(#text(name.toLower()));
       }
     );
-    filtered;
+    filtered.map(toPublicVendorProfile);
   };
 
-  public query func getOutletsByCity(city : City) : async [Vendor] {
+  // Customer-facing: Returns safe public vendor profiles (no sensitive data)
+  // Accessible to all users including guests
+  public query func getOutletsByCity(city : City) : async [PublicVendorProfile] {
     let outletValues = vendors.values().toArray();
     let filtered = outletValues.filter(
       func(v) {
         v.city == city;
       }
     );
-    filtered;
+    filtered.map(toPublicVendorProfile);
+  };
+
+  // Customer-facing: Returns safe public vendor profiles by store category (no sensitive data)
+  // Accessible to all users including guests for browsing
+  public query func getOutletsByStoreCategory(category : StoreCategory) : async [PublicVendorProfile] {
+    let outletValues = vendors.values().toArray();
+    let filtered = outletValues.filter(
+      func(v) {
+        v.storeCategory == category;
+      }
+    );
+    filtered.map(toPublicVendorProfile);
   };
 
   public query ({ caller }) func isVendor() : async Bool {
     callerIsVendor(caller);
+  };
+
+  // Vendor self-registration: Any authenticated user can apply to become a vendor
+  public shared ({ caller }) func applyAsVendor(application : VendorApplication) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can apply as vendors");
+    };
+    if (application.principal != caller) {
+      Runtime.trap("Unauthorized: Cannot apply on behalf of another user");
+    };
+    if (callerIsVendor(caller)) {
+      Runtime.trap("Already registered as vendor");
+    };
+    vendorApplications.add(caller, application);
+  };
+
+  public query ({ caller }) func getVendorApplications() : async [VendorApplication] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view vendor applications");
+    };
+    vendorApplications.values().toArray();
   };
 
   public shared ({ caller }) func addProduct(product : Product) : async () {
@@ -291,6 +395,11 @@ actor {
       Runtime.trap("Unauthorized: Only vendors can delete products");
     };
     products.remove(productId);
+  };
+
+  // Public access: Anyone can view a single product (including guests)
+  public query func getProduct(productId : Text) : async ?Product {
+    products.get(productId);
   };
 
   // Customer-facing: Only returns products from vendors with enabled outlets
@@ -342,6 +451,18 @@ actor {
     carts.add(caller, updatedCart);
   };
 
+  public shared ({ caller }) func removeFromCart(productId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Please sign in to remove items from cart");
+    };
+    let currentCart = switch (carts.get(caller)) {
+      case (null) { [] };
+      case (?cart) { cart };
+    };
+    let updatedCart = currentCart.filter(func(item) { item.productId != productId });
+    carts.add(caller, updatedCart);
+  };
+
   public query ({ caller }) func getCart() : async [CartItem] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Please sign in to view cart");
@@ -366,6 +487,10 @@ actor {
     if (review.reviewer != caller) {
       Runtime.trap("Unauthorized: Cannot add review on behalf of another user");
     };
+    // Security: Only customers who purchased the product can review it
+    if (not hasCustomerPurchasedProduct(caller, productId)) {
+      Runtime.trap("Unauthorized: You can only review products you have purchased");
+    };
     let product = switch (products.get(productId)) {
       case (null) { Runtime.trap("Product not found") };
       case (?p) { p };
@@ -384,6 +509,18 @@ actor {
       case (?wl) { wl };
     };
     let updatedWishlist = currentWishlist.concat([productId]);
+    wishlists.add(caller, updatedWishlist);
+  };
+
+  public shared ({ caller }) func removeFromWishlist(productId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Please sign in to remove from wishlist");
+    };
+    let currentWishlist = switch (wishlists.get(caller)) {
+      case (null) { [] };
+      case (?wl) { wl };
+    };
+    let updatedWishlist = currentWishlist.filter(func(id) { id != productId });
     wishlists.add(caller, updatedWishlist);
   };
 
@@ -424,20 +561,39 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can approve vendors");
     };
-    let vendor = switch (vendors.get(vendorPrincipal)) {
-      case (null) { Runtime.trap("Vendor not found") };
-      case (?vendor) { vendor };
+    let application = switch (vendorApplications.get(vendorPrincipal)) {
+      case (null) { Runtime.trap("Vendor application not found") };
+      case (?app) { app };
     };
-    let updatedVendor = { vendor with verified = true };
-    vendors.add(vendorPrincipal, updatedVendor);
+    
+    let newVendor : Vendor = {
+      principal = application.principal;
+      name = application.name;
+      verified = true;
+      outletName = application.outletName;
+      outletStatus = #enabled;
+      walletDue = 0;
+      documents = application.documents;
+      mobile = application.mobile;
+      city = application.city;
+      area = application.area;
+      aadhaar = application.aadhaar;
+      gst = application.gst;
+      outletPhoto = application.outletPhoto;
+      storeCategory = application.storeCategory;
+    };
+    
+    vendors.add(vendorPrincipal, newVendor);
+    vendorPrincipals.add(vendorPrincipal, true);
+    vendorApplications.remove(vendorPrincipal);
+    AccessControl.assignRole(accessControlState, caller, vendorPrincipal, #user);
   };
 
   public shared ({ caller }) func rejectVendor(vendorPrincipal : Principal) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can reject vendors");
     };
-    vendors.remove(vendorPrincipal);
-    vendorPrincipals.remove(vendorPrincipal);
+    vendorApplications.remove(vendorPrincipal);
   };
 
   public shared ({ caller }) func setVendorOutletStatus(vendorPrincipal : Principal, status : OutletStatus) : async () {
@@ -594,7 +750,7 @@ actor {
       Runtime.trap("Unauthorized: Only authenticated users can add discounts");
     };
     if (not callerIsVendor(caller) and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only vendors can add discounts");
+      Runtime.trap("Unauthorized: Only vendors and admins can add discounts");
     };
     let currentDiscounts = switch (discounts.get(caller)) {
       case (null) { [] };

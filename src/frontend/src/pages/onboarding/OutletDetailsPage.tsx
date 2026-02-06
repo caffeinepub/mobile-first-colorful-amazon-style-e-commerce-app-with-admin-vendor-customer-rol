@@ -7,6 +7,8 @@ import { saveOutletDetailsData, getVendorLoginData } from '@/utils/onboardingSto
 import FloatingLabelInput from '@/components/forms/FloatingLabelInput';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { getStoreCategoryLabel } from '@/constants/storeCategories';
 
 export default function OutletDetailsPage() {
   const navigate = useNavigate();
@@ -105,6 +107,14 @@ export default function OutletDetailsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-5">
+            {/* Show selected category as read-only confirmation */}
+            <div className="p-4 bg-primary/10 rounded-xl border-2 border-primary/20">
+              <p className="text-sm text-muted-foreground mb-1">Selected Store Category</p>
+              <Badge className="bg-primary text-primary-foreground text-base px-3 py-1">
+                {getStoreCategoryLabel(vendorData.storeCategory)}
+              </Badge>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <FloatingLabelInput

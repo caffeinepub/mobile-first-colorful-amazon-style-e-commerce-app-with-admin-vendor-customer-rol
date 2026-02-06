@@ -11,8 +11,8 @@ export default function AdminAnalyticsPage() {
     return (
       <div className="container mx-auto px-4 py-6">
         <AdminNav />
-        <h1 className="text-3xl font-bold mb-6">Analytics</h1>
-        <p>Loading analytics...</p>
+        <h1 className="text-3xl font-extrabold mb-6">Analytics</h1>
+        <p className="font-semibold">Loading analytics...</p>
       </div>
     );
   }
@@ -21,8 +21,8 @@ export default function AdminAnalyticsPage() {
     return (
       <div className="container mx-auto px-4 py-6">
         <AdminNav />
-        <h1 className="text-3xl font-bold mb-6">Analytics</h1>
-        <p className="text-destructive">Failed to load analytics data</p>
+        <h1 className="text-3xl font-extrabold mb-6">Analytics</h1>
+        <p className="text-destructive font-semibold">Failed to load analytics data</p>
       </div>
     );
   }
@@ -37,94 +37,102 @@ export default function AdminAnalyticsPage() {
       <AdminNav />
       
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
-          <TrendingUp className="h-8 w-8 text-primary" />
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-soft">
+          <TrendingUp className="h-8 w-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Analytics
         </h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all">
-          <CardHeader className="surface-primary-tint rounded-t-xl pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Users className="h-5 w-5 text-primary" />
+        <Card className="marketplace-card bg-gradient-to-br from-primary/15 to-primary/5 border-primary/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-bold">
+              <div className="p-2 rounded-xl bg-primary/20 border-2 border-primary/40 shadow-soft">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
               Total Vendors
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <p className="text-4xl font-extrabold text-primary">
               {totalVendors}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Registered vendors</p>
+            <p className="text-sm text-muted-foreground mt-1 font-semibold">Registered vendors</p>
           </CardContent>
         </Card>
 
-        <Card className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all">
-          <CardHeader className="surface-secondary-tint rounded-t-xl pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Package className="h-5 w-5 text-secondary" />
+        <Card className="marketplace-card bg-gradient-to-br from-secondary/15 to-secondary/5 border-secondary/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-bold">
+              <div className="p-2 rounded-xl bg-secondary/20 border-2 border-secondary/40 shadow-soft">
+                <Package className="h-5 w-5 text-secondary" />
+              </div>
               Total Orders
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
+            <p className="text-4xl font-extrabold text-secondary">
               {totalOrders}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">All time orders</p>
+            <p className="text-sm text-muted-foreground mt-1 font-semibold">All time orders</p>
           </CardContent>
         </Card>
 
-        <Card className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all">
-          <CardHeader className="surface-accent-tint rounded-t-xl pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <DollarSign className="h-5 w-5 text-accent" />
+        <Card className="marketplace-card bg-gradient-to-br from-accent/15 to-accent/5 border-accent/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-bold">
+              <div className="p-2 rounded-xl bg-accent/20 border-2 border-accent/40 shadow-soft">
+                <DollarSign className="h-5 w-5 text-accent" />
+              </div>
               Total Sales
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold bg-gradient-to-r from-accent to-highlight bg-clip-text text-transparent">
+            <p className="text-4xl font-extrabold text-accent">
               {formatInr(totalSales)}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Gross revenue</p>
+            <p className="text-sm text-muted-foreground mt-1 font-semibold">Gross revenue</p>
           </CardContent>
         </Card>
 
-        <Card className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all">
-          <CardHeader className="surface-highlight-tint rounded-t-xl pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Percent className="h-5 w-5 text-highlight" />
+        <Card className="marketplace-card bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-bold">
+              <div className="p-2 rounded-xl bg-destructive/20 border-2 border-destructive/40 shadow-soft">
+                <Percent className="h-5 w-5 text-destructive" />
+              </div>
               Total Commission
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold bg-gradient-to-r from-highlight to-primary bg-clip-text text-transparent">
+            <p className="text-4xl font-extrabold text-destructive">
               {formatInr(totalCommission)}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">10% commission earned</p>
+            <p className="text-sm text-muted-foreground mt-1 font-semibold">10% commission earned</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="mt-6 border-2">
-        <CardHeader className="surface-secondary-tint rounded-t-xl">
-          <CardTitle>Summary</CardTitle>
+      <Card className="mt-6 marketplace-card">
+        <CardHeader className="surface-secondary-tint rounded-t-2xl">
+          <CardTitle className="font-extrabold">Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Average Order Value</span>
-            <span className="font-semibold">
+            <span className="text-muted-foreground font-semibold">Average Order Value</span>
+            <span className="font-extrabold">
               {totalOrders > 0 ? formatInr(Math.round(totalSales / totalOrders)) : formatInr(0)}
             </span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-muted-foreground">Commission Rate</span>
-            <span className="font-semibold">10%</span>
+            <span className="text-muted-foreground font-semibold">Commission Rate</span>
+            <span className="font-extrabold">10%</span>
           </div>
           <div className="flex justify-between items-center py-2">
-            <span className="text-muted-foreground">Average Commission per Order</span>
-            <span className="font-semibold">
+            <span className="text-muted-foreground font-semibold">Average Commission per Order</span>
+            <span className="font-extrabold">
               {totalOrders > 0 ? formatInr(Math.round(totalCommission / totalOrders)) : formatInr(0)}
             </span>
           </div>

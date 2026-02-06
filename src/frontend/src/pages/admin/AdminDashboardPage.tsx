@@ -1,6 +1,6 @@
 import { Users, ShoppingCart, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
 import { useNavigate } from '@tanstack/react-router';
 import AdminNav from '../../components/admin/AdminNav';
 
@@ -13,16 +13,16 @@ export default function AdminDashboardPage() {
       description: 'View all vendors, approve/reject applications, manage outlet status, and view documents',
       icon: Users,
       path: '/admin/vendors',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      gradient: 'from-primary to-secondary',
+      bgGradient: 'from-primary/15 to-secondary/15',
     },
     {
       title: 'Orders Panel',
       description: 'View all orders, filter by city (Kanpur, Unnao), and track order status',
       icon: ShoppingCart,
       path: '/admin/orders',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      gradient: 'from-accent to-highlight',
+      bgGradient: 'from-accent/15 to-highlight/15',
     },
   ];
 
@@ -31,14 +31,14 @@ export default function AdminDashboardPage() {
       <AdminNav />
       
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-secondary">
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-soft">
           <Users className="h-8 w-8 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Admin Control Panel
           </h1>
-          <p className="text-muted-foreground">Manage your marketplace operations</p>
+          <p className="text-muted-foreground font-semibold">Manage your marketplace operations</p>
         </div>
       </div>
 
@@ -48,53 +48,53 @@ export default function AdminDashboardPage() {
           return (
             <Card
               key={card.path}
-              className="border-2 hover:border-primary/50 hover:shadow-soft-lg transition-all cursor-pointer group"
+              className={`marketplace-card cursor-pointer tap-scale bg-gradient-to-br ${card.bgGradient}`}
               onClick={() => navigate({ to: card.path })}
             >
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
-                  <div className={`p-3 rounded-xl ${card.bgColor}`}>
-                    <Icon className={`h-8 w-8 ${card.color}`} />
+                  <div className={`p-3 rounded-2xl bg-gradient-to-br ${card.gradient} shadow-soft`}>
+                    <Icon className="h-8 w-8 text-white" />
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </div>
-                <CardTitle className="text-xl">{card.title}</CardTitle>
-                <CardDescription className="text-sm leading-relaxed">
+                <CardTitle className="text-xl font-extrabold">{card.title}</CardTitle>
+                <CardDescription className="text-sm leading-relaxed font-medium">
                   {card.description}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <PrimaryCtaButton className="w-full font-extrabold rounded-xl">
                   Open {card.title}
-                </Button>
+                </PrimaryCtaButton>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      <Card className="border-2">
+      <Card className="marketplace-card">
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common administrative tasks</CardDescription>
+          <CardTitle className="font-extrabold">Quick Actions</CardTitle>
+          <CardDescription className="font-medium">Common administrative tasks</CardDescription>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-4">
-          <Button
+          <PrimaryCtaButton
             variant="outline"
-            className="justify-start"
+            className="justify-start font-bold rounded-xl"
             onClick={() => navigate({ to: '/admin/products' })}
           >
             <Users className="h-4 w-4 mr-2" />
             Manage Products
-          </Button>
-          <Button
+          </PrimaryCtaButton>
+          <PrimaryCtaButton
             variant="outline"
-            className="justify-start"
+            className="justify-start font-bold rounded-xl"
             onClick={() => navigate({ to: '/admin/vendors' })}
           >
             <Users className="h-4 w-4 mr-2" />
             View All Vendors
-          </Button>
+          </PrimaryCtaButton>
         </CardContent>
       </Card>
     </div>

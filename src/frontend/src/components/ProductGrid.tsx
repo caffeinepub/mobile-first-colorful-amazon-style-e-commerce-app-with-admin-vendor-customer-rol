@@ -46,7 +46,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="empty-state-container">
-        <p className="text-muted-foreground text-lg">No products found</p>
+        <p className="text-muted-foreground text-lg font-semibold">No products found</p>
       </div>
     );
   }
@@ -62,7 +62,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
 
         return (
           <Link key={product.id} to="/product/$productId" params={{ productId: product.id }}>
-            <Card className="group card-lift h-full flex flex-col border-2 rounded-2xl shadow-soft hover:shadow-soft-xl bg-card">
+            <Card className="marketplace-card h-full flex flex-col tap-scale">
               <div className="relative aspect-square overflow-hidden rounded-t-2xl">
                 {imageUrl ? (
                   <img
@@ -72,33 +72,33 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                    <span className="text-muted-foreground">No image</span>
+                    <span className="text-muted-foreground font-semibold">No image</span>
                   </div>
                 )}
                 {discount > 0 && (
-                  <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground shadow-lg border-2 border-card font-bold text-xs px-2 py-1">
+                  <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground shadow-soft border-2 border-card font-extrabold text-xs px-2.5 py-1 rounded-lg">
                     -{discount}%
                   </Badge>
                 )}
                 {Number(product.stock) < 10 && (
-                  <Badge className={`absolute top-2 right-2 ${availabilityStatus.className} shadow-lg border-2 border-card text-xs font-semibold`}>
+                  <Badge className={`absolute top-2 right-2 ${availabilityStatus.className} shadow-soft border-2 border-card text-xs font-bold rounded-lg`}>
                     {availabilityStatus.text}
                   </Badge>
                 )}
               </div>
-              <CardContent className="p-3 flex-1">
-                <h3 className="font-semibold text-sm line-clamp-2 mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-primary">₹{finalPrice.toFixed(2)}</span>
+              <CardContent className="p-4 flex-1">
+                <h3 className="font-bold text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl font-extrabold text-primary">₹{finalPrice.toFixed(2)}</span>
                   {discount > 0 && (
-                    <span className="text-sm text-muted-foreground line-through">₹{price.toFixed(2)}</span>
+                    <span className="text-xs text-muted-foreground line-through font-medium">₹{price.toFixed(2)}</span>
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="p-3 pt-0">
+              <CardFooter className="p-4 pt-0">
                 <PrimaryCtaButton
                   size="sm"
-                  className="w-full gap-2 shadow-md hover:shadow-lg rounded-xl h-10"
+                  className="w-full gap-2 shadow-soft rounded-xl h-11 font-extrabold text-sm"
                   onClick={(e) => handleAddToCart(e, product.id)}
                   disabled={Number(product.stock) === 0}
                 >
