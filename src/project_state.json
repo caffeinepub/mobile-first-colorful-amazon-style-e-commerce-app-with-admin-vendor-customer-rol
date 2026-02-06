@@ -1,56 +1,25 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Add full Progressive Web App (PWA) installability so the app can be installed and launched like a native mobile app (mobile-first), including manifest, icons, standalone display, theme/background colors, service worker, offline caching, and Chrome mobile Add to Home Screen prompt.",
+  "summary": "Convert the app into a fully installable Progressive Web App (PWA) for QuickBazar with manifest, icons, service worker, offline caching, install prompt support, and compliance with Chrome PWA install criteria.",
   "architectural_notes": [
-    "PWA support required: web app manifest (name/short_name, start_url=home, display=standalone, theme/background colors), mobile icon set, service worker enabled with offline caching for main pages, and Chrome mobile Add to Home Screen install prompt."
+    "Add Web App Manifest for PWA: name/short_name QuickBazar, start_url '/', display 'standalone', theme_color '#FF6A00', background_color '#ffffff'.",
+    "Add PWA icons (192x192, 512x512, and maskable) and reference them from the manifest.",
+    "Register a service worker and implement offline caching for the home and main pages.",
+    "Support install prompt flow and meet Chrome PWA installability criteria so Chrome mobile shows 'Install app'."
   ],
   "known_issues": [],
   "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- PWA app icon (pwa-icon.dim_72x72.png)\n- PWA app icon (pwa-icon.dim_96x96.png)\n- PWA app icon (pwa-icon.dim_128x128.png)\n- PWA app icon (pwa-icon.dim_144x144.png)\n- PWA app icon (pwa-icon.dim_152x152.png)\n- PWA app icon (pwa-icon.dim_384x384.png)\n- Maskable PWA app icon (pwa-maskable.dim_192x192.png)",
-  "existing_features": [
-    {
-      "id": "feature-ensure-the-pwa-manifest-is-complete-and-mobile-first-set-app-name-short-name-start-url-to-the-home-route-scope-to-root-display-mode-to-standalone-and-define-theme-color-background-color-that-match-the-app-s-current-orange-marketplace-theme",
-      "title": "Ensure the PWA manifest is complete and mobile-first: set app name + short name, start_url to the home route, scope to root, display mode to standalone, and define theme_color + background_color that match the app’s current orange marketplace theme.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-a-complete-mobile-app-icon-set-for-installation-including-maskable-icons-and-wire-them-into-the-web-app-manifest-and-apple-touch-metadata-so-installable-experiences-work-on-chrome-android-and-ios-safari",
-      "title": "Provide a complete mobile app icon set for installation (including maskable icons) and wire them into the web app manifest and Apple touch metadata so installable experiences work on Chrome Android and iOS Safari.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-keep-the-service-worker-enabled-and-ensure-it-provides-offline-behavior-for-the-app-s-main-pages-by-caching-the-app-shell-for-navigations-and-serving-a-cached-fallback-when-the-network-is-unavailable",
-      "title": "Keep the service worker enabled and ensure it provides offline behavior for the app’s main pages by caching the app shell for navigations and serving a cached fallback when the network is unavailable.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enable-an-add-to-home-screen-a2hs-install-prompt-ux-for-chrome-on-mobile-by-capturing-the-browser-beforeinstallprompt-event-and-presenting-a-mobile-first-install-banner-button-that-triggers-the-prompt",
-      "title": "Enable an “Add to Home Screen” (A2HS) install prompt UX for Chrome on mobile by capturing the browser beforeinstallprompt event and presenting a mobile-first install banner/button that triggers the prompt.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    }
-  ],
+  "existing_features": [],
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Implement full PWA installability (manifest, icons, standalone mode, theme/background colors, service worker + offline caching, Chrome mobile install prompt) with mobile-first configuration",
+      "summary": "Make QuickBazar a fully installable PWA (manifest, icons incl. maskable, service worker + offline caching for home/main pages, install prompt support, meet Chrome install criteria)",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Make the app fully PWA installable (manifest, icons, service worker, offline caching, and A2HS prompt)",
+  "projectName": "QuickBazar",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

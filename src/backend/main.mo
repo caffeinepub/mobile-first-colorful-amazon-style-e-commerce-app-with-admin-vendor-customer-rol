@@ -554,6 +554,9 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authorized users can view vendor data");
     };
+    if (not callerIsVendor(caller)) {
+      Runtime.trap("Unauthorized: Only vendors can view vendor data");
+    };
     vendors.get(caller);
   };
 
@@ -751,6 +754,19 @@ actor {
     };
     if (not callerIsVendor(caller) and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only vendors and admins can add discounts");
+    };
+    // Vendors can only add discounts for themselves
+    if (callerIsVendor(caller) and not AccessControl.isAdmin(accessControlState, caller)) {
+      switch (discount.vendor) {
+        case (null) { /* Global discount - only admins should be able to create these */ 
+          Runtime.trap("Unauthorized: Only admins can create global discounts");
+        };
+        case (?vendorPrincipal) {
+          if (vendorPrincipal != caller) {
+            Runtime.trap("Unauthorized: Vendors can only add discounts for themselves");
+          };
+        };
+      };
     };
     let currentDiscounts = switch (discounts.get(caller)) {
       case (null) { [] };

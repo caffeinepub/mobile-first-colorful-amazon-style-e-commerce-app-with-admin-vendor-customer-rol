@@ -1,101 +1,24 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T11:35:24.752Z",
+  "generatedAt": "2026-02-06T13:13:27.527Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
-    "items": [
-      {
-        "id": "REQ-1",
-        "summary": "Ensure the PWA manifest is complete and mobile-first: set app name + short name, start_url to the home route, scope to root, display mode to standalone, and define theme_color + background_color that match the app’s current orange marketplace theme.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/manifest.webmanifest",
-          "frontend/index.html"
-        ],
-        "matchedFiles": [
-          "frontend/public/manifest.webmanifest"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Provide a complete mobile app icon set for installation (including maskable icons) and wire them into the web app manifest and Apple touch metadata so installable experiences work on Chrome Android and iOS Safari.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/assets/generated/pwa-icon.dim_72x72.png",
-          "frontend/public/assets/generated/pwa-icon.dim_96x96.png",
-          "frontend/public/assets/generated/pwa-icon.dim_128x128.png",
-          "frontend/public/assets/generated/pwa-icon.dim_144x144.png",
-          "frontend/public/assets/generated/pwa-icon.dim_152x152.png",
-          "frontend/public/assets/generated/pwa-icon.dim_384x384.png",
-          "frontend/public/assets/generated/pwa-maskable.dim_192x192.png",
-          "frontend/public/manifest.webmanifest",
-          "frontend/index.html"
-        ],
-        "matchedFiles": [
-          "frontend/public/assets/generated/pwa-icon.dim_72x72.png",
-          "frontend/public/assets/generated/pwa-icon.dim_96x96.png",
-          "frontend/public/assets/generated/pwa-icon.dim_128x128.png",
-          "frontend/public/assets/generated/pwa-icon.dim_144x144.png",
-          "frontend/public/assets/generated/pwa-icon.dim_152x152.png",
-          "frontend/public/assets/generated/pwa-icon.dim_384x384.png",
-          "frontend/public/assets/generated/pwa-maskable.dim_192x192.png",
-          "frontend/public/manifest.webmanifest"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Keep the service worker enabled and ensure it provides offline behavior for the app’s main pages by caching the app shell for navigations and serving a cached fallback when the network is unavailable.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/public/sw.js"
-        ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/public/sw.js"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Enable an “Add to Home Screen” (A2HS) install prompt UX for Chrome on mobile by capturing the browser beforeinstallprompt event and presenting a mobile-first install banner/button that triggers the prompt.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useA2HS.ts",
-          "frontend/src/components/pwa/A2HSInstallBanner.tsx",
-          "frontend/src/components/AppLayout.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useA2HS.ts",
-          "frontend/src/components/pwa/A2HSInstallBanner.tsx",
-          "frontend/src/components/AppLayout.tsx"
-        ]
-      }
-    ]
+    "total": 0,
+    "implemented": 0,
+    "items": []
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/assets/generated/pwa-icon.dim_128x128.png",
-    "frontend/public/assets/generated/pwa-icon.dim_144x144.png",
-    "frontend/public/assets/generated/pwa-icon.dim_152x152.png",
-    "frontend/public/assets/generated/pwa-icon.dim_384x384.png",
-    "frontend/public/assets/generated/pwa-icon.dim_72x72.png",
-    "frontend/public/assets/generated/pwa-icon.dim_96x96.png",
-    "frontend/public/assets/generated/pwa-maskable.dim_192x192.png",
+    "frontend/index.html",
     "frontend/public/manifest.webmanifest",
-    "frontend/public/sw.js",
-    "frontend/src/App.tsx",
-    "frontend/src/components/AppLayout.tsx",
-    "frontend/src/components/pwa/A2HSInstallBanner.tsx",
-    "frontend/src/hooks/useA2HS.ts",
     "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",

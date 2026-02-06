@@ -1,117 +1,12 @@
 {
   "kind": "build_request",
-  "title": "Make the app fully PWA installable (manifest, icons, service worker, offline caching, and A2HS prompt)",
+  "title": "Untitled request",
   "priority": "normal",
-  "requirements": [
-    {
-      "id": "REQ-1",
-      "text": "Ensure the PWA manifest is complete and mobile-first: set app name + short name, start_url to the home route, scope to root, display mode to standalone, and define theme_color + background_color that match the app’s current orange marketplace theme.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Add Progressive Web App support with:\n\n- Web app manifest\n- Installable configuration\n- App name and short name set\n- App icon set for mobile\n- Start URL set to home\n- Display mode standalone\n- Theme color and background color set\n\nUse mobile-first configuration."
-        ]
-      },
-      "acceptanceCriteria": [
-        "frontend/public/manifest.webmanifest contains: name, short_name, start_url set to '/', scope set to '/', display set to 'standalone', and explicit theme_color + background_color values.",
-        "The theme_color used in the manifest matches the <meta name=\"theme-color\"> value in frontend/index.html.",
-        "Manifest icons reference real files under /assets/generated/ with correct sizes/type fields.",
-        "PWA continues to prefer portrait usage on mobile (orientation remains portrait-primary or equivalent)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Provide a complete mobile app icon set for installation (including maskable icons) and wire them into the web app manifest and Apple touch metadata so installable experiences work on Chrome Android and iOS Safari.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "- App icon set for mobile"
-        ]
-      },
-      "acceptanceCriteria": [
-        "frontend/public/manifest.webmanifest includes a multi-size icon set (at least: 192x192 and 512x512) plus at least one maskable icon entry.",
-        "frontend/index.html includes an apple-touch-icon link that points to an existing generated PNG (180x180).",
-        "All referenced icon files exist in frontend/public/assets/generated/ and are served correctly at runtime (no 404s)."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Keep the service worker enabled and ensure it provides offline behavior for the app’s main pages by caching the app shell for navigations and serving a cached fallback when the network is unavailable.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "- Service worker enabled\n- Offline caching for main pages"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The service worker is registered by the app in production builds (no console error; registration succeeds when supported).",
-        "When offline, a navigation to the app (e.g., '/') loads a cached app shell if available; otherwise it shows the existing offline fallback page (frontend/public/offline.html).",
-        "The service worker caches core static assets (icons + other critical assets already listed) and cleans up old caches on activate.",
-        "Offline behavior does not cache or store authenticated/private API responses (continue to avoid caching authenticated requests)."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Enable an “Add to Home Screen” (A2HS) install prompt UX for Chrome on mobile by capturing the browser beforeinstallprompt event and presenting a mobile-first install banner/button that triggers the prompt.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Enable “Add to Home Screen” install prompt on Chrome mobile.\n\nApp should install and open like a native mobile app."
-        ]
-      },
-      "acceptanceCriteria": [
-        "On supported Chrome mobile, when the app becomes installable, the UI shows a clear install call-to-action (English text) without blocking normal navigation.",
-        "Tapping the install call-to-action triggers the deferred beforeinstallprompt prompt and handles the user’s choice (accepted/dismissed) without errors.",
-        "After the app is installed (appinstalled event), the install UI no longer appears.",
-        "The install UI is mobile-first (fits small screens and does not overlap core navigation controls excessively, e.g., bottom nav)."
-      ]
-    }
-  ],
-  "constraints": [
-    "Do not edit files under frontend/src/components/ui (read-only UI components).",
-    "Do not edit immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Backend remains single-actor; no backend changes are required for PWA enablement."
-  ],
-  "nonGoals": [
-    "Implementing push notifications.",
-    "Adding background sync for mutations or offline-first order/cart writes.",
-    "Integrating third-party PWA libraries/plugins (e.g., Vite PWA plugin) unless strictly necessary.",
-    "Supporting desktop-specific installation UX beyond ensuring standards-based installability."
-  ],
+  "requirements": [],
+  "constraints": [],
+  "nonGoals": [],
   "imageRequirements": {
-    "required": [
-      "PWA app icon (pwa-icon.dim_72x72.png)",
-      "PWA app icon (pwa-icon.dim_96x96.png)",
-      "PWA app icon (pwa-icon.dim_128x128.png)",
-      "PWA app icon (pwa-icon.dim_144x144.png)",
-      "PWA app icon (pwa-icon.dim_152x152.png)",
-      "PWA app icon (pwa-icon.dim_384x384.png)",
-      "Maskable PWA app icon (pwa-maskable.dim_192x192.png)"
-    ],
+    "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [
-      "Use English for user-facing text"
-    ],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }
