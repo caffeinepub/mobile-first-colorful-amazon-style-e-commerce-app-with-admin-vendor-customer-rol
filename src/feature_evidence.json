@@ -2,13 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-prevent-admin-routes-from-rendering-a-blank-loading-only-screen-when-the-backend-actor-fails-to-initialize-e-g-initializeaccesscontrolwithsecret-errors-by-detecting-the-react-query-actor-query-error-state-and-rendering-an-explicit-user-visible-error-screen-instead",
-      "featureTitle": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
+      "featureId": "feature-fix-the-admin-dashboard-page-crash-minified-react-error-185-by-making-admindashboardpage-render-safe-under-all-transient-invalid-data-conditions-undefined-null-analytics-object-missing-fields-unexpected-numeric-values-such-as-infinity-nan-after-bigint-conversion",
+      "featureTitle": "Fix the Admin Dashboard page crash (Minified React error #185) by making AdminDashboardPage render-safe under all transient/invalid data conditions (undefined/null analytics object, missing fields, unexpected numeric values such as Infinity/NaN after bigint conversion).",
       "files": [
-        "frontend/src/components/auth/AccessDeniedScreen.tsx",
-        "frontend/src/components/auth/RequireRole.tsx",
-        "frontend/src/hooks/useActorQueryState.ts",
-        "frontend/src/utils/errors.ts"
+        "frontend/src/pages/admin/AdminDashboardPage.tsx",
+        "frontend/src/utils/formatInr.ts",
+        "frontend/src/utils/safeNumbers.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -20,37 +19,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-17"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-frontend-src-components-auth-requirerole-tsx-to-include-actor-query-state-awareness-for-admin-protection-if-identity-exists-but-the-actor-query-is-errored-or-the-actor-is-null-due-to-an-initialization-failure-render-accessdeniedscreen-with-admin-diagnostics-enabled-showadminbutton-and-include-the-underlying-actor-error-message-when-available",
-      "featureTitle": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
-      "files": [
-        "frontend/src/components/auth/AccessDeniedScreen.tsx",
-        "frontend/src/components/auth/RequireRole.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-18"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-lightweight-structured-console-log-when-admin-enters-the-actor-initialization-failed-path-including-principal-if-available-actor-query-status-and-whether-the-caffeineadmintoken-parameter-is-present-to-aid-debugging-of-admin-access-flakiness",
-      "featureTitle": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
+      "featureId": "feature-ensure-admin-role-data-is-defined-before-rendering-the-admindashboardpage-content-by-adding-explicit-safe-loading-guard-behavior-tied-to-admin-role-resolution-do-not-render-dashboard-analytics-cards-until-the-admin-role-check-has-deterministically-completed",
+      "featureTitle": "Ensure admin role data is defined before rendering the AdminDashboardPage content by adding explicit safe loading/guard behavior tied to admin-role resolution (do not render dashboard analytics/cards until the admin role check has deterministically completed).",
       "files": [
         "frontend/src/components/auth/RequireRole.tsx",
-        "frontend/src/utils/urlParams.ts"
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -62,28 +40,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-19"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-global-react-error-boundary-or-route-level-error-boundary-around-admin-pages-so-that-runtime-rendering-exceptions-in-admin-screens-e-g-charts-components-display-a-visible-fallback-message-instead-of-a-blank-page",
-      "featureTitle": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/admin/AdminErrorBoundary.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-20"
+        "REQ-2"
       ],
       "confidence": "high"
     }

@@ -1,94 +1,55 @@
 {
   "kind": "build_request",
-  "title": "Fix blank /admin page by handling actor initialization failures and showing actionable admin diagnostics",
+  "title": "Fix /admin dashboard crash (React error #185) with defensive rendering and role gating",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-17",
-      "text": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
+      "id": "REQ-1",
+      "text": "Fix the Admin Dashboard page crash (Minified React error #185) by making AdminDashboardPage render-safe under all transient/invalid data conditions (undefined/null analytics object, missing fields, unexpected numeric values such as Infinity/NaN after bigint conversion).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "ab yeh admin page mein kuch show ho nahi raha"
+          "Admin dashboard page is crashing with React error 185.\nFix admin dashboard component.\nAdd null checks and safe loading states."
         ]
       },
       "acceptanceCriteria": [
-        "If the actor React Query is in an error state, /admin shows an error UI (not a blank page and not an infinite skeleton).",
-        "The error UI includes a short, English explanation that initialization failed and prompts the user to retry/refresh access.",
-        "The UI works consistently for /admin, /admin/products, /admin/vendors, and /admin/orders."
+        "Navigating to /admin never triggers AdminErrorBoundary for data-shape issues coming from analytics (null/undefined/partial fields).",
+        "If analytics.totalRevenue (or any numeric field) converts to NaN/Infinity or otherwise invalid, the dashboard renders a safe fallback value (e.g., \"0\" / \"0.00\") and does not throw.",
+        "Recharts section never throws due to invalid/empty chart data; when chart data is invalid/empty, an explicit empty-state UI is shown instead of rendering the chart."
       ]
     },
     {
-      "id": "REQ-18",
-      "text": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
+      "id": "REQ-2",
+      "text": "Ensure admin role data is defined before rendering the AdminDashboardPage content by adding explicit safe loading/guard behavior tied to admin-role resolution (do not render dashboard analytics/cards until the admin role check has deterministically completed).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "admin page mein kuch show ho nahi raha"
+          "Ensure admin role data is defined before rendering dashboard."
         ]
       },
       "acceptanceCriteria": [
-        "When identity is present and the actor query has status=error, RequireRole(requiredRole='admin') renders AccessDeniedScreen with showAdminButton=true.",
-        "AccessDeniedScreen shows an English message that includes (or is derived from) the actor initialization error when available from the query state.",
-        "When the actor query is pending, RequireRole shows the loading skeleton; when it succeeds, RequireRole proceeds with the existing deterministic admin state machine."
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "text": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A single structured console message is emitted when transitioning into the actor-init-failed AccessDenied state for admin routes (and not spammed on every render).",
-        "The log includes principal (if available), actor query status, and token-present boolean."
-      ]
-    },
-    {
-      "id": "REQ-20",
-      "text": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If an admin page throws during render, the app displays an English fallback UI with a safe navigation option (e.g., Go to Home) instead of rendering blank content.",
-        "The error boundary does not break non-admin routes."
+        "While the admin role check is still loading/unfetched, the admin route shows a non-crashing loading state (skeleton/spinner) rather than attempting to render the dashboard.",
+        "If the admin role check resolves to non-admin, the user is shown the existing access denied UI and the dashboard does not render.",
+        "If the admin role check resolves to admin, the dashboard renders normally and proceeds to fetch/render analytics with safe loading/empty/error states."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (shadcn/ui sources are read-only).",
-    "Do not edit immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
-    "Keep role capability enforcement intact; only improve failure/edge-case handling so the admin page never appears blank."
+    "Do not modify any files under frontend/src/components/ui (shadcn components are read-only).",
+    "Keep all user-facing text in English."
   ],
   "nonGoals": [
-    "Changing backend authorization rules or admin token semantics.",
-    "Adding new admin features or analytics metrics beyond fixing visibility and diagnostics."
+    "Adding new admin features or changing admin navigation/routes beyond what is needed to prevent the crash.",
+    "Backend schema changes or new backend APIs (unless strictly required to prevent the crash)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

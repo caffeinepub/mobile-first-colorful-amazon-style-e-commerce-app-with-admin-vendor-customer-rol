@@ -1,396 +1,41 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 94,
-  "summary": "Mobile-first colorful Amazon-like marketplace app with strict role-based capabilities: customers can only shop (no data editing), vendors can only create/manage their own outlet and products (including photo upload), and admins can change/manage everything; built on ICP (Motoko) + React/Vite/shadcn with existing RBAC + RequireRole patterns.",
+  "projectStateVersion": 3,
+  "summary": "Project includes an admin dashboard; current priority is fixing a production crash on the admin dashboard caused by React error 185 and improving defensive rendering/loading states around admin role data.",
   "architectural_notes": [
-    "Frontend is React + Vite + Tailwind with shadcn/ui components and shared AppLayout navigation shell.",
-    "Authentication uses Internet Identity; UI includes login flow and profile setup modal scaffolding.",
-    "Authorization is enforced via Motoko RBAC (access-control + authorization mixin) and mirrored in frontend via RequireRole/AccessDenied patterns.",
-    "Binary assets are handled via a Motoko blob-storage module with a frontend StorageClient helper.",
-    "Project includes an ICP-focused build/deploy template (icp.yaml, deploy.sh, Dockerfile) for reproducible builds.",
-    "Authorization and blob-storage Motoko components updated to v4.0.0 (componentized modules used by backend/main.mo).",
-    "Core infrastructure component updated to v1.0.2 alongside authorization/blob-storage v4.0.0 integrations in backend/main.mo.",
-    "Build template now includes image asset maintenance scripts (resize-images.js, prune-unused-images.js) for generated frontend assets.",
-    "Build-template React frontend now vendors full shadcn/ui component sources plus custom ESLint rules (require Internet Identity provider; prevent BigInt in query keys) for consistent ICP/II-ready apps.",
-    "Frontend now includes PWA assets (manifest.webmanifest, sw.js, offline.html, generated icons) to support installable and offline-tolerant behavior."
+    "Admin dashboard should defensively render: add null checks and safe loading states; do not render dashboard UI until admin role data is loaded/defined."
   ],
   "known_issues": [
-    "Intermittent admin dashboard access: page initially opens, then shows Access Denied (possible auth/role state mismatch or session refresh issue).",
-    "Admin page currently shows blank/no content (user reports nothing is displayed)."
+    "Admin dashboard page crashes with React error 185 when opening admin page; likely due to undefined admin role data during render."
   ],
   "isFixRequest": true,
-  "generatedImages": [
-    {
-      "filename": "frontend/public/assets/generated/apple-touch-icon.dim_180x180.png",
-      "description": "Generated Apple touch icon for PWA/installable support.",
-      "targetWidth": 180,
-      "targetHeight": 180
-    },
-    {
-      "filename": "frontend/public/assets/generated/pwa-icon.dim_192x192.png",
-      "description": "Generated PWA icon (192x192).",
-      "targetWidth": 192,
-      "targetHeight": 192
-    },
-    {
-      "filename": "frontend/public/assets/generated/pwa-icon.dim_512x512.png",
-      "description": "Generated PWA icon (512x512).",
-      "targetWidth": 512,
-      "targetHeight": 512
-    },
-    {
-      "filename": "frontend/public/assets/generated/pwa-maskable.dim_512x512.png",
-      "description": "Generated maskable PWA icon (512x512).",
-      "targetWidth": 512,
-      "targetHeight": 512
-    },
-    {
-      "filename": "frontend/public/assets/generated/quickbazar-logo.dim_512x512.png",
-      "description": "Generated QuickBazar logo asset.",
-      "targetWidth": 512,
-      "targetHeight": 512
-    }
-  ],
   "existing_features": [
     {
-      "id": "IF-1",
-      "title": "Motoko backend canister scaffold with main entrypoints",
-      "synonyms": [
-        "core infrastructure",
-        "backend main canister"
-      ],
-      "description": "Base Motoko backend wiring (main.mo) integrating authorization and blob storage modules as the core application canister foundation.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-2",
-      "title": "Role-based authorization (admin/vendor/customer)",
-      "synonyms": [
-        "access control",
-        "RBAC",
-        "authorization mixin"
-      ],
-      "description": "Authorization layer implemented in Motoko (MixinAuthorization, access-control) to gate backend operations and support role checks used by the frontend RequireRole pattern.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-3",
-      "title": "Blob storage canister module",
-      "synonyms": [
-        "storage",
-        "blob store"
-      ],
-      "description": "Motoko blob storage module (Storage, Mixin) for storing and serving binary assets, with a frontend StorageClient utility for access.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-4",
-      "title": "Internet Identity authentication integration",
-      "synonyms": [
-        "II login",
-        "identity provider"
-      ],
-      "description": "Frontend hooks and components for Internet Identity sign-in (useInternetIdentity, useActor) including LoginButton and profile setup modal scaffolding.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-5",
-      "title": "Route-level role enforcement UI",
-      "synonyms": [
-        "RequireRole",
-        "AccessDenied"
-      ],
-      "description": "Frontend components to enforce and display role-based access at the UI layer (RequireRole + AccessDeniedScreen).",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-6",
-      "title": "Storefront pages (home, categories, product, cart, checkout)",
-      "synonyms": [
-        "customer storefront"
-      ],
-      "description": "Core shopping UI pages and components: Home (HeroBannerSlider, ProductGrid), Categories, Category Listing, Product page, Cart, and Checkout.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-7",
-      "title": "Customer account pages (profile, orders, wishlist)",
-      "synonyms": [
-        "customer portal"
-      ],
-      "description": "Customer-facing authenticated pages for managing profile, viewing orders, and wishlist.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-8",
-      "title": "Vendor portal pages (dashboard, products, orders)",
-      "synonyms": [
-        "vendor admin"
-      ],
-      "description": "Vendor-facing pages for managing products and viewing vendor orders, with a vendor dashboard landing page.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-9",
-      "title": "Admin console pages (dashboard, products, orders, vendors)",
-      "synonyms": [
-        "admin portal"
-      ],
-      "description": "Admin-facing pages for managing products, orders, and vendors with an admin dashboard.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-10",
-      "title": "Application layout and navigation (top/bottom nav)",
-      "synonyms": [
-        "AppLayout",
-        "navigation"
-      ],
-      "description": "Reusable layout shell and navigation components (TopNav, BottomNav, AppLayout) connecting the storefront and role-based sections.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-11",
-      "title": "React/Vite frontend scaffold with shadcn/ui component library",
-      "synonyms": [
-        "UI kit",
-        "shadcn"
-      ],
-      "description": "Frontend build system and UI foundation including Tailwind, shadcn/ui component set, and lint rules ensuring II provider requirements.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-12",
-      "title": "Build/deploy template for ICP project",
-      "synonyms": [
-        "build-template",
-        "dockerfile",
-        "icp.yaml"
-      ],
-      "description": "Project template artifacts for building and deploying (Dockerfile, deploy scripts, ICP configuration, workspace/package setup).",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "IF-13",
-      "title": "Mobile-first landing screen with Customer/Vendor login CTAs",
-      "synonyms": [
-        "landing page login choice",
-        "customer vs vendor entry"
-      ],
-      "description": "Replaced/updated the home landing experience to provide two prominent primary actions (“Customer Login” and “Vendor Login”) using the existing mobile navigation shell.",
+      "id": "feature-fix-the-admin-dashboard-page-crash-minified-react-error-185-by-making-admindashboardpage-render-safe-under-all-transient-invalid-data-conditions-undefined-null-analytics-object-missing-fields-unexpected-numeric-values-such-as-infinity-nan-after-bigint-conversion",
+      "title": "Fix the Admin Dashboard page crash (Minified React error #185) by making AdminDashboardPage render-safe under all transient/invalid data conditions (undefined/null analytics object, missing fields, unexpected numeric values such as Infinity/NaN after bigint conversion).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "IF-14",
-      "title": "Customer onboarding form and city-filtered vendor discovery list",
-      "synonyms": [
-        "customer login form",
-        "vendor list by city"
-      ],
-      "description": "Customer onboarding/login screen (Name, Mobile, City (Kanpur/Unnao), Area, Pin code) with post-submit navigation to a vendor list screen filtered by selected city and vendor cards (Outlet name, Area, Mobile, View Shop).",
+      "id": "feature-ensure-admin-role-data-is-defined-before-rendering-the-admindashboardpage-content-by-adding-explicit-safe-loading-guard-behavior-tied-to-admin-role-resolution-do-not-render-dashboard-analytics-cards-until-the-admin-role-check-has-deterministically-completed",
+      "title": "Ensure admin role data is defined before rendering the AdminDashboardPage content by adding explicit safe loading/guard behavior tied to admin-role resolution (do not render dashboard analytics/cards until the admin role check has deterministically completed).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
-    },
-    {
-      "id": "IF-15",
-      "title": "Vendor shop page filtered to selected vendor products",
-      "synonyms": [
-        "view shop",
-        "vendor-scoped product listing"
-      ],
-      "description": "Customer “View Shop” experience that opens a vendor shop page and lists only products for the selected vendor (reusing existing product grid/card patterns).",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-16",
-      "title": "Vendor onboarding flow: vendor login form + outlet details screen",
-      "synonyms": [
-        "vendor login",
-        "outlet onboarding"
-      ],
-      "description": "Vendor onboarding/login screen (Name, Mobile, City (Kanpur/Unnao), Area, Pin code) followed by an Outlet Details screen capturing outlet information (including picture upload field and IDs) and then routing into a vendor dashboard entry page.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-17",
-      "title": "Backend vendor outlet profile data model + migration (city/area/pin/outlet fields, IDs, picture, status)",
-      "synonyms": [
-        "vendor outlet fields",
-        "outlet profile backend",
-        "vendor discovery backend"
-      ],
-      "description": "Motoko backend extended to store and serve outlet-specific vendor fields (city, area, pin code, outlet name/mobile, outlet picture via blob storage, Aadhar, optional GST) plus outlet status (Enabled/Disabled), with migration support and APIs consumable by customers (discovery), vendors (create/update), and admins (management).",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-18",
-      "title": "Backend vendor wallet commission rules + outlet auto-disable/enable",
-      "synonyms": [
-        "vendor wallet due",
-        "10% commission",
-        "wallet limit 1000"
-      ],
-      "description": "Motoko backend implements vendor wallet business rules: add 10% commission per order to wallet due; enforce 1000 INR wallet limit; auto-disable outlet when due >= 1000; provide backend action to reset wallet due to 0 and re-enable outlet.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-19",
-      "title": "Vendor Dashboard wallet/status UI with “Pay Company” action",
-      "synonyms": [
-        "vendor dashboard wallet card",
-        "pay company button"
-      ],
-      "description": "Vendor dashboard updated to show outlet name, status (Enabled/Disabled), total sales, and wallet due (INR formatting) in a mobile-first card layout, including a “Pay Company” button that calls the backend reset/pay action and refreshes UI state.",
-      "reqIds": [
-        "REQ-6",
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-20",
-      "title": "Admin vendor management: outlet enable/disable, wallet dues, and orders overview",
-      "synonyms": [
-        "admin vendors page",
-        "admin wallet oversight"
-      ],
-      "description": "Admin console extended to manage vendors with outlet details, view wallet due amounts, enable/disable vendor outlets, and view total orders/overview using existing admin orders data where available.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-21",
-      "title": "Bright, colorful, mobile-first theme applied to onboarding/vendor flow screens",
-      "synonyms": [
-        "Amazon-like theme",
-        "rounded cards",
-        "large CTAs"
-      ],
-      "description": "UI styling updated for the new Customer/Vendor flow screens to consistently use bright colors, rounded cards, soft shadows, large buttons, and mobile-friendly spacing with English labels.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-22",
-      "title": "Strict role capability enforcement across UI + backend APIs (customer/vendor/admin)",
-      "synonyms": [
-        "capability restrictions",
-        "role-scoped mutations",
-        "management screen access control"
-      ],
-      "description": "End-to-end enforcement of strict role capabilities: customers are limited to shopping-only flows; vendors are limited to creating/managing their own outlet profile plus CRUD on their own products and photo uploads; all admin management screens and backend mutation APIs are restricted to admins. Frontend routes/navigation use RequireRole/AccessDenied patterns and backend Motoko authorization guards enforce the same constraints.",
-      "reqIds": [
-        "REQ-11",
-        "REQ-12",
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "IF-23",
-      "title": "PWA offline-ready assets (manifest, service worker, offline fallback, icons)",
-      "synonyms": [
-        "PWA support",
-        "offline page",
-        "service worker"
-      ],
-      "description": "Frontend now includes Progressive Web App assets: web manifest, service worker registration/logic, an offline fallback page, and generated app icons (including maskable) to support installable, offline-tolerant behavior.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
-      "id": "feature-prevent-protected-pages-especially-admin-from-rendering-their-content-until-the-required-role-check-has-completed-do-not-render-the-children-by-default-while-role-admin-vendor-queries-are-still-unfetched",
-      "title": "Prevent protected pages (especially /admin) from rendering their content until the required role check has completed; do not render the children by default while role/admin/vendor queries are still unfetched.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-role-guarding-logic-frontend-src-components-auth-requirerole-tsx-so-that-each-requiredrole-admin-vendor-user-has-a-deterministic-state-machine-1-unauthenticated-accessdenied-sign-in-message-2-authenticated-but-role-check-not-fetched-yet-loading-ui-3-fetched-and-unauthorized-accessdenied-4-fetched-and-authorized-render-children",
-      "title": "Update the role-guarding logic (frontend/src/components/auth/RequireRole.tsx) so that each requiredRole ('admin', 'vendor', 'user') has a deterministic state machine: (1) unauthenticated => AccessDenied sign-in message, (2) authenticated but role check not fetched yet => loading UI, (3) fetched and unauthorized => AccessDenied, (4) fetched and authorized => render children.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-lightweight-debugging-visibility-for-admin-access-flakiness-log-a-single-structured-console-message-from-requirerole-when-it-transitions-into-an-accessdenied-state-for-admin-routes-including-principal-if-available-and-current-query-states-adminfetched-adminloading-isadmin",
-      "title": "Add lightweight debugging visibility for admin access flakiness: log a single structured console message from RequireRole when it transitions into an AccessDenied state for admin routes, including principal (if available) and current query states (adminFetched/adminLoading/isAdmin).",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-prevent-admin-routes-from-rendering-a-blank-loading-only-screen-when-the-backend-actor-fails-to-initialize-e-g-initializeaccesscontrolwithsecret-errors-by-detecting-the-react-query-actor-query-error-state-and-rendering-an-explicit-user-visible-error-screen-instead",
-      "title": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-frontend-src-components-auth-requirerole-tsx-to-include-actor-query-state-awareness-for-admin-protection-if-identity-exists-but-the-actor-query-is-errored-or-the-actor-is-null-due-to-an-initialization-failure-render-accessdeniedscreen-with-admin-diagnostics-enabled-showadminbutton-and-include-the-underlying-actor-error-message-when-available",
-      "title": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-lightweight-structured-console-log-when-admin-enters-the-actor-initialization-failed-path-including-principal-if-available-actor-query-status-and-whether-the-caffeineadmintoken-parameter-is-present-to-aid-debugging-of-admin-access-flakiness",
-      "title": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-global-react-error-boundary-or-route-level-error-boundary-around-admin-pages-so-that-runtime-rendering-exceptions-in-admin-screens-e-g-charts-components-display-a-visible-fallback-message-instead-of-a-blank-page",
-      "title": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "gameProjectType": "none",
-  "projectName": "Mobile-first marketplace landing + customer/vendor onboarding, outlet wallet rules, and admin vendor controls",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Fix admin dashboard crash (React error 185) by adding null checks/safe loading states and ensuring admin role data is defined before rendering",
+      "reqIds": [],
+      "status": "in_progress"
+    }
+  ],
+  "projectName": "Fix /admin dashboard crash (React error #185) with defensive rendering and role gating",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -1,6 +1,10 @@
 /**
- * Shared helper to extract a user-friendly English message from unknown errors
- * (including backend trap/reject messages) for reuse across admin diagnostics.
+ * Shared helper utilities to extract user-friendly English messages from unknown errors
+ * (including backend trap/reject messages) for reuse across admin diagnostics and error displays.
+ */
+
+/**
+ * Extract a user-friendly English message from unknown errors
  */
 export function extractErrorMessage(error: unknown): string {
   // Handle string errors
@@ -42,4 +46,42 @@ export function formatErrorForDiagnostics(error: unknown): string {
   }
   
   return message;
+}
+
+/**
+ * Create a copyable diagnostics text block with error details
+ */
+export function createDiagnosticsText(
+  error: unknown,
+  context?: {
+    componentStack?: string;
+    timestamp?: Date;
+    userAgent?: string;
+  }
+): string {
+  const lines: string[] = [];
+  
+  lines.push('Error Diagnostics');
+  lines.push('═══════════════');
+  lines.push('');
+  
+  lines.push('Error Message:');
+  lines.push(extractErrorMessage(error));
+  lines.push('');
+  
+  if (context?.componentStack) {
+    lines.push('Component Stack:');
+    lines.push(context.componentStack.trim());
+    lines.push('');
+  }
+  
+  if (context?.timestamp) {
+    lines.push('Timestamp: ' + context.timestamp.toISOString());
+  }
+  
+  if (context?.userAgent) {
+    lines.push('User Agent: ' + context.userAgent);
+  }
+  
+  return lines.join('\n');
 }

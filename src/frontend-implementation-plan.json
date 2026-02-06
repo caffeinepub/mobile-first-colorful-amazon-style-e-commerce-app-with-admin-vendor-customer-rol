@@ -1,97 +1,52 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin routes: surface actor initialization failures, add admin diagnostics, and prevent blank screens with error boundaries",
+  "title": "Stabilize /admin dashboard with defensive rendering and deterministic admin-role gating",
   "requirements": [
     {
-      "id": "REQ-17",
-      "summary": "Show an explicit, actionable error UI on /admin routes when the backend actor React Query is errored (instead of a blank/infinite loading state).",
+      "id": "REQ-1",
+      "summary": "Make AdminDashboardPage render-safe for null/partial analytics and invalid numeric conversions, and prevent Recharts crashes via explicit empty-state rendering.",
       "acceptanceCriteria": [
-        "If the actor React Query is in an error state, /admin shows an error UI (not a blank page and not an infinite skeleton).",
-        "The error UI includes a short, English explanation that initialization failed and prompts the user to retry/refresh access.",
-        "The UI works consistently for /admin, /admin/products, /admin/vendors, and /admin/orders."
+        "Navigating to /admin never triggers AdminErrorBoundary for data-shape issues coming from analytics (null/undefined/partial fields).",
+        "If analytics.totalRevenue (or any numeric field) converts to NaN/Infinity or otherwise invalid, the dashboard renders a safe fallback value (e.g., \"0\" / \"0.00\") and does not throw.",
+        "Recharts section never throws due to invalid/empty chart data; when chart data is invalid/empty, an explicit empty-state UI is shown instead of rendering the chart."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useActorQueryState.ts",
-          "operation": "create",
-          "description": "Add a lightweight hook that reads the React Query cache for the actor query (status/error/data) and subscribes to changes without re-running the actor creation logic."
-        },
-        {
-          "path": "frontend/src/utils/errors.ts",
-          "operation": "create",
-          "description": "Add a small shared helper to extract a user-friendly English message from unknown errors (including backend trap/reject messages) for reuse across admin diagnostics."
-        },
-        {
-          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
           "operation": "modify",
-          "description": "Enhance the error UI to optionally render actor initialization failure details (status + extracted error message) in the existing diagnostics area and to present an explicit English initialization-failed message with a retry/refresh prompt when provided by callers. Verify the component's usage instructions before implementing."
+          "description": "Harden AdminDashboardPage rendering: validate analytics object/fields before use; replace direct Number/toFixed usage with finite-number guards (treat NaN/Infinity as 0); ensure revenue formatting cannot throw; sanitize chartData (finite, non-negative) and render a clear empty-state when data is empty/invalid to avoid Recharts runtime crashes."
         },
         {
-          "path": "frontend/src/components/auth/RequireRole.tsx",
+          "path": "frontend/src/utils/safeNumbers.ts",
+          "operation": "create",
+          "description": "Add shared helpers for defensive numeric handling (e.g., bigint->number conversion that clamps non-finite results to 0, safeFixed that never throws, and safe string fallback for missing values) to keep admin analytics UI resilient."
+        },
+        {
+          "path": "frontend/src/utils/formatInr.ts",
           "operation": "modify",
-          "description": "Use the actor query cache state (via the new hook) to detect actor initialization failures for admin routes and render a visible error screen (AccessDeniedScreen with diagnostics) instead of returning only loading skeletons. Verify the component's usage instructions before implementing."
+          "description": "Make formatInr resilient to NaN/Infinity by coercing non-finite inputs to 0 before calling toLocaleString, preventing incidental crashes if reused by admin/vendor/customer currency displays."
         }
       ]
     },
     {
-      "id": "REQ-18",
-      "summary": "Make RequireRole aware of actor query error/null-actor states for admin protection and show AccessDeniedScreen with admin diagnostics and the underlying actor error when available.",
+      "id": "REQ-2",
+      "summary": "Ensure /admin content only renders after admin-role resolution completes, showing a safe loading UI while role is unresolved and access denied UI for non-admins.",
       "acceptanceCriteria": [
-        "When identity is present and the actor query has status=error, RequireRole(requiredRole='admin') renders AccessDeniedScreen with showAdminButton=true.",
-        "AccessDeniedScreen shows an English message that includes (or is derived from) the actor initialization error when available from the query state.",
-        "When the actor query is pending, RequireRole shows the loading skeleton; when it succeeds, RequireRole proceeds with the existing deterministic admin state machine."
+        "While the admin role check is still loading/unfetched, the admin route shows a non-crashing loading state (skeleton/spinner) rather than attempting to render the dashboard.",
+        "If the admin role check resolves to non-admin, the user is shown the existing access denied UI and the dashboard does not render.",
+        "If the admin role check resolves to admin, the dashboard renders normally and proceeds to fetch/render analytics with safe loading/empty/error states."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/auth/RequireRole.tsx",
           "operation": "modify",
-          "description": "Update the admin deterministic state machine to add a distinct actor-init-failed branch: if identity exists and actor query status is error (or actor is null due to init failure), render AccessDeniedScreen with showAdminButton=true and pass/derive the actor error message when available; keep the existing pending/success behavior intact. Verify the component's usage instructions before implementing."
+          "description": "Tighten deterministic admin guard behavior so children (AdminDashboardPage) cannot mount until the admin-role check has conclusively fetched; keep a stable skeleton/loading UI during actor/admin resolution and ensure non-admins always see the existing AccessDeniedScreen. Use the selected \"authorization\" component’s frontend role/permission model conceptually for admin gating logic. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Accept an optional actor error/status input from RequireRole and display it as part of the admin diagnostics panel in clear English (derived via the shared error-extraction helper). Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "summary": "Emit a single structured console log when admin routes enter the actor-initialization-failed denial path (not spammed per render).",
-      "acceptanceCriteria": [
-        "A single structured console message is emitted when transitioning into the actor-init-failed AccessDenied state for admin routes (and not spammed on every render).",
-        "The log includes principal (if available), actor query status, and token-present boolean."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/auth/RequireRole.tsx",
-          "operation": "modify",
-          "description": "Add a one-time-per-transition structured console log when entering the actor-init-failed admin denial path, including principal (if available), actor query status, and a boolean indicating whether the caffeineAdminToken parameter/secret is present (checked via urlParams utilities). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/urlParams.ts",
-          "operation": "modify",
-          "description": "Export a stable token-present helper (e.g., hasParameter/hasSecretParameter) that reflects whether caffeineAdminToken is currently present in URL or persisted session, so admin diagnostics and the structured log can consistently report token presence."
-        }
-      ]
-    },
-    {
-      "id": "REQ-20",
-      "summary": "Add an error boundary around admin pages so runtime rendering exceptions show a visible fallback UI instead of a blank page.",
-      "acceptanceCriteria": [
-        "If an admin page throws during render, the app displays an English fallback UI with a safe navigation option (e.g., Go to Home) instead of rendering blank content.",
-        "The error boundary does not break non-admin routes."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/admin/AdminErrorBoundary.tsx",
-          "operation": "create",
-          "description": "Create a route-level React error boundary component for admin pages that shows an English fallback message and a safe navigation option (e.g., Go to Home) when an admin screen throws during render."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wrap /admin, /admin/products, /admin/vendors, and /admin/orders route components with the new AdminErrorBoundary (inside or alongside RequireRole) so admin-only crashes display fallback UI while non-admin routes remain unchanged."
+          "description": "Align role/admin React Query hooks with deterministic guard needs (e.g., ensure admin-role resolution has clear fetched/loading signals and does not transiently report false/undefined in a way that could allow premature dashboard rendering). Use the selected \"authorization\" component’s frontend role resolution expectations. Verify the component's usage instructions before implementing."
         }
       ]
     }

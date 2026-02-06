@@ -1,69 +1,41 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T15:24:44.683Z",
+  "generatedAt": "2026-02-06T03:05:43.892Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-17",
-        "summary": "Prevent /admin routes from rendering a blank/loading-only screen when the backend actor fails to initialize (e.g., _initializeAccessControlWithSecret errors) by detecting the React Query actor query error state and rendering an explicit, user-visible error screen instead.",
+        "id": "REQ-1",
+        "summary": "Fix the Admin Dashboard page crash (Minified React error #185) by making AdminDashboardPage render-safe under all transient/invalid data conditions (undefined/null analytics object, missing fields, unexpected numeric values such as Infinity/NaN after bigint conversion).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useActorQueryState.ts",
-          "frontend/src/utils/errors.ts",
-          "frontend/src/components/auth/AccessDeniedScreen.tsx",
-          "frontend/src/components/auth/RequireRole.tsx"
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "frontend/src/utils/safeNumbers.ts",
+          "frontend/src/utils/formatInr.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useActorQueryState.ts",
-          "frontend/src/utils/errors.ts",
-          "frontend/src/components/auth/AccessDeniedScreen.tsx",
-          "frontend/src/components/auth/RequireRole.tsx"
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "frontend/src/utils/safeNumbers.ts",
+          "frontend/src/utils/formatInr.ts"
         ]
       },
       {
-        "id": "REQ-18",
-        "summary": "Update frontend/src/components/auth/RequireRole.tsx to include actor query state awareness for admin protection: if identity exists but the actor query is errored or the actor is null due to an initialization failure, render AccessDeniedScreen with admin diagnostics enabled (showAdminButton) and include the underlying actor error message when available.",
+        "id": "REQ-2",
+        "summary": "Ensure admin role data is defined before rendering the AdminDashboardPage content by adding explicit safe loading/guard behavior tied to admin-role resolution (do not render dashboard analytics/cards until the admin role check has deterministically completed).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/auth/RequireRole.tsx",
-          "frontend/src/components/auth/AccessDeniedScreen.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
           "frontend/src/components/auth/RequireRole.tsx",
-          "frontend/src/components/auth/AccessDeniedScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-19",
-        "summary": "Add a lightweight, structured console log when /admin enters the actor-initialization-failed path, including principal (if available), actor query status, and whether the caffeineAdminToken parameter is present, to aid debugging of admin access flakiness.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/auth/RequireRole.tsx",
-          "frontend/src/utils/urlParams.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/auth/RequireRole.tsx",
-          "frontend/src/utils/urlParams.ts"
-        ]
-      },
-      {
-        "id": "REQ-20",
-        "summary": "Add a global React error boundary (or route-level error boundary) around admin pages so that runtime rendering exceptions in admin screens (e.g., charts/components) display a visible fallback message instead of a blank page.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/admin/AdminErrorBoundary.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/admin/AdminErrorBoundary.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
@@ -73,12 +45,11 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/admin/AdminErrorBoundary.tsx",
-    "frontend/src/components/auth/AccessDeniedScreen.tsx",
     "frontend/src/components/auth/RequireRole.tsx",
-    "frontend/src/hooks/useActorQueryState.ts",
-    "frontend/src/utils/errors.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
+    "frontend/src/utils/formatInr.ts",
+    "frontend/src/utils/safeNumbers.ts",
     "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",

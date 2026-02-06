@@ -51,6 +51,7 @@ export function useGetCallerUserRole() {
       return actor.getCallerUserRole();
     },
     enabled: !!actor && !isFetching,
+    retry: false,
   });
 }
 
@@ -68,6 +69,7 @@ export function useIsAdmin() {
       }
     },
     enabled: !!actor && !isFetching,
+    retry: false,
   });
 }
 
@@ -81,6 +83,7 @@ export function useIsVendor() {
       return actor.isVendor();
     },
     enabled: !!actor && !isFetching,
+    retry: false,
   });
 }
 
@@ -473,14 +476,11 @@ export function useGetAnalytics() {
   return useQuery({
     queryKey: ['analytics'],
     queryFn: async () => {
-      if (!actor) return null;
-      try {
-        return await actor.getAnalytics();
-      } catch {
-        return null;
-      }
+      if (!actor) throw new Error('Actor not available');
+      return await actor.getAnalytics();
     },
     enabled: !!actor && !isFetching,
+    retry: 1,
   });
 }
 

@@ -1,16 +1,112 @@
-import { Package, ShoppingBag, TrendingUp, Users } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, Users, AlertCircle, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { useGetAnalytics } from '../../hooks/useQueries';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState } from 'react';
+import { safeBigIntToNumber, safeFixed, safeToString, sanitizeChartValue } from '../../utils/safeNumbers';
 
 export default function AdminDashboardPage() {
-  const { data: analytics } = useGetAnalytics();
+  const { data: analytics, isLoading, isError, error } = useGetAnalytics();
+  const [copied, setCopied] = useState(false);
 
+  const handleCopyError = () => {
+    const errorText = error ? String(error) : 'Unknown error';
+    navigator.clipboard.writeText(errorText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          Admin Dashboard
+        </h1>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="border-2 animate-pulse">
+              <CardHeader className="pb-2">
+                <div className="h-4 bg-muted rounded w-24"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded w-16"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card className="border-2">
+          <CardHeader>
+            <div className="h-6 bg-muted rounded w-32"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] bg-muted rounded"></div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          Admin Dashboard
+        </h1>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Failed to load analytics data. Please try refreshing the page.</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyError}
+              className="ml-2"
+            >
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Empty/unavailable state - check if analytics is null or undefined
+  if (!analytics) {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          Admin Dashboard
+        </h1>
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Analytics data is currently unavailable. Please check back later.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Safely convert analytics values with defensive checks
+  const totalProducts = safeBigIntToNumber(analytics.totalProducts);
+  const totalOrders = safeBigIntToNumber(analytics.totalOrders);
+  const totalRevenue = safeBigIntToNumber(analytics.totalRevenue);
+  const totalVendors = safeBigIntToNumber(analytics.totalVendors);
+
+  // Prepare chart data with sanitized values
   const chartData = [
-    { name: 'Products', value: Number(analytics?.totalProducts || 0) },
-    { name: 'Orders', value: Number(analytics?.totalOrders || 0) },
-    { name: 'Vendors', value: Number(analytics?.totalVendors || 0) },
+    { name: 'Products', value: sanitizeChartValue(totalProducts) },
+    { name: 'Orders', value: sanitizeChartValue(totalOrders) },
+    { name: 'Vendors', value: sanitizeChartValue(totalVendors) },
   ];
+
+  // Only render chart if we have valid data (at least one non-zero value)
+  const hasChartData = chartData.some(item => item.value > 0);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -25,7 +121,9 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{analytics?.totalProducts.toString() || '0'}</div>
+            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              {safeToString(analytics.totalProducts)}
+            </div>
           </CardContent>
         </Card>
 
@@ -37,7 +135,9 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-secondary">{analytics?.totalOrders.toString() || '0'}</div>
+            <div className="text-2xl font-bold text-secondary">
+              {safeToString(analytics.totalOrders)}
+            </div>
           </CardContent>
         </Card>
 
@@ -49,7 +149,9 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">${Number(analytics?.totalRevenue || 0).toFixed(2)}</div>
+            <div className="text-2xl font-bold text-accent">
+              ${safeFixed(totalRevenue, 2)}
+            </div>
           </CardContent>
         </Card>
 
@@ -61,7 +163,9 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-chart-3">{analytics?.totalVendors.toString() || '0'}</div>
+            <div className="text-2xl font-bold text-chart-3">
+              {safeToString(analytics.totalVendors)}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -71,21 +175,30 @@ export default function AdminDashboardPage() {
           <CardTitle>Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
-              <XAxis dataKey="name" stroke="oklch(var(--foreground))" />
-              <YAxis stroke="oklch(var(--foreground))" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'oklch(var(--card))', 
-                  border: '1px solid oklch(var(--border))',
-                  borderRadius: '8px'
-                }} 
-              />
-              <Bar dataKey="value" fill="oklch(var(--primary))" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {hasChartData ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
+                <XAxis dataKey="name" stroke="oklch(var(--foreground))" />
+                <YAxis stroke="oklch(var(--foreground))" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'oklch(var(--card))', 
+                    border: '1px solid oklch(var(--border))',
+                    borderRadius: '8px'
+                  }} 
+                />
+                <Bar dataKey="value" fill="oklch(var(--primary))" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <AlertCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>No data available to display</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

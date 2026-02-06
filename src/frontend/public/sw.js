@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quickbazar-v1';
+const CACHE_NAME = 'quickbazar-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to precache on install
@@ -28,6 +28,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -37,7 +38,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - network first, then cache, with offline fallback
+// Fetch event - network first for HTML/documents, cache first for static assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -61,10 +62,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For navigation requests, use network first with offline fallback
-  if (request.mode === 'navigate') {
+  // For navigation requests and HTML documents, use network first with offline fallback
+  if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(
       fetch(request)
+        .then((response) => {
+          // Don't cache HTML responses to avoid stale admin pages
+          return response;
+        })
         .catch(() => {
           return caches.match(OFFLINE_URL);
         })
@@ -77,8 +82,7 @@ self.addEventListener('fetch', (event) => {
     request.destination === 'script' ||
     request.destination === 'style' ||
     request.destination === 'image' ||
-    request.destination === 'font' ||
-    request.destination === 'document'
+    request.destination === 'font'
   ) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
