@@ -1,42 +1,78 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T03:05:43.889Z",
-  "summary": "Diff adds defensive numeric utilities and updates AdminDashboardPage to handle loading/error/null analytics states and sanitize numeric values. It also updates RequireRole to deterministically block admin content rendering until the admin check is fetched, showing a skeleton while loading and denying non-admins.",
+  "generatedAt": "2026-02-06T03:24:45.563Z",
+  "summary": "Diff implements a three-role enum on the backend and updates several frontend guards/routes to use admin/vendor/customer with added defensive loading for admin routes. However, the backend bootstrap/admin-seeding behavior appears incomplete/non-persistent, and the frontend “assign admin” flow does not actually call a backend endpoint to perform/admin-bootstrap role assignment. Many additional UI/styling enhancements were introduced beyond the requested auth/role fixes.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Recharts section never throws due to invalid/empty chart data; when chart data is invalid/empty, an explicit empty-state UI is shown instead of rendering the chart.",
-      "reason": "AdminDashboardPage shows sanitization utilities and begins building chartData, but the diff is truncated before showing whether it conditionally renders an explicit empty-state UI instead of rendering Recharts when chart data is invalid/empty.",
+      "id": "REQ-2",
+      "requirement": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the admin role automatically; subsequent new users default to customer unless explicitly assigned otherwise.",
+      "reason": "The diff shows a non-persistent flag `hasInitializedAdmin` and an `ensureAdminExists` helper, but there is no clear server-side \"registration\" definition/path shown that assigns the *first registered user* as admin and defaults subsequent registrations to customer. No registration API changes are evidenced in the provided diff excerpt.",
       "evidence": [
-        "frontend/src/pages/admin/AdminDashboardPage.tsx (truncated at chartData construction)"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as admin (without requiring any pre-shared token).",
+      "reason": "The shown bootstrap uses an in-memory `hasInitializedAdmin` flag and assigns admin to the caller if they are not admin, but it does not demonstrate checking whether *any admin exists in persistent state* (e.g., across upgrades/restarts) before promoting the caller. No migration/persistent-state upgrade file was added, and `hasInitializedAdmin` is not shown as stable/persistent.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Fix admin role assignment flow end-to-end so assigning the current II principal as admin immediately enables access to /admin without reload and without relying on caffeineAdminToken.",
+      "reason": "`useAssignAdminRole` does not call any backend method to assign/admin-bootstrap; it only waits and refetches queries. That does not satisfy \"assign admin\" end-to-end unless another backend call path is triggered elsewhere (not evidenced). Also, token-related logic is still referenced in guard diagnostics/UI (`hasParameter('caffeineAdminToken')`, `hasAdminToken`).",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/components/auth/AccessDeniedScreen.tsx",
+        "frontend/src/components/auth/RequireRole.tsx"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Fix RequireRole to never crash when role or user data is missing/undefined for all requiredRole values (admin/vendor/customer) and render a loading state instead.",
+      "reason": "The provided excerpt shows a detailed state machine and skeleton loading for `requiredRole === 'admin'`, but the vendor/customer branches are not visible due to truncation, so it is not evidenced that the same defensive behavior applies to vendor and customer routes.",
+      "evidence": [
+        "frontend/src/components/auth/RequireRole.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Admin access gating adds actor-initialization error state handling with diagnostic logging and token presence checks (caffeineAdminToken) beyond simple role gating.",
-      "reason": "REQ-2 asks for safe loading/guard behavior tied to admin-role resolution and preserving existing access denied UI; it does not request adding new diagnostic logging, token checks, or a new denial branch for actor initialization failures.",
+      "description": "Large-scale UI/styling revamp across multiple pages (gradients, shadows, tinted headers, new PrimaryCtaButton usage, extensive visual changes) unrelated to role/auth flow fixes.",
+      "reason": "BuildRequest explicitly avoids redesigning unrelated pages outside role/auth flows beyond what is necessary; these changes appear to be broad styling/UX enhancements not required to fix RBAC/admin login.",
       "evidence": [
-        "frontend/src/components/auth/RequireRole.tsx"
+        "frontend-file-summaries.txt",
+        "frontend/src/index.css",
+        "frontend/src/components/buttons/PrimaryCtaButton.tsx",
+        "frontend/src/pages/admin/AdminProductsPage.tsx",
+        "frontend/src/pages/CartPage.tsx",
+        "frontend/src/pages/CheckoutPage.tsx",
+        "frontend/src/pages/ProductPage.tsx",
+        "frontend/src/components/ProductGrid.tsx"
       ]
     },
     {
-      "description": "URL parameter utilities expanded to support sessionStorage persistence and additional helpers.",
-      "reason": "BuildRequest does not mention changing URL param handling; this appears unrelated to fixing the admin dashboard crash and role-gated defensive rendering.",
+      "description": "SessionStorage-backed URL parameter persistence utilities (store/get persisted parameters), implying token persistence support.",
+      "reason": "Not requested; the BuildRequest specifically says not to rely on caffeineAdminToken, and does not ask for token persistence utilities.",
       "evidence": [
         "frontend/src/utils/urlParams.ts"
       ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/BottomNav.tsx",
+    "frontend/src/components/TopNav.tsx",
+    "frontend/src/components/auth/AccessDeniedScreen.tsx",
     "frontend/src/components/auth/RequireRole.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/admin/AdminDashboardPage.tsx",
-    "frontend/src/utils/formatInr.ts",
-    "frontend/src/utils/safeNumbers.ts",
+    "frontend/src/pages/customer/CustomerProfilePage.tsx",
     "frontend/src/utils/urlParams.ts",
     "project_state.json"
   ]

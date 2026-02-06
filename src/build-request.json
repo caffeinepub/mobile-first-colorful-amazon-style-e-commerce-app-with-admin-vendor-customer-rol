@@ -1,52 +1,126 @@
 {
   "kind": "build_request",
-  "title": "Fix /admin dashboard crash (React error #185) with defensive rendering and role gating",
+  "title": "Fix Internet Identity admin login and rebuild role-based access (admin/vendor/customer) with safe guards",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Admin Dashboard page crash (Minified React error #185) by making AdminDashboardPage render-safe under all transient/invalid data conditions (undefined/null analytics object, missing fields, unexpected numeric values such as Infinity/NaN after bigint conversion).",
-      "target": "frontend",
+      "text": "Rebuild backend role model and APIs to support exactly three roles: `admin`, `vendor`, and `customer` (replace/alias any existing `user` role to `customer`), and ensure all role checks and permission guards use the new roles consistently.",
+      "target": "backend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "Admin dashboard page is crashing with React error 185.\nFix admin dashboard component.\nAdd null checks and safe loading states."
+          "Rebuild admin auth with three roles:\nadmin, vendor, customer"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to /admin never triggers AdminErrorBoundary for data-shape issues coming from analytics (null/undefined/partial fields).",
-        "If analytics.totalRevenue (or any numeric field) converts to NaN/Infinity or otherwise invalid, the dashboard renders a safe fallback value (e.g., \"0\" / \"0.00\") and does not throw.",
-        "Recharts section never throws due to invalid/empty chart data; when chart data is invalid/empty, an explicit empty-state UI is shown instead of rendering the chart."
+        "Backend exposes a single canonical role model containing only: admin, vendor, customer (no runtime path depends on a legacy `user` role).",
+        "All existing backend authorization checks that previously relied on a `user` role are updated to use `customer` semantics (or an explicit backward-compatible mapping), so customer-only endpoints still work.",
+        "Vendor-only endpoints remain vendor-restricted; admin-only endpoints remain admin-restricted."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Ensure admin role data is defined before rendering the AdminDashboardPage content by adding explicit safe loading/guard behavior tied to admin-role resolution (do not render dashboard analytics/cards until the admin role check has deterministically completed).",
+      "text": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the `admin` role automatically; subsequent new users default to `customer` unless explicitly assigned otherwise.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Set first registered user as admin by default."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On a fresh canister with no prior users/roles, the first successfully registered principal becomes `admin`.",
+        "On the same canister, the next newly registered principal becomes `customer` by default.",
+        "The definition of “registered” is consistent and implemented server-side (not dependent on frontend state)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add backend behavior to ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as `admin` (without requiring any pre-shared token).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Assign my current Internet Identity user as Admin.\n\nIf no admin role exists, automatically create one and set the current logged-in user as Admin."
+        ]
+      },
+      "acceptanceCriteria": [
+        "If the canister has zero admins, an authenticated caller can become admin via a single backend call path without providing an admin token.",
+        "If an admin already exists, the backend does not allow arbitrary callers to promote themselves to admin (promotion must follow the app’s intended admin-assignment rules).",
+        "After the auto-admin bootstrap executes, admin-only APIs (e.g., analytics) succeed for that caller."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Fix admin role assignment flow end-to-end so that assigning the current Internet Identity principal as `admin` immediately enables access to `/admin` routes without requiring a page crash/reload, and without relying on a missing/invalid `caffeineAdminToken` URL parameter.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Allow admin dashboard to open after admin role is assigned."
+        ]
+      },
+      "acceptanceCriteria": [
+        "From an authenticated non-admin session, performing the “assign admin” action results in `isAdmin` becoming true after React Query refetch/invalidations and `/admin` content becomes accessible.",
+        "Admin dashboard loads successfully after assignment without requiring manual URL token manipulation.",
+        "If `?caffeineAdminToken=...` is absent, the app still initializes the backend actor successfully (no actor init hard-failure solely due to missing token)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Update the frontend route guards and role wrappers to use the new role names (`admin`, `vendor`, `customer`) and ensure all places that previously used `requiredRole=\"user\"` are migrated appropriately to `requiredRole=\"customer\"`.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "Ensure admin role data is defined before rendering dashboard."
+          "Rebuild admin auth with three roles:\nadmin, vendor, customer"
         ]
       },
       "acceptanceCriteria": [
-        "While the admin role check is still loading/unfetched, the admin route shows a non-crashing loading state (skeleton/spinner) rather than attempting to render the dashboard.",
-        "If the admin role check resolves to non-admin, the user is shown the existing access denied UI and the dashboard does not render.",
-        "If the admin role check resolves to admin, the dashboard renders normally and proceeds to fetch/render analytics with safe loading/empty/error states."
+        "All guarded customer routes (e.g., profile/wishlist/orders) still function for authenticated customers and do not mistakenly deny access due to role renaming.",
+        "All vendor routes remain guarded by vendor access.",
+        "All admin routes remain guarded by admin access."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Fix `RequireRole` to never crash when role or user data is missing/undefined: add safe checks so that if the authenticated user info, actor state, or role query results are not yet available (undefined/not fetched), the component renders a loading state (skeleton) instead of throwing or rendering an error.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Fix RequireRole guard so it does not crash when role is missing.\nAdd safe check: if user or role is undefined, show loading instead of error."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating directly to `/admin` while role queries are still pending does not crash the app.",
+        "If `identity` exists but role queries return `undefined` transiently, `RequireRole` shows a loading UI rather than denying access or throwing.",
+        "The same defensive behavior applies to all supported requiredRole values (admin/vendor/customer)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/components/ui (shadcn components are read-only).",
-    "Keep all user-facing text in English."
+    "Backend must remain a single Motoko actor (all logic in `backend/main.mo`; only add `backend/migration.mo` if persistent state upgrades are required).",
+    "Do not edit any files under `frontend/src/components/ui` or other immutable frontend paths listed in SYSTEM_CONTEXT.",
+    "Use English for all user-facing UI text."
   ],
   "nonGoals": [
-    "Adding new admin features or changing admin navigation/routes beyond what is needed to prevent the crash.",
-    "Backend schema changes or new backend APIs (unless strictly required to prevent the crash)."
+    "Implement third-party authentication providers (only Internet Identity is used).",
+    "Add real-time features (WebSockets) or external databases/services.",
+    "Redesign unrelated pages outside role/auth flows beyond what is necessary to make role-based access work."
   ],
   "imageRequirements": {
     "required": [],

@@ -35,18 +35,11 @@ export default function AccessDeniedScreen({
   const handleRefreshAccess = async () => {
     setIsRefreshing(true);
     try {
-      // Clear the actor cache to force re-initialization with the token
-      await queryClient.invalidateQueries({ queryKey: ['actor'] });
-      await queryClient.refetchQueries({ queryKey: ['actor'] });
-      
-      // Wait a moment for actor to reinitialize
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Refetch admin status
+      // Refetch admin status without clearing actor
       await queryClient.invalidateQueries({ queryKey: ['isAdmin'] });
-      await queryClient.invalidateQueries({ queryKey: ['callerUserRole'] });
+      await queryClient.invalidateQueries({ queryKey: ['callerRole'] });
       await queryClient.refetchQueries({ queryKey: ['isAdmin'] });
-      await queryClient.refetchQueries({ queryKey: ['callerUserRole'] });
+      await queryClient.refetchQueries({ queryKey: ['callerRole'] });
       
       toast.success('Access refreshed', {
         description: 'Checking admin status...',
@@ -65,13 +58,13 @@ export default function AccessDeniedScreen({
   const handleAssignAdmin = async () => {
     try {
       await assignAdminRole.mutateAsync();
-      toast.success('Admin role assigned successfully!', {
-        description: 'You now have admin access. The page will update automatically.',
+      toast.success('Admin role check completed!', {
+        description: 'If you are the first user, you now have admin access.',
       });
     } catch (error: any) {
-      console.error('Failed to assign admin role:', error);
+      console.error('Failed to check admin role:', error);
       const errorMessage = extractErrorMessage(error);
-      toast.error('Failed to assign admin role', {
+      toast.error('Failed to check admin role', {
         description: errorMessage,
       });
     }
@@ -101,9 +94,9 @@ export default function AccessDeniedScreen({
                     The application could not connect to the backend. This usually means:
                   </p>
                   <ul className="list-disc list-inside space-y-1 text-destructive-foreground/90">
-                    <li>The admin token is missing or invalid</li>
                     <li>The backend canister is not responding</li>
                     <li>There's a network connectivity issue</li>
+                    <li>Your session may have expired</li>
                   </ul>
                 </div>
                 {actorErrorMessage && (
@@ -122,16 +115,10 @@ export default function AccessDeniedScreen({
           {showAdminButton && (
             <Alert className="text-left">
               <AlertDescription className="space-y-2">
-                <div className="font-semibold text-sm mb-2">Admin Access Diagnostics:</div>
+                <div className="font-semibold text-sm mb-2">Admin Access Information:</div>
                 <div className="text-xs space-y-1 font-mono">
                   <div className="break-all">
                     <span className="text-muted-foreground">Principal:</span> {principalId}
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Admin Token Present:</span>{' '}
-                    <span className={hasAdminToken ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                      {hasAdminToken ? 'Yes' : 'No'}
-                    </span>
                   </div>
                   {actorStatus && (
                     <div>
@@ -143,18 +130,14 @@ export default function AccessDeniedScreen({
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mt-2">
-                  {hasAdminToken ? (
-                    <>Admin token detected. Click "Refresh Access" to retry initialization with the token.</>
-                  ) : (
-                    <>No admin token found. Add <code className="bg-muted px-1 rounded">?caffeineAdminToken=YOUR_TOKEN</code> to the URL.</>
-                  )}
+                  The first registered user automatically becomes admin. Click "Check Admin Status" to verify your role.
                 </div>
               </AlertDescription>
             </Alert>
           )}
 
           <div className="flex flex-col gap-2">
-            {showAdminButton && hasAdminToken && (
+            {showAdminButton && (
               <Button
                 onClick={handleRefreshAccess}
                 disabled={isRefreshing}
@@ -183,12 +166,12 @@ export default function AccessDeniedScreen({
                 {assignAdminRole.isPending ? (
                   <>
                     <span className="animate-spin mr-2">⏳</span>
-                    Assigning Admin Role...
+                    Checking Admin Status...
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="mr-2 h-4 w-4" />
-                    Assign Admin Role to My Account
+                    Check Admin Status
                   </>
                 )}
               </Button>

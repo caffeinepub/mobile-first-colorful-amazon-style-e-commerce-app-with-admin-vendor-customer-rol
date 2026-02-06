@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, VendorDashboardStats, UserRole } from '../backend';
+import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, VendorDashboardStats, UserRole__1 } from '../backend';
 import { Principal } from '@dfinity/principal';
 
 // User Profile Queries
@@ -40,25 +40,31 @@ export function useSaveCallerUserProfile() {
   });
 }
 
-// Role Queries
-export function useGetCallerUserRole() {
-  const { actor, isFetching } = useActor();
+// Role Queries - Using new three-role system (admin/vendor/customer)
+export function useGetCallerRole() {
+  const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery({
-    queryKey: ['callerUserRole'],
+  const query = useQuery<UserRole__1>({
+    queryKey: ['callerRole'],
     queryFn: async () => {
-      if (!actor) return 'guest';
-      return actor.getCallerUserRole();
+      if (!actor) throw new Error('Actor not available');
+      return actor.getCallerRole();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
     retry: false,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useIsAdmin() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['isAdmin'],
     queryFn: async () => {
       if (!actor) return false;
@@ -68,61 +74,69 @@ export function useIsAdmin() {
         return false;
       }
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
     retry: false,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useIsVendor() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['isVendor'],
     queryFn: async () => {
       if (!actor) return false;
-      return actor.isVendor();
+      try {
+        return await actor.isVendor();
+      } catch {
+        return false;
+      }
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
     retry: false,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useAssignAdminRole() {
-  const { actor } = useActor();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      // The backend automatically assigns admin role to the first user
+      // This mutation just triggers a refetch to update the UI
       if (!identity) throw new Error('Not authenticated');
       
-      const principal = identity.getPrincipal();
-      // Use UserRole.admin enum value
-      await actor.assignCallerUserRole(principal, 'admin' as UserRole);
+      // Wait a moment to allow backend to process
+      await new Promise(resolve => setTimeout(resolve, 500));
     },
     onSuccess: async () => {
-      // First invalidate the actor to force re-initialization
-      await queryClient.invalidateQueries({ queryKey: ['actor'] });
-      
-      // Wait for actor to reinitialize
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Then invalidate and refetch role queries
+      // Invalidate and refetch role queries without touching actor
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['callerUserRole'] }),
+        queryClient.invalidateQueries({ queryKey: ['callerRole'] }),
         queryClient.invalidateQueries({ queryKey: ['isAdmin'] }),
       ]);
       
       // Force refetch to ensure data is fresh
       await Promise.all([
-        queryClient.refetchQueries({ queryKey: ['callerUserRole'] }),
+        queryClient.refetchQueries({ queryKey: ['callerRole'] }),
         queryClient.refetchQueries({ queryKey: ['isAdmin'] }),
       ]);
     },
     onError: (error) => {
-      // Log the full error for debugging
-      console.error('Admin role assignment error:', error);
+      console.error('Admin role check error:', error);
     },
   });
 }

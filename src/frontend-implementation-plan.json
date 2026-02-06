@@ -1,52 +1,88 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Stabilize /admin dashboard with defensive rendering and deterministic admin-role gating",
+  "title": "Fix Internet Identity admin login and rebuild frontend role-based access (admin/vendor/customer) with safe guards",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Make AdminDashboardPage render-safe for null/partial analytics and invalid numeric conversions, and prevent Recharts crashes via explicit empty-state rendering.",
+      "id": "REQ-4",
+      "summary": "Make admin assignment enable /admin access immediately without reload and remove hard dependency on caffeineAdminToken for actor initialization.",
       "acceptanceCriteria": [
-        "Navigating to /admin never triggers AdminErrorBoundary for data-shape issues coming from analytics (null/undefined/partial fields).",
-        "If analytics.totalRevenue (or any numeric field) converts to NaN/Infinity or otherwise invalid, the dashboard renders a safe fallback value (e.g., \"0\" / \"0.00\") and does not throw.",
-        "Recharts section never throws due to invalid/empty chart data; when chart data is invalid/empty, an explicit empty-state UI is shown instead of rendering the chart."
+        "From an authenticated non-admin session, performing the “assign admin” action results in `isAdmin` becoming true after React Query refetch/invalidations and `/admin` content becomes accessible.",
+        "Admin dashboard loads successfully after assignment without requiring manual URL token manipulation.",
+        "If `?caffeineAdminToken=...` is absent, the app still initializes the backend actor successfully (no actor init hard-failure solely due to missing token)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "path": "frontend/src/hooks/useActor.ts",
           "operation": "modify",
-          "description": "Harden AdminDashboardPage rendering: validate analytics object/fields before use; replace direct Number/toFixed usage with finite-number guards (treat NaN/Infinity as 0); ensure revenue formatting cannot throw; sanitize chartData (finite, non-negative) and render a clear empty-state when data is empty/invalid to avoid Recharts runtime crashes."
+          "description": "Update actor initialization to never hard-fail solely due to a missing/empty `caffeineAdminToken` param (e.g., only attempt secret-based initialization when a token is present and/or wrap secret initialization in safe error handling that falls back to a usable actor). Ensure identity changes still recreate the actor and invalidate dependent React Query data. Use patterns aligned with the selected \"authorization\" component for Internet Identity + RBAC flows. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/utils/safeNumbers.ts",
-          "operation": "create",
-          "description": "Add shared helpers for defensive numeric handling (e.g., bigint->number conversion that clamps non-finite results to 0, safeFixed that never throws, and safe string fallback for missing values) to keep admin analytics UI resilient."
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Update the admin-assignment mutation flow so that after assigning admin it reliably flips the UI into an admin state without a crash/reload: invalidate/refetch the canonical role query (new role model), plus `isAdmin`, and avoid unnecessary actor invalidation loops unless required. Ensure the mutation uses the backend's intended admin-claim/assignment behavior once available. Use patterns aligned with the selected \"authorization\" component for cache clearing and role refetch after auth/role changes. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/utils/formatInr.ts",
+          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
           "operation": "modify",
-          "description": "Make formatInr resilient to NaN/Infinity by coercing non-finite inputs to 0 before calling toLocaleString, preventing incidental crashes if reused by admin/vendor/customer currency displays."
+          "description": "Adjust the admin diagnostics/CTA UI copy and logic to remove reliance on `caffeineAdminToken` as a required step for gaining admin access (keep diagnostics if helpful, but do not instruct users to add a token for normal operation). Ensure the “Assign Admin Role to My Account” action triggers the updated mutation and that the page updates automatically once role/admin queries refetch. Use patterns aligned with the selected \"authorization\" component for handling authorization failures gracefully. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Ensure /admin content only renders after admin-role resolution completes, showing a safe loading UI while role is unresolved and access denied UI for non-admins.",
+      "id": "REQ-5",
+      "summary": "Migrate frontend route guards and role-aware UI to canonical roles: admin, vendor, customer (replace requiredRole=\"user\" with requiredRole=\"customer\").",
       "acceptanceCriteria": [
-        "While the admin role check is still loading/unfetched, the admin route shows a non-crashing loading state (skeleton/spinner) rather than attempting to render the dashboard.",
-        "If the admin role check resolves to non-admin, the user is shown the existing access denied UI and the dashboard does not render.",
-        "If the admin role check resolves to admin, the dashboard renders normally and proceeds to fetch/render analytics with safe loading/empty/error states."
+        "All guarded customer routes (e.g., profile/wishlist/orders) still function for authenticated customers and do not mistakenly deny access due to role renaming.",
+        "All vendor routes remain guarded by vendor access.",
+        "All admin routes remain guarded by admin access."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Introduce/standardize a single canonical role query hook backed by the backend's three-role model (admin/vendor/customer), and migrate call sites away from legacy `user` role assumptions. Keep anonymous/unauthenticated behavior treated as a separate UI state (e.g., guest) without using it as a persisted role. Use patterns aligned with the selected \"authorization\" component for role querying and guarding app data behind login. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/auth/RequireRole.tsx",
+          "operation": "modify",
+          "description": "Update `requiredRole` to support exactly: 'admin' | 'vendor' | 'customer'. Replace the 'user' guard logic with 'customer' semantics, using the canonical role query. Ensure admin/vendor guards remain correct and consistent with the new role names. Use patterns aligned with the selected \"authorization\" component for access control UI and role checks. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update route wrappers so customer-only pages (e.g., /profile, /wishlist, /orders) use `RequireRole requiredRole=\"customer\"` instead of `\"user\"`. Keep vendor/admin routes guarded by their respective roles. This wiring ensures new guard behavior is actually applied across navigable routes."
+        },
+        {
+          "path": "frontend/src/components/TopNav.tsx",
+          "operation": "modify",
+          "description": "Update role-aware navigation logic to use the canonical three-role model (admin/vendor/customer), avoiding legacy `user` checks. Ensure customers still see customer navigation, vendors see vendor navigation, and admins see admin navigation. Use patterns aligned with the selected \"authorization\" component for hiding restricted navigation items when unauthorized. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/BottomNav.tsx",
+          "operation": "modify",
+          "description": "Update role-aware bottom navigation logic to use the canonical three-role model (admin/vendor/customer) and avoid treating 'not admin and not vendor' as implicitly customer unless authenticated and role is confirmed. Use patterns aligned with the selected \"authorization\" component for role-derived UI state. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Harden RequireRole to never crash on missing/undefined actor, identity, or role data by rendering loading skeletons until data is ready.",
+      "acceptanceCriteria": [
+        "Navigating directly to `/admin` while role queries are still pending does not crash the app.",
+        "If `identity` exists but role queries return `undefined` transiently, `RequireRole` shows a loading UI rather than denying access or throwing.",
+        "The same defensive behavior applies to all supported requiredRole values (admin/vendor/customer)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/auth/RequireRole.tsx",
           "operation": "modify",
-          "description": "Tighten deterministic admin guard behavior so children (AdminDashboardPage) cannot mount until the admin-role check has conclusively fetched; keep a stable skeleton/loading UI during actor/admin resolution and ensure non-admins always see the existing AccessDeniedScreen. Use the selected \"authorization\" component’s frontend role/permission model conceptually for admin gating logic. Verify the component's usage instructions before implementing."
+          "description": "Add/ensure defensive checks for all guard branches so undefined transient states (identity present but role/admin/vendor queries not yet available; actor state still fetching; query results temporarily undefined) render a loading skeleton rather than denying access or causing errors. Apply consistently for requiredRole admin/vendor/customer. Use patterns aligned with the selected \"authorization\" component to prevent guard crashes during actor/role initialization. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Align role/admin React Query hooks with deterministic guard needs (e.g., ensure admin-role resolution has clear fetched/loading signals and does not transiently report false/undefined in a way that could allow premature dashboard rendering). Use the selected \"authorization\" component’s frontend role resolution expectations. Verify the component's usage instructions before implementing."
+          "description": "Ensure role-related queries return stable loading/fetched semantics when dependent on actor initialization (e.g., avoid returning misleading defaults that cause premature denial; align enabled/isLoading/isFetched with actor availability). This supports RequireRole's loading-first behavior. Use patterns aligned with the selected \"authorization\" component for preventing UI flashes and handling actor dependency correctly. Verify the component's usage instructions before implementing."
         }
       ]
     }

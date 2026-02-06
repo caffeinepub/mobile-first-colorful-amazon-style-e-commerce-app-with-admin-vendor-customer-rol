@@ -90,7 +90,7 @@ const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
   component: () => (
-    <RequireRole requiredRole="user">
+    <RequireRole requiredRole="customer">
       <CustomerProfilePage />
     </RequireRole>
   ),
@@ -100,7 +100,7 @@ const wishlistRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/wishlist',
   component: () => (
-    <RequireRole requiredRole="user">
+    <RequireRole requiredRole="customer">
       <WishlistPage />
     </RequireRole>
   ),
@@ -110,7 +110,7 @@ const ordersRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/orders',
   component: () => (
-    <RequireRole requiredRole="user">
+    <RequireRole requiredRole="customer">
       <OrdersPage />
     </RequireRole>
   ),

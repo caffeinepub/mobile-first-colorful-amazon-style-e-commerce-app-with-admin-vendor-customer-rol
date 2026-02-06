@@ -1,28 +1,39 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project includes an admin dashboard; current priority is fixing a production crash on the admin dashboard caused by React error 185 and improving defensive rendering/loading states around admin role data.",
+  "summary": "Implement and fix admin authentication/authorization for an Internet Identity-based app, including robust role handling and an admin dashboard that loads correctly.",
   "architectural_notes": [
-    "Admin dashboard should defensively render: add null checks and safe loading states; do not render dashboard UI until admin role data is loaded/defined."
+    "Role-based access control (RBAC) with three roles: admin, vendor, customer",
+    "Bootstrap/admin seeding: first registered user becomes admin; if no admin role exists, create it and assign to current user",
+    "RequireRole guard must be resilient to undefined user/role state and render loading instead of throwing"
   ],
   "known_issues": [
-    "Admin dashboard page crashes with React error 185 when opening admin page; likely due to undefined admin role data during render."
+    "Admin login/role access is currently broken; admin dashboard may not open",
+    "RequireRole guard can crash when user or role is missing/undefined"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-admin-dashboard-page-crash-minified-react-error-185-by-making-admindashboardpage-render-safe-under-all-transient-invalid-data-conditions-undefined-null-analytics-object-missing-fields-unexpected-numeric-values-such-as-infinity-nan-after-bigint-conversion",
-      "title": "Fix the Admin Dashboard page crash (Minified React error #185) by making AdminDashboardPage render-safe under all transient/invalid data conditions (undefined/null analytics object, missing fields, unexpected numeric values such as Infinity/NaN after bigint conversion).",
+      "id": "feature-fix-admin-role-assignment-flow-end-to-end-so-that-assigning-the-current-internet-identity-principal-as-admin-immediately-enables-access-to-admin-routes-without-requiring-a-page-crash-reload-and-without-relying-on-a-missing-invalid-caffeineadmintoken-url-parameter",
+      "title": "Fix admin role assignment flow end-to-end so that assigning the current Internet Identity principal as `admin` immediately enables access to `/admin` routes without requiring a page crash/reload, and without relying on a missing/invalid `caffeineAdminToken` URL parameter.",
       "reqIds": [
-        "REQ-1"
+        "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-admin-role-data-is-defined-before-rendering-the-admindashboardpage-content-by-adding-explicit-safe-loading-guard-behavior-tied-to-admin-role-resolution-do-not-render-dashboard-analytics-cards-until-the-admin-role-check-has-deterministically-completed",
-      "title": "Ensure admin role data is defined before rendering the AdminDashboardPage content by adding explicit safe loading/guard behavior tied to admin-role resolution (do not render dashboard analytics/cards until the admin role check has deterministically completed).",
+      "id": "feature-update-the-frontend-route-guards-and-role-wrappers-to-use-the-new-role-names-admin-vendor-customer-and-ensure-all-places-that-previously-used-requiredrole-user-are-migrated-appropriately-to-requiredrole-customer",
+      "title": "Update the frontend route guards and role wrappers to use the new role names (`admin`, `vendor`, `customer`) and ensure all places that previously used `requiredRole=\"user\"` are migrated appropriately to `requiredRole=\"customer\"`.",
       "reqIds": [
-        "REQ-2"
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-requirerole-to-never-crash-when-role-or-user-data-is-missing-undefined-add-safe-checks-so-that-if-the-authenticated-user-info-actor-state-or-role-query-results-are-not-yet-available-undefined-not-fetched-the-component-renders-a-loading-state-skeleton-instead-of-throwing-or-rendering-an-error",
+      "title": "Fix `RequireRole` to never crash when role or user data is missing/undefined: add safe checks so that if the authenticated user info, actor state, or role query results are not yet available (undefined/not fetched), the component renders a loading state (skeleton) instead of throwing or rendering an error.",
+      "reqIds": [
+        "REQ-6"
       ],
       "version": 1
     }
@@ -30,12 +41,60 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Fix admin dashboard crash (React error 185) by adding null checks/safe loading states and ensuring admin role data is defined before rendering",
+      "summary": "Fix admin login and role-based access; ensure admin dashboard loads after role assignment",
       "reqIds": [],
-      "status": "in_progress"
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Assign current Internet Identity user as Admin; auto-create admin role if missing",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Fix RequireRole guard to avoid crashes when role/user missing; show loading when undefined",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Rebuild admin auth with three roles (admin, vendor, customer)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Set first registered user as admin by default",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Rebuild backend role model and APIs to support exactly three roles: `admin`, `vendor`, and `customer` (replace/alias any existing `user` role to `customer`), and ensure all role checks and permission guards use the new roles consistently.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement backend bootstrap logic so that when the first user is registered, that principal is assigned the `admin` role automatically; subsequent new users default to `customer` unless explicitly assigned otherwise.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add backend behavior to ensure an admin exists: if no admin role exists in persistent state, automatically create the admin role assignment and set the current authenticated caller as `admin` (without requiring any pre-shared token).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
     }
   ],
-  "projectName": "Fix /admin dashboard crash (React error #185) with defensive rendering and role gating",
+  "projectName": "Fix Internet Identity admin login and rebuild role-based access (admin/vendor/customer) with safe guards",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

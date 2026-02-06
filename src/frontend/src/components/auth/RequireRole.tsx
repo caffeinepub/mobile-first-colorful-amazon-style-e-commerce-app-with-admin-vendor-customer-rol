@@ -1,5 +1,5 @@
 import { type ReactNode, useRef } from 'react';
-import { useGetCallerUserRole, useIsVendor, useIsAdmin } from '../../hooks/useQueries';
+import { useGetCallerRole, useIsVendor, useIsAdmin } from '../../hooks/useQueries';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useActorQueryState } from '../../hooks/useActorQueryState';
 import { hasParameter } from '../../utils/urlParams';
@@ -8,13 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface RequireRoleProps {
   children: ReactNode;
-  requiredRole: 'admin' | 'vendor' | 'user';
+  requiredRole: 'admin' | 'vendor' | 'customer';
 }
 
 export default function RequireRole({ children, requiredRole }: RequireRoleProps) {
   const { identity } = useInternetIdentity();
   const actorQueryState = useActorQueryState();
-  const { data: userRole, isLoading: roleLoading, isFetched: roleFetched } = useGetCallerUserRole();
+  const { data: role, isLoading: roleLoading, isFetched: roleFetched } = useGetCallerRole();
   const { data: isVendor, isLoading: vendorLoading, isFetched: vendorFetched } = useIsVendor();
   const { data: isAdmin, isLoading: adminLoading, isFetched: adminFetched } = useIsAdmin();
 
@@ -157,8 +157,8 @@ export default function RequireRole({ children, requiredRole }: RequireRoleProps
     );
   }
 
-  // Deterministic state machine for user role
-  if (requiredRole === 'user') {
+  // Deterministic state machine for customer role
+  if (requiredRole === 'customer') {
     // State 1: Not authenticated → deny immediately
     if (!isAuthenticated) {
       return <AccessDeniedScreen message="Please sign in to access this page" />;
@@ -184,22 +184,17 @@ export default function RequireRole({ children, requiredRole }: RequireRoleProps
       );
     }
 
-    // State 4: Role check fetched and user is guest → deny
-    if (roleFetched && userRole === 'guest') {
-      return <AccessDeniedScreen message="Please complete your profile to continue" />;
+    // State 4: Role check fetched - allow access for customer role
+    // In the new system, authenticated users who are not admin/vendor are customers
+    if (roleFetched && role) {
+      const roleValue = typeof role === 'string' ? role : (role as any).__kind__;
+      if (roleValue === 'customer' || roleValue === 'admin' || roleValue === 'vendor') {
+        return <>{children}</>;
+      }
     }
 
-    // State 5: Role check fetched and user has valid role → allow access
-    if (roleFetched && userRole && userRole !== 'guest') {
-      return <>{children}</>;
-    }
-
-    // Fallback: If we reach here, something unexpected happened → show loading
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
+    // State 5: If role is undefined or invalid, deny access
+    return <AccessDeniedScreen message="Please complete your profile to continue" />;
   }
 
   // If requiredRole is invalid, deny access

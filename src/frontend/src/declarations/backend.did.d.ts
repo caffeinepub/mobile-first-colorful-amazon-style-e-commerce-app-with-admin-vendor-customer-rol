@@ -66,6 +66,9 @@ export interface UserProfile {
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export type UserRole__1 = { 'admin' : null } |
+  { 'customer' : null } |
+  { 'vendor' : null };
 export interface Vendor {
   'principal' : Principal,
   'verified' : boolean,
@@ -129,6 +132,7 @@ export interface _SERVICE {
       'totalVendors' : bigint,
     }
   >,
+  'getCallerRole' : ActorMethod<[], UserRole__1>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCart' : ActorMethod<[], Array<CartItem>>,

@@ -6,21 +6,25 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import LoginButton from './auth/LoginButton';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCart, useGetCallerUserRole, useIsVendor } from '../hooks/useQueries';
+import { useGetCart, useGetCallerRole, useIsVendor, useIsAdmin } from '../hooks/useQueries';
 import { useState } from 'react';
 
 export default function TopNav() {
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
   const { data: cart } = useGetCart();
-  const { data: role } = useGetCallerUserRole();
+  const { data: role } = useGetCallerRole();
   const { data: isVendor } = useIsVendor();
+  const { data: isAdmin } = useIsAdmin();
   const [searchQuery, setSearchQuery] = useState('');
 
   const cartItemCount = cart?.reduce((sum, item) => sum + Number(item.quantity), 0) || 0;
-  const isAdmin = role === 'admin';
-  const isVendorUser = isVendor === true;
-  const isCustomer = identity && !isAdmin && !isVendorUser;
+  
+  // Determine user role from the new three-role system
+  const roleValue = role ? (typeof role === 'string' ? role : (role as any).__kind__) : null;
+  const isAdminUser = isAdmin === true || roleValue === 'admin';
+  const isVendorUser = isVendor === true || roleValue === 'vendor';
+  const isCustomer = identity && !isAdminUser && !isVendorUser;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +128,7 @@ export default function TopNav() {
                   </Link>
                 </>
               )}
-              {isAdmin && (
+              {isAdminUser && (
                 <>
                   <Link to="/admin">
                     <Button variant="ghost" className="text-white hover:bg-white/20 focus-ring-primary transition-colors">
@@ -205,7 +209,7 @@ export default function TopNav() {
                       </Link>
                     </>
                   )}
-                  {isAdmin && (
+                  {isAdminUser && (
                     <>
                       <Link to="/admin">
                         <Button variant="ghost" className="w-full justify-start hover:bg-primary/10 hover:text-primary">

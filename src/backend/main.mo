@@ -17,6 +17,12 @@ actor {
   // Types & Shared State
   // =========================
 
+  public type UserRole = {
+    #admin;
+    #vendor;
+    #customer;
+  };
+
   public type Product = {
     id : Text;
     name : Text;
@@ -110,26 +116,60 @@ actor {
 
   let vendorPrincipals = Map.empty<Principal, Bool>();
 
+  // Track if we've initialized the first admin
+  var hasInitializedAdmin = false;
+
   // =========================
   // Authorization with Persistent State
   // =========================
 
-  // Initialize access control with persistent state
   var accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  public query ({ caller }) func isVendor() : async Bool {
-    switch (vendorPrincipals.get(caller)) {
-      case (?true) { true };
-      case (_) { false };
+  // Bootstrap: Ensure admin exists on first authenticated call
+  func ensureAdminExists(caller : Principal) {
+    if (not hasInitializedAdmin and caller != Principal.fromText("2vxsx-fae")) {
+      if (not AccessControl.isAdmin(accessControlState, caller)) {
+        // No admin exists, make this caller the first admin
+        AccessControl.assignRole(accessControlState, caller, caller, #admin);
+        hasInitializedAdmin := true;
+      } else {
+        hasInitializedAdmin := true;
+      };
     };
   };
 
+  // Helper to check if caller is a vendor
   func callerIsVendor(caller : Principal) : Bool {
     switch (vendorPrincipals.get(caller)) {
-      case (?true) { true };
-      case (_) { false };
+      case (null) { false };
+      case (?isVendor) { isVendor };
     };
+  };
+
+  // Helper to check if caller is admin
+  func callerIsAdmin(caller : Principal) : Bool {
+    AccessControl.isAdmin(accessControlState, caller);
+  };
+
+  // Helper to check if caller is authenticated (not anonymous)
+  func callerIsAuthenticated(caller : Principal) : Bool {
+    caller != Principal.fromText("2vxsx-fae");
+  };
+
+  // Role checking
+  public query ({ caller }) func getCallerRole() : async UserRole {
+    if (AccessControl.isAdmin(accessControlState, caller)) {
+      return #admin;
+    } else if (callerIsVendor(caller)) {
+      return #vendor;
+    } else {
+      return #customer;
+    };
+  };
+
+  public query ({ caller }) func isVendor() : async Bool {
+    callerIsVendor(caller);
   };
 
   // =========================
@@ -137,22 +177,28 @@ actor {
   // =========================
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
+      Runtime.trap("Unauthorized: Please sign in to view profile");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+    ensureAdminExists(caller);
+
+    if (caller != user and not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
+      Runtime.trap("Unauthorized: Please sign in to save profile");
     };
     userProfiles.add(caller, profile);
   };
@@ -161,12 +207,10 @@ actor {
   // Product APIs
   // =========================
 
-  // Public browsing - no auth required (guests allowed)
-  public query ({ caller }) func getProducts(sortBy : Text) : async [Product] {
+  public query ({ caller }) func getProducts(_sortBy : Text) : async [Product] {
     products.values().toArray();
   };
 
-  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getProduct(id : Text) : async Product {
     switch (products.get(id)) {
       case (null) { Runtime.trap("Product not found") };
@@ -175,7 +219,9 @@ actor {
   };
 
   public shared ({ caller }) func addProduct(product : Product) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller) and not callerIsVendor(caller)) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller) and not callerIsVendor(caller)) {
       Runtime.trap("Unauthorized: Only admins or vendors can add products");
     };
 
@@ -187,10 +233,12 @@ actor {
   };
 
   public shared ({ caller }) func updateProduct(id : Text, product : Product) : async () {
+    ensureAdminExists(caller);
+
     switch (products.get(id)) {
       case (null) { Runtime.trap("Product not found") };
       case (?existingProduct) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
+        if (callerIsAdmin(caller)) {
           products.add(id, product);
           return;
         };
@@ -209,10 +257,12 @@ actor {
   };
 
   public shared ({ caller }) func deleteProduct(id : Text) : async () {
+    ensureAdminExists(caller);
+
     switch (products.get(id)) {
       case (null) { Runtime.trap("Product not found") };
       case (?existingProduct) {
-        if (AccessControl.isAdmin(accessControlState, caller)) {
+        if (callerIsAdmin(caller)) {
           products.remove(id);
           return;
         };
@@ -228,6 +278,8 @@ actor {
   };
 
   public query ({ caller }) func getVendorProducts() : async [Product] {
+    ensureAdminExists(caller);
+
     if (not callerIsVendor(caller)) {
       Runtime.trap("Unauthorized: Only vendors can view their products");
     };
@@ -240,7 +292,9 @@ actor {
   // =========================
 
   public shared ({ caller }) func addItemToCart(productId : Text, quantity : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to add items to cart");
     };
 
@@ -253,7 +307,9 @@ actor {
   };
 
   public query ({ caller }) func getCart() : async [CartItem] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to view cart");
     };
 
@@ -264,7 +320,9 @@ actor {
   };
 
   public shared ({ caller }) func clearCart() : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to clear cart");
     };
 
@@ -272,7 +330,9 @@ actor {
   };
 
   public shared ({ caller }) func updateCartQuantity(productId : Text, quantity : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to update cart");
     };
 
@@ -295,7 +355,9 @@ actor {
   };
 
   public shared ({ caller }) func removeCartItem(productId : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to remove items from cart");
     };
 
@@ -315,12 +377,14 @@ actor {
   // =========================
 
   public shared ({ caller }) func addReview(productId : Text, review : Review) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to add reviews");
     };
 
     if (review.reviewer != caller) {
-      Runtime.trap("Unauthorized: Cannot submit review on behalf of another user");
+      Runtime.trap("Unauthorized: Cannot submit review on behalf of another customer");
     };
 
     switch (products.get(productId)) {
@@ -339,12 +403,10 @@ actor {
   // Category APIs
   // =========================
 
-  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getCategories() : async [Category] {
     categories.values().toArray();
   };
 
-  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getCategory(id : Text) : async Category {
     switch (categories.get(id)) {
       case (null) { Runtime.trap("Category not found") };
@@ -353,7 +415,9 @@ actor {
   };
 
   public shared ({ caller }) func addCategory(category : Category) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can add categories");
     };
 
@@ -361,7 +425,9 @@ actor {
   };
 
   public shared ({ caller }) func updateCategory(id : Text, category : Category) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can update categories");
     };
 
@@ -374,7 +440,9 @@ actor {
   };
 
   public shared ({ caller }) func deleteCategory(id : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can delete categories");
     };
 
@@ -386,19 +454,23 @@ actor {
   // =========================
 
   public shared ({ caller }) func addVendor(vendorPrincipal : Principal, vendor : Vendor) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can add vendors");
     };
 
     vendors.add(vendorPrincipal, vendor);
     vendorPrincipals.add(vendorPrincipal, true);
 
-    // AccessControl.assignRole already includes admin-only guard
+    // Assign user role in AccessControl (user = customer)
     AccessControl.assignRole(accessControlState, caller, vendorPrincipal, #user);
   };
 
   public shared ({ caller }) func updateVendor(vendorPrincipal : Principal, vendor : Vendor) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can update vendors");
     };
 
@@ -411,7 +483,9 @@ actor {
   };
 
   public shared ({ caller }) func removeVendor(vendorPrincipal : Principal) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can remove vendors");
     };
 
@@ -420,14 +494,15 @@ actor {
   };
 
   public query ({ caller }) func getVendors() : async [Vendor] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can view all vendors");
     };
 
     vendors.values().toArray();
   };
 
-  // Public browsing - no auth required (guests allowed)
   public query ({ caller }) func getVendor(vendorPrincipal : Principal) : async ?Vendor {
     vendors.get(vendorPrincipal);
   };
@@ -440,6 +515,8 @@ actor {
   };
 
   public query ({ caller }) func getVendorDashboardStats() : async VendorDashboardStats {
+    ensureAdminExists(caller);
+
     if (not callerIsVendor(caller)) {
       Runtime.trap("Unauthorized: Only vendors can access dashboard stats");
     };
@@ -468,12 +545,14 @@ actor {
   // =========================
 
   public shared ({ caller }) func createOrder(order : Order) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to create orders");
     };
 
     if (order.customer != caller) {
-      Runtime.trap("Unauthorized: Cannot create order on behalf of another user");
+      Runtime.trap("Unauthorized: Cannot create order on behalf of another customer");
     };
 
     orders.add(order.id, order);
@@ -500,6 +579,8 @@ actor {
   };
 
   public shared ({ caller }) func payCompany() : async () {
+    ensureAdminExists(caller);
+
     if (not callerIsVendor(caller)) {
       Runtime.trap("Unauthorized: Only vendors can perform this action");
     };
@@ -522,7 +603,9 @@ actor {
   };
 
   public query ({ caller }) func getCustomerOrders() : async [Order] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to view orders");
     };
 
@@ -530,6 +613,8 @@ actor {
   };
 
   public query ({ caller }) func getVendorOrders() : async [Order] {
+    ensureAdminExists(caller);
+
     if (not callerIsVendor(caller)) {
       Runtime.trap("Unauthorized: Only vendors can view their orders");
     };
@@ -538,7 +623,9 @@ actor {
   };
 
   public query ({ caller }) func getAllOrders() : async [Order] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can view all orders");
     };
 
@@ -546,6 +633,8 @@ actor {
   };
 
   public query ({ caller }) func getOrder(orderId : Text) : async Order {
+    ensureAdminExists(caller);
+
     switch (orders.get(orderId)) {
       case (null) { Runtime.trap("Order not found") };
       case (?order) {
@@ -557,7 +646,7 @@ actor {
           return order;
         };
 
-        if (AccessControl.isAdmin(accessControlState, caller)) {
+        if (callerIsAdmin(caller)) {
           return order;
         };
 
@@ -567,11 +656,13 @@ actor {
   };
 
   public shared ({ caller }) func updateOrderStatus(orderId : Text, status : OrderStatus) : async () {
+    ensureAdminExists(caller);
+
     switch (orders.get(orderId)) {
       case (null) { Runtime.trap("Order not found") };
       case (?order) {
         // Admins can update any order
-        if (AccessControl.isAdmin(accessControlState, caller)) {
+        if (callerIsAdmin(caller)) {
           let updatedOrder = { order with status };
           orders.add(orderId, updatedOrder);
           return;
@@ -594,7 +685,9 @@ actor {
   // =========================
 
   public shared ({ caller }) func addToWishlist(productId : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to add to wishlist");
     };
 
@@ -607,7 +700,9 @@ actor {
   };
 
   public shared ({ caller }) func removeFromWishlist(productId : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to remove from wishlist");
     };
 
@@ -623,7 +718,9 @@ actor {
   };
 
   public query ({ caller }) func getWishlist() : async [Text] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAuthenticated(caller)) {
       Runtime.trap("Unauthorized: Please sign in to view wishlist");
     };
 
@@ -643,7 +740,9 @@ actor {
     totalProducts : Nat;
     totalVendors : Nat;
   } {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    ensureAdminExists(caller);
+
+    if (not callerIsAdmin(caller)) {
       Runtime.trap("Unauthorized: Only admins can view analytics");
     };
 

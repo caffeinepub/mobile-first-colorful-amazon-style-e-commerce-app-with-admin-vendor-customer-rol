@@ -2,13 +2,16 @@ import { User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useGetCallerUserProfile, useGetCallerUserRole } from '../../hooks/useQueries';
+import { useGetCallerUserProfile, useGetCallerRole } from '../../hooks/useQueries';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 
 export default function CustomerProfilePage() {
   const { identity } = useInternetIdentity();
   const { data: profile } = useGetCallerUserProfile();
-  const { data: role } = useGetCallerUserRole();
+  const { data: role } = useGetCallerRole();
+
+  // Extract role value from enum type
+  const roleValue = role ? (typeof role === 'string' ? role : (role as any).__kind__) : 'customer';
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -18,7 +21,7 @@ export default function CustomerProfilePage() {
         </div>
         <div>
           <h1 className="text-3xl font-bold">My Profile</h1>
-          <p className="text-muted-foreground capitalize">{role} Account</p>
+          <p className="text-muted-foreground capitalize">{roleValue} Account</p>
         </div>
       </div>
 

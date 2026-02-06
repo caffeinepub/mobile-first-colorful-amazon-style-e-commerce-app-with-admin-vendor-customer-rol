@@ -27,15 +27,15 @@ export interface VendorDashboardStats {
     walletDue: bigint;
 }
 export type Time = bigint;
-export interface Category {
-    id: string;
-    name: string;
-    image: ExternalBlob;
-}
 export interface OrderItem {
     productId: string;
     quantity: bigint;
     price: bigint;
+}
+export interface Category {
+    id: string;
+    name: string;
+    image: ExternalBlob;
 }
 export interface Order {
     id: string;
@@ -92,6 +92,11 @@ export enum UserRole {
     user = "user",
     guest = "guest"
 }
+export enum UserRole__1 {
+    admin = "admin",
+    customer = "customer",
+    vendor = "vendor"
+}
 export interface backendInterface {
     addCategory(category: Category): Promise<void>;
     addItemToCart(productId: string, quantity: bigint): Promise<void>;
@@ -111,6 +116,7 @@ export interface backendInterface {
         totalRevenue: bigint;
         totalVendors: bigint;
     }>;
+    getCallerRole(): Promise<UserRole__1>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCart(): Promise<Array<CartItem>>;
@@ -119,7 +125,7 @@ export interface backendInterface {
     getCustomerOrders(): Promise<Array<Order>>;
     getOrder(orderId: string): Promise<Order>;
     getProduct(id: string): Promise<Product>;
-    getProducts(sortBy: string): Promise<Array<Product>>;
+    getProducts(_sortBy: string): Promise<Array<Product>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVendor(vendorPrincipal: Principal): Promise<Vendor | null>;
     getVendorDashboardStats(): Promise<VendorDashboardStats>;

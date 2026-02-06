@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { Home, Grid3x3, ShoppingCart, User, LayoutDashboard, Package } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useGetCart, useGetCallerUserRole, useIsVendor } from '../hooks/useQueries';
+import { useGetCart, useGetCallerRole, useIsVendor, useIsAdmin } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import type { LucideIcon } from 'lucide-react';
 
@@ -16,14 +16,18 @@ export default function BottomNav() {
   const router = useRouterState();
   const currentPath = router.location.pathname;
   const { data: cart } = useGetCart();
-  const { data: role } = useGetCallerUserRole();
+  const { data: role } = useGetCallerRole();
   const { data: isVendor } = useIsVendor();
+  const { data: isAdmin } = useIsAdmin();
   const { identity } = useInternetIdentity();
 
   const cartItemCount = cart?.reduce((sum, item) => sum + Number(item.quantity), 0) || 0;
-  const isAdmin = role === 'admin';
-  const isVendorUser = isVendor === true;
-  const isCustomer = identity && !isAdmin && !isVendorUser;
+  
+  // Determine user role from the new three-role system
+  const roleValue = role ? (typeof role === 'string' ? role : (role as any).__kind__) : null;
+  const isAdminUser = isAdmin === true || roleValue === 'admin';
+  const isVendorUser = isVendor === true || roleValue === 'vendor';
+  const isCustomer = identity && !isAdminUser && !isVendorUser;
 
   // Customer navigation
   const customerNavItems: NavItem[] = [
@@ -55,7 +59,7 @@ export default function BottomNav() {
   ];
 
   let navItems: NavItem[] = guestNavItems;
-  if (isAdmin) {
+  if (isAdminUser) {
     navItems = adminNavItems;
   } else if (isVendorUser) {
     navItems = vendorNavItems;

@@ -82,6 +82,11 @@ export const Order = IDL.Record({
   'timestamp' : Time,
   'items' : IDL.Vec(OrderItem),
 });
+export const UserRole__1 = IDL.Variant({
+  'admin' : IDL.Null,
+  'customer' : IDL.Null,
+  'vendor' : IDL.Null,
+});
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'email' : IDL.Text,
@@ -151,6 +156,7 @@ export const idlService = IDL.Service({
       ],
       ['query'],
     ),
+  'getCallerRole' : IDL.Func([], [UserRole__1], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCart' : IDL.Func([], [IDL.Vec(CartItem)], ['query']),
@@ -262,6 +268,11 @@ export const idlFactory = ({ IDL }) => {
     'timestamp' : Time,
     'items' : IDL.Vec(OrderItem),
   });
+  const UserRole__1 = IDL.Variant({
+    'admin' : IDL.Null,
+    'customer' : IDL.Null,
+    'vendor' : IDL.Null,
+  });
   const UserProfile = IDL.Record({
     'name' : IDL.Text,
     'email' : IDL.Text,
@@ -328,6 +339,7 @@ export const idlFactory = ({ IDL }) => {
         ],
         ['query'],
       ),
+    'getCallerRole' : IDL.Func([], [UserRole__1], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCart' : IDL.Func([], [IDL.Vec(CartItem)], ['query']),
