@@ -353,6 +353,7 @@ export function useCreateOrder() {
       queryClient.invalidateQueries({ queryKey: ['allOrders'] });
       queryClient.invalidateQueries({ queryKey: ['ordersByCity'] });
       queryClient.invalidateQueries({ queryKey: ['vendorOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
     },
   });
 }
@@ -482,6 +483,21 @@ export function useSetVendorOutletStatus() {
     mutationFn: async ({ vendorPrincipal, status }: { vendorPrincipal: Principal; status: OutletStatus }) => {
       if (!actor) throw new Error('Actor not available');
       return actor.setVendorOutletStatus(vendorPrincipal, status);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    },
+  });
+}
+
+export function useMarkVendorAsPaid() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vendorPrincipal: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.markVendorAsPaid(vendorPrincipal);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });

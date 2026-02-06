@@ -1,73 +1,38 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Upgrade the Admin Dashboard into a full control panel with new sections for Vendor Management and Orders Panel accessible via visible cards and menu options.",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-upgrade-the-admin-landing-page-into-an-admin-control-panel-that-shows-visible-navigation-cards-and-menu-options-for-the-admin-sections-vendor-management-and-orders-panel-and-keep-existing-admin-sections-accessible",
-      "title": "Upgrade the /admin landing page into an Admin Control Panel that shows visible navigation cards and menu options for the admin sections: Vendor Management and Orders Panel (and keep existing admin sections accessible).",
+      "id": "feature-restore-the-missing-frontend-build-configuration-required-for-production-builds-by-adding-frontend-vite-config-ts-and-frontend-tsconfig-json-and-any-other-required-root-frontend-config-files-so-the-frontend-can-compile-successfully-in-the-deployment-environment",
+      "title": "Restore the missing frontend build configuration required for production builds by adding `frontend/vite.config.ts` and `frontend/tsconfig.json` (and any other required root frontend config files) so the frontend can compile successfully in the deployment environment.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-vendor-management-admin-section-to-support-viewing-all-vendors-approving-rejecting-vendors-enabling-disabling-vendor-outlets-and-viewing-vendor-documents",
-      "title": "Implement the Vendor Management admin section to support: viewing all vendors, approving/rejecting vendors, enabling/disabling vendor outlets, and viewing vendor documents.",
+      "id": "feature-fix-the-production-build-time-incompatibility-caused-by-process-env-ii-url-being-referenced-in-the-browser-bundle-in-the-read-only-frontend-src-hooks-useinternetidentity-ts-by-updating-the-vite-build-configuration-to-shim-define-process-env-ii-url-at-build-time-using-a-safe-default-e-g-https-identity-ic0-app-and-or-import-meta-env-vite-ii-url-without-editing-any-immutable-hook-files",
+      "title": "Fix the production build-time incompatibility caused by `process.env.II_URL` being referenced in the browser bundle (in the read-only `frontend/src/hooks/useInternetIdentity.ts`) by updating the Vite build configuration to shim/define `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, without editing any immutable hook files.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-the-orders-panel-admin-section-to-support-viewing-all-orders-filtering-by-city-kanpur-unnao-and-order-status-tracking",
-      "title": "Implement the Orders Panel admin section to support viewing all orders, filtering by city (Kanpur, Unnao), and order status tracking.",
+      "id": "feature-run-through-the-full-build-deploy-verification-steps-and-ensure-the-deployed-app-loads-successfully-documenting-any-required-environment-variables-e-g-vite-ii-url-in-frontend-deployment-md-if-additional-adjustments-were-needed",
+      "title": "Run through the full build/deploy verification steps and ensure the deployed app loads successfully, documenting any required environment variables (e.g., `VITE_II_URL`) in `frontend/DEPLOYMENT.md` if additional adjustments were needed.",
       "reqIds": [
-        "REQ-4"
+        "REQ-3"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Upgrade Admin Dashboard into a full control panel with visible cards and menu options for admin sections",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add Vendor Management section: view all vendors, approve/reject vendors, enable/disable vendor outlet, view vendor documents",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Add Orders Panel section: view all orders, filter by city (Kanpur, Unnao), order status tracking",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Extend the backend vendor model and APIs so the admin UI can approve/reject vendors and fetch vendor documents for viewing.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Extend the backend order model so each order has a city value that can be used by the admin Orders Panel filter (Kanpur/Unnao), and ensure existing order creation provides/populates this value.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Upgrade Admin Dashboard into a full admin control panel (Vendor Management + Orders Panel)",
+  "new_feature_requests": [],
+  "projectName": "Fix frontend production build/deployment and retry build",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

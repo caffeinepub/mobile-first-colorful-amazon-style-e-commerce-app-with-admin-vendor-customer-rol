@@ -229,6 +229,7 @@ export interface backendInterface {
     getWishlist(): Promise<Array<string>>;
     isCallerAdmin(): Promise<boolean>;
     isVendor(): Promise<boolean>;
+    markVendorAsPaid(vendorPrincipal: Principal): Promise<void>;
     rejectVendor(vendorPrincipal: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setVendorOutletStatus(vendorPrincipal: Principal, status: OutletStatus): Promise<void>;
@@ -781,6 +782,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.isVendor();
+            return result;
+        }
+    }
+    async markVendorAsPaid(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.markVendorAsPaid(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.markVendorAsPaid(arg0);
             return result;
         }
     }

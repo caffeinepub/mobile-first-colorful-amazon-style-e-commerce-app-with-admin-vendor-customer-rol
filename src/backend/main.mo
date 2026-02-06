@@ -9,10 +9,7 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
-import Migration "migration";
 
-// Apply migration logic to transform old actor state on upgrades
-(with migration = Migration.run)
 actor {
   include MixinStorage();
 
@@ -129,7 +126,7 @@ actor {
   let vendorPrincipals = Map.empty<Principal, Bool>();
 
   // Track if we've initialized the first admin
-  stable var hasInitializedAdmin = false;
+  var hasInitializedAdmin = false;
 
   // =========================
   // Authorization with Persistent State
@@ -425,6 +422,26 @@ actor {
       case (?vendor) { vendor };
     };
     vendor.documents;
+  };
+
+  // DOWN PAYMENT MANAGEMENT FEATURE
+
+  public shared ({ caller }) func markVendorAsPaid(vendorPrincipal : Principal) : async () {
+    ensureAdminExists(caller);
+    if (not callerIsAdmin(caller)) {
+      Runtime.trap("Unauthorized: Only admins can mark vendor payments");
+    };
+    let vendor = switch (vendors.get(vendorPrincipal)) {
+      case (null) { Runtime.trap("Vendor not found") };
+      case (?vendor) { vendor };
+    };
+
+    let updatedVendor = {
+      vendor with
+      walletDue = 0;
+      outletStatus = #enabled;
+    };
+    vendors.add(vendorPrincipal, updatedVendor);
   };
 
   // =========================

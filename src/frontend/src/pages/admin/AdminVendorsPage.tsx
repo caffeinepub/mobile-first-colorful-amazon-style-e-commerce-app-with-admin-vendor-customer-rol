@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Users, CheckCircle, XCircle, Power, FileText, Eye, Download } from 'lucide-react';
+import { Users, CheckCircle, XCircle, Power, FileText, Eye, Download, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useGetVendors, useApproveVendor, useRejectVendor, useSetVendorOutletStatus, useGetVendorDocuments } from '../../hooks/useQueries';
+import { useGetVendors, useApproveVendor, useRejectVendor, useSetVendorOutletStatus, useGetVendorDocuments, useMarkVendorAsPaid } from '../../hooks/useQueries';
 import { toast } from 'sonner';
 import { formatInr } from '../../utils/formatInr';
+import { extractErrorMessage } from '../../utils/errors';
 import { OutletStatus } from '../../backend';
 import type { Vendor } from '../../backend';
 import { Principal } from '@dfinity/principal';
@@ -18,6 +19,7 @@ export default function AdminVendorsPage() {
   const approveVendor = useApproveVendor();
   const rejectVendor = useRejectVendor();
   const setOutletStatus = useSetVendorOutletStatus();
+  const markAsPaid = useMarkVendorAsPaid();
   
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [documentsDialogOpen, setDocumentsDialogOpen] = useState(false);
@@ -31,7 +33,7 @@ export default function AdminVendorsPage() {
       toast.success('Vendor approved successfully!');
     } catch (error: any) {
       toast.error('Failed to approve vendor', {
-        description: error.message || 'Please try again.',
+        description: extractErrorMessage(error),
       });
     }
   };
@@ -44,7 +46,7 @@ export default function AdminVendorsPage() {
       toast.success('Vendor rejected and removed');
     } catch (error: any) {
       toast.error('Failed to reject vendor', {
-        description: error.message || 'Please try again.',
+        description: extractErrorMessage(error),
       });
     }
   };
@@ -68,7 +70,22 @@ export default function AdminVendorsPage() {
       );
     } catch (error: any) {
       toast.error('Failed to update outlet status', {
-        description: error.message || 'Please try again.',
+        description: extractErrorMessage(error),
+      });
+    }
+  };
+
+  const handleMarkAsPaid = async (vendor: Vendor) => {
+    if (!confirm(`Mark ${vendor.name} as paid? This will reset their wallet to ₹0 and enable their outlet.`)) return;
+    
+    try {
+      await markAsPaid.mutateAsync(vendor.principal);
+      toast.success('Payment recorded successfully!', {
+        description: `${vendor.name}'s wallet has been reset and outlet enabled.`,
+      });
+    } catch (error: any) {
+      toast.error('Failed to mark vendor as paid', {
+        description: extractErrorMessage(error),
       });
     }
   };
@@ -226,6 +243,27 @@ export default function AdminVendorsPage() {
                         </>
                       )}
                     </Button>
+                    {walletDue > 0 && (
+                      <Button
+                        onClick={() => handleMarkAsPaid(vendor)}
+                        disabled={markAsPaid.isPending}
+                        variant="default"
+                        size="sm"
+                        className="flex-1 min-w-[120px] bg-green-600 hover:bg-green-700"
+                      >
+                        {markAsPaid.isPending ? (
+                          <>
+                            <span className="animate-spin mr-2">⏳</span>
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            Mark as Paid
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

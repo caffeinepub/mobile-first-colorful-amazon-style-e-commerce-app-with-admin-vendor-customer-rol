@@ -136,6 +136,7 @@ export interface backendInterface {
     getWishlist(): Promise<Array<string>>;
     isCallerAdmin(): Promise<boolean>;
     isVendor(): Promise<boolean>;
+    markVendorAsPaid(vendorPrincipal: Principal): Promise<void>;
     rejectVendor(vendorPrincipal: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setVendorOutletStatus(vendorPrincipal: Principal, status: OutletStatus): Promise<void>;

@@ -1,126 +1,81 @@
 {
   "kind": "build_request",
-  "title": "Upgrade Admin Dashboard into a full admin control panel (Vendor Management + Orders Panel)",
+  "title": "Fix frontend production build/deployment and retry build",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Upgrade the /admin landing page into an Admin Control Panel that shows visible navigation cards and menu options for the admin sections: Vendor Management and Orders Panel (and keep existing admin sections accessible).",
+      "text": "Restore the missing frontend build configuration required for production builds by adding `frontend/vite.config.ts` and `frontend/tsconfig.json` (and any other required root frontend config files) so the frontend can compile successfully in the deployment environment.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-1",
+          "msg-2",
+          "msg-3"
         ],
         "quotes": [
-          "Upgrade the Admin Dashboard to a full control panel.\n\nAdd these admin sections with visible cards and menu options:\n\n1) Vendor Management\n...\n\n2) Orders Panel\n..."
+          "try again"
         ]
       },
       "acceptanceCriteria": [
-        "Visiting /admin shows a control panel page with at least two prominent cards: “Vendor Management” and “Orders Panel”.",
-        "The control panel provides persistent menu/navigation options (e.g., top tabs/links) that allow navigating to Vendor Management and Orders Panel pages without relying only on browser back.",
-        "Existing admin routes (/admin/products, /admin/vendors, /admin/orders) remain reachable and do not regress."
+        "`frontend/vite.config.ts` exists and is valid for a Vite + React + TypeScript project.",
+        "`frontend/tsconfig.json` exists and is valid for a Vite + React + TypeScript project.",
+        "A production build completes without configuration-file-not-found errors (e.g., missing Vite/TS config)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement the Vendor Management admin section to support: viewing all vendors, approving/rejecting vendors, enabling/disabling vendor outlets, and viewing vendor documents.",
-      "target": "both",
+      "text": "Fix the production build-time incompatibility caused by `process.env.II_URL` being referenced in the browser bundle (in the read-only `frontend/src/hooks/useInternetIdentity.ts`) by updating the Vite build configuration to shim/define `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, without editing any immutable hook files.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-1",
+          "msg-2",
+          "msg-3"
         ],
         "quotes": [
-          "1) Vendor Management\n- View all vendors\n- Approve / Reject vendor\n- Enable / Disable vendor outlet\n- View vendor documents"
+          "try again"
         ]
       },
       "acceptanceCriteria": [
-        "Admin can see a list/table/grid of all vendors (using backend data, not static data).",
-        "Each vendor row/card provides actions to set approval state (Approve and Reject) and reflects the current approval state in the UI.",
-        "Each vendor row/card provides an Enable/Disable outlet control and reflects current outlet status in the UI.",
-        "Vendor documents are viewable per vendor (a vendor details panel/page/modal is acceptable) and the UI gracefully shows an empty state when no documents exist.",
-        "All vendor management actions show success/error feedback and refresh vendor data after mutations."
+        "The production build does not fail with errors like `process is not defined` or missing `process.env` references.",
+        "Internet Identity login still works in production builds using the configured identity provider URL.",
+        "No changes are made to immutable paths (including `frontend/src/hooks/useInternetIdentity.ts`)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Extend the backend vendor model and APIs so the admin UI can approve/reject vendors and fetch vendor documents for viewing.",
-      "target": "backend",
+      "text": "Run through the full build/deploy verification steps and ensure the deployed app loads successfully, documenting any required environment variables (e.g., `VITE_II_URL`) in `frontend/DEPLOYMENT.md` if additional adjustments were needed.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-1",
+          "msg-2",
+          "msg-3"
         ],
         "quotes": [
-          "- Approve / Reject vendor\n- View vendor documents"
+          "try again"
         ]
       },
       "acceptanceCriteria": [
-        "Backend exposes admin-authorized operations to set a vendor’s approval state (e.g., via updating the vendor record).",
-        "Backend exposes an admin-authorized query to fetch a vendor’s document list by vendor principal.",
-        "Vendor documents are stored in canister state and include enough metadata for display (at minimum: name/title and a retrievable blob reference) and can be returned to the frontend for viewing/download.",
-        "All new/updated admin endpoints enforce admin authorization consistently with existing admin-only patterns (e.g., same style as getVendors/getAllOrders)."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Implement the Orders Panel admin section to support viewing all orders, filtering by city (Kanpur, Unnao), and order status tracking.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "2) Orders Panel\n- View all orders\n- Filter by city (Kanpur, Unnao)\n- Order status tracking"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Admin can view all orders (existing behavior remains).",
-        "Orders page includes a city filter control with options: All, Kanpur, Unnao.",
-        "Selecting a city filters the visible orders accordingly.",
-        "Order status tracking remains visible per order (status badge/text) and existing status update behavior continues to work."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Extend the backend order model so each order has a city value that can be used by the admin Orders Panel filter (Kanpur/Unnao), and ensure existing order creation provides/populates this value.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "- Filter by city (Kanpur, Unnao)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Order records include a city field suitable for filtering in the admin UI.",
-        "Order creation logic populates the city field (using an explicit input or a deterministic derivation from existing stored data) so newly created orders can be filtered by city.",
-        "Admin getAllOrders continues to work and returns city data with each order."
+        "A production build succeeds end-to-end.",
+        "The deployed frontend loads in the browser without a blank screen or immediate runtime crash.",
+        "`frontend/DEPLOYMENT.md` reflects the final, correct deployment prerequisites (including environment variables) if changes were required."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit files under frontend/src/components/ui (compose existing shadcn components instead).",
-    "Do not modify frontend immutable hook paths listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/main.tsx).",
-    "User-facing text must be in English."
+    "Backend must remain a single Motoko actor in `backend/main.mo`; do not introduce additional backend services.",
+    "Do not edit files in `frontend/immutablePaths` (including `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`, and `frontend/src/main.tsx`).",
+    "Use English for all user-facing text."
   ],
   "nonGoals": [
-    "Adding third-party authentication providers (only Internet Identity is supported).",
-    "Adding real-time updates via WebSockets or push notifications.",
-    "Implementing external database storage; persistence must remain within the canister/state patterns already used."
+    "Adding new product features unrelated to build/deploy stability.",
+    "Refactoring authentication flows beyond what is required to fix the build/deployment.",
+    "Changing backend schemas or adding migrations (not requested)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

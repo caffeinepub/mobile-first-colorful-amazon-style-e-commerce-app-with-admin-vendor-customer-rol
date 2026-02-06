@@ -1,91 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin Control Panel: Vendor Management + Orders Panel (frontend upgrade)",
+  "title": "Restore Vite/TS config and shim Internet Identity env for successful production builds",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Upgrade /admin into an Admin Control Panel with prominent navigation cards and persistent admin navigation, while keeping existing admin routes reachable.",
+      "summary": "Restore missing Vite + React + TypeScript production build configuration files so the frontend compiles in deployment.",
       "acceptanceCriteria": [
-        "Visiting /admin shows a control panel page with at least two prominent cards: “Vendor Management” and “Orders Panel”.",
-        "The control panel provides persistent menu/navigation options (e.g., top tabs/links) that allow navigating to Vendor Management and Orders Panel pages without relying only on browser back.",
-        "Existing admin routes (/admin/products, /admin/vendors, /admin/orders) remain reachable and do not regress."
+        "`frontend/vite.config.ts` exists and is valid for a Vite + React + TypeScript project.",
+        "`frontend/tsconfig.json` exists and is valid for a Vite + React + TypeScript project.",
+        "A production build completes without configuration-file-not-found errors (e.g., missing Vite/TS config)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/admin/AdminNav.tsx",
+          "path": "frontend/vite.config.ts",
           "operation": "create",
-          "description": "Create a shared AdminNav component (tabs/links) for persistent navigation across admin pages (Control Panel, Vendor Management, Orders Panel, and existing admin sections). Verify the component's usage instructions before implementing."
+          "description": "Create a Vite configuration for React + TypeScript builds, including React plugin setup and any required build defaults for deployment stability."
         },
         {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Replace the current vendor-list dashboard UI with an Admin Control Panel layout: add prominent navigation cards linking to Vendor Management (/admin/vendors) and Orders Panel (/admin/orders), and include the shared AdminNav for persistent navigation."
+          "path": "frontend/tsconfig.json",
+          "operation": "create",
+          "description": "Create the root TypeScript config for the frontend with appropriate compilerOptions for a Vite + React app (including JSX, module resolution, and any needed path aliasing used by the codebase such as `@/*`)."
         },
         {
-          "path": "frontend/src/pages/admin/AdminProductsPage.tsx",
-          "operation": "modify",
-          "description": "Wire in the shared AdminNav so persistent admin navigation is available on the Products admin page (ensuring existing functionality remains intact)."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminVendorsPage.tsx",
-          "operation": "modify",
-          "description": "Wire in the shared AdminNav so persistent admin navigation is available on the Vendor Management page (while implementing the expanded vendor management capabilities in REQ-2)."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
-          "operation": "modify",
-          "description": "Wire in the shared AdminNav so persistent admin navigation is available on the Orders Panel page (while implementing city filtering in REQ-4)."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Tighten admin route protection by using the authorization component’s role-gated UI approach (use RequireRole requiredRole=\"admin\" around admin routes) and ensure the /admin, /admin/products, /admin/vendors, /admin/orders routes remain registered and reachable. Verify the component's usage instructions before implementing."
+          "path": "frontend/tsconfig.node.json",
+          "operation": "create",
+          "description": "Add a Node-oriented TS config used by Vite tooling/config typing (to prevent deployment/build environments from failing when type-checking `vite.config.ts`)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Implement Vendor Management admin UX: list vendors from backend data, approve/reject, enable/disable outlets, and view vendor documents with success/error feedback and data refresh.",
+      "summary": "Prevent `process.env.II_URL` browser-bundle failures by shimming/defining it at Vite build time (without editing immutable hook files).",
       "acceptanceCriteria": [
-        "Admin can see a list/table/grid of all vendors (using backend data, not static data).",
-        "Each vendor row/card provides actions to set approval state (Approve and Reject) and reflects the current approval state in the UI.",
-        "Each vendor row/card provides an Enable/Disable outlet control and reflects current outlet status in the UI.",
-        "Vendor documents are viewable per vendor (a vendor details panel/page/modal is acceptable) and the UI gracefully shows an empty state when no documents exist.",
-        "All vendor management actions show success/error feedback and refresh vendor data after mutations."
+        "The production build does not fail with errors like `process is not defined` or missing `process.env` references.",
+        "Internet Identity login still works in production builds using the configured identity provider URL.",
+        "No changes are made to immutable paths (including `frontend/src/hooks/useInternetIdentity.ts`)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/vite.config.ts",
           "operation": "modify",
-          "description": "Add/adjust React Query hooks to use backend vendor admin capabilities: fetch all vendors, approve vendor, reject vendor, set vendor outlet status, and fetch vendor documents. Ensure mutations invalidate/refetch vendor queries and surface errors for UI feedback."
+          "description": "Update Vite config to define/shim `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, ensuring the bundle does not rely on a runtime `process` object."
         },
         {
-          "path": "frontend/src/pages/admin/AdminVendorsPage.tsx",
+          "path": "frontend/src/vite-env.d.ts",
           "operation": "modify",
-          "description": "Upgrade the page into the Vendor Management section: render all vendors from backend data; add Approve/Reject actions that reflect verified state; add Enable/Disable outlet controls reflecting outletStatus; add a documents viewer (Dialog/Drawer) that fetches documents per vendor, shows empty state, and supports opening/downloading via blob-storage ExternalBlob direct URLs. Verify the component's usage instructions before implementing."
+          "description": "Ensure TypeScript environment variable typings include `VITE_II_URL` (and remain compatible with the Vite-based solution for selecting the Internet Identity provider URL)."
         }
       ]
     },
     {
-      "id": "REQ-4",
-      "summary": "Enhance the admin Orders Panel to support city filtering (All/Kanpur/Unnao) while preserving order status visibility and status update behavior.",
+      "id": "REQ-3",
+      "summary": "Document build/deploy verification steps and required environment variables for a successful deployed frontend.",
       "acceptanceCriteria": [
-        "Admin can view all orders (existing behavior remains).",
-        "Orders page includes a city filter control with options: All, Kanpur, Unnao.",
-        "Selecting a city filters the visible orders accordingly.",
-        "Order status tracking remains visible per order (status badge/text) and existing status update behavior continues to work."
+        "A production build succeeds end-to-end.",
+        "The deployed frontend loads in the browser without a blank screen or immediate runtime crash.",
+        "`frontend/DEPLOYMENT.md` reflects the final, correct deployment prerequisites (including environment variables) if changes were required."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/DEPLOYMENT.md",
           "operation": "modify",
-          "description": "Add an optional city-scoped orders query hook that can call the backend city-filter capability when a city filter is selected, while keeping the existing all-orders query for the 'All' option."
-        },
-        {
-          "path": "frontend/src/pages/admin/AdminOrdersPage.tsx",
-          "operation": "modify",
-          "description": "Add a city filter control (All, Kanpur, Unnao) and filter the displayed orders accordingly (either client-side using the order.city field or by switching to the city-scoped query). Keep existing status badge display and status update mutation behavior unchanged."
+          "description": "Update deployment documentation to reflect the final fix approach (Vite-time shim for `process.env.II_URL` without changing immutable hooks), list required/optional environment variables (e.g., `VITE_II_URL`), and provide concise build + deploy verification steps to confirm the app loads successfully."
         }
       ]
     }

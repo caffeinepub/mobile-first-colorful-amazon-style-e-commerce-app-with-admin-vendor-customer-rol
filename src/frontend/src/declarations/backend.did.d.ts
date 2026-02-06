@@ -147,6 +147,7 @@ export interface _SERVICE {
   'getWishlist' : ActorMethod<[], Array<string>>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isVendor' : ActorMethod<[], boolean>,
+  'markVendorAsPaid' : ActorMethod<[Principal], undefined>,
   'rejectVendor' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setVendorOutletStatus' : ActorMethod<[Principal, OutletStatus], undefined>,
