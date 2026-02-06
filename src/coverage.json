@@ -1,63 +1,96 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T06:17:06.916Z",
+  "generatedAt": "2026-02-06T09:55:59.107Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 5,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Restore the missing frontend build configuration required for production builds by adding `frontend/vite.config.ts` and `frontend/tsconfig.json` (and any other required root frontend config files) so the frontend can compile successfully in the deployment environment.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/vite.config.ts",
-          "frontend/tsconfig.json",
-          "frontend/tsconfig.node.json"
-        ],
-        "matchedFiles": [
-          "frontend/vite.config.ts",
-          "frontend/tsconfig.node.json"
-        ]
+        "summary": "Update the commission logic so that a 10% commission is added to a vendor’s wallet due only when an order transitions to status \"delivered\" (not when the order is created). Ensure the commission is applied exactly once per order (i.e., changing status to \"delivered\" multiple times must not keep increasing wallet due).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-2",
-        "summary": "Fix the production build-time incompatibility caused by `process.env.II_URL` being referenced in the browser bundle (in the read-only `frontend/src/hooks/useInternetIdentity.ts`) by updating the Vite build configuration to shim/define `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, without editing any immutable hook files.",
+        "summary": "Enforce the wallet limit rule: when vendor.walletDue becomes >= 1000 due to commission accrual, automatically set the vendor’s outletStatus to \"disabled\" in the backend. When the outlet is disabled, customer-facing product listings must not include products belonging to that vendor (i.e., hide disabled-outlet products from customers).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/vite.config.ts",
-          "frontend/src/vite-env.d.ts"
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/vite.config.ts"
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Run through the full build/deploy verification steps and ensure the deployed app loads successfully, documenting any required environment variables (e.g., `VITE_II_URL`) in `frontend/DEPLOYMENT.md` if additional adjustments were needed.",
+        "summary": "Update vendor-facing UI to show a wallet panel that includes: Wallet Due, Commission Rate (fixed at 10%), and Limit (fixed at 1000). When walletDue >= 1000 and/or outletStatus is disabled, show a prominent red warning banner on vendor dashboard and vendor wallet pages.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/DEPLOYMENT.md"
+          "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "frontend/src/pages/vendor/VendorWalletPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/DEPLOYMENT.md"
+          "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+          "frontend/src/pages/vendor/VendorWalletPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Add an \"Outlet Profile\" section for vendors that displays: Outlet Name, Photo, Mobile, City, Area, Aadhaar (masked), and GST (optional). Aadhaar must be displayed in a masked form (do not show the full Aadhaar value in the UI).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/maskAadhaar.ts",
+          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/maskAadhaar.ts",
+          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add an \"Edit Outlet\" button in the vendor profile area that allows the vendor to update Outlet Profile fields (including changing the outlet photo). Persist the changes to the backend and refresh relevant vendor queries so the updated profile appears immediately after saving.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/vendor/EditOutletDialog.tsx",
+          "frontend/src/pages/vendor/VendorProfilePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/vendor/EditOutletDialog.tsx",
+          "frontend/src/pages/vendor/VendorProfilePage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/DEPLOYMENT.md",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/vendor/EditOutletDialog.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/CheckoutPage.tsx",
+    "frontend/src/pages/ProductPage.tsx",
+    "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+    "frontend/src/pages/vendor/VendorProfilePage.tsx",
+    "frontend/src/pages/vendor/VendorWalletPage.tsx",
+    "frontend/src/utils/maskAadhaar.ts",
     "frontend/src/utils/urlParams.ts",
-    "frontend/tsconfig.node.json",
-    "frontend/vite.config.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

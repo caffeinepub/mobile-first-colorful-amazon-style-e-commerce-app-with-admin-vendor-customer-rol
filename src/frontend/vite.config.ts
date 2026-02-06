@@ -18,6 +18,9 @@ export default defineConfig({
     'process.env.II_URL': JSON.stringify(
       process.env.VITE_II_URL || 'https://identity.ic0.app'
     ),
+    // Additional shims to prevent any remaining process references
+    'process.env': '{}',
+    'process': '{ env: {} }',
   },
   build: {
     outDir: 'dist',

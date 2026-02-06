@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, UserRole__1, City, OutletStatus } from '../backend';
+import type { Product, Category, CartItem, Order, UserProfile, Vendor, Review, UserRole__1, City, AnalyticsData } from '../backend';
+import { OutletStatus, ExternalBlob } from '../backend';
 import { Principal } from '@dfinity/principal';
-import { ExternalBlob } from '../backend';
 
 // User Profile Queries
 export function useGetCallerUserProfile() {
@@ -142,7 +142,7 @@ export function useAssignAdminRole() {
   });
 }
 
-// Product Queries
+// Product Queries - Customer-facing uses getCustomerProducts
 export function useGetProducts(sortBy: string = 'name') {
   const { actor, isFetching } = useActor();
 
@@ -150,26 +150,9 @@ export function useGetProducts(sortBy: string = 'name') {
     queryKey: ['products', sortBy],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllProducts();
+      return actor.getCustomerProducts();
     },
     enabled: !!actor && !isFetching,
-  });
-}
-
-export function useGetProduct(productId: string) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Product | null>({
-    queryKey: ['product', productId],
-    queryFn: async () => {
-      if (!actor) return null;
-      try {
-        return await actor.getProduct(productId);
-      } catch {
-        return null;
-      }
-    },
-    enabled: !!actor && !isFetching && !!productId,
   });
 }
 
@@ -200,7 +183,6 @@ export function useUpdateProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['product'] });
       queryClient.invalidateQueries({ queryKey: ['vendorProducts'] });
     },
   });
@@ -354,6 +336,8 @@ export function useCreateOrder() {
       queryClient.invalidateQueries({ queryKey: ['ordersByCity'] });
       queryClient.invalidateQueries({ queryKey: ['vendorOrders'] });
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
+      queryClient.invalidateQueries({ queryKey: ['callerVendor'] });
+      queryClient.invalidateQueries({ queryKey: ['adminAnalytics'] });
     },
   });
 }
@@ -390,6 +374,61 @@ export function useGetVendorOrders() {
       }
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetCallerVendor() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  const query = useQuery<Vendor | null>({
+    queryKey: ['callerVendor'],
+    queryFn: async () => {
+      if (!actor) return null;
+      try {
+        return await actor.getCallerVendor();
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!actor && !actorFetching,
+    retry: false,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
+}
+
+export function useUpdateOutletProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      name,
+      outletName,
+      mobile,
+      area,
+      outletPhoto,
+      city,
+      gst,
+    }: {
+      name: string;
+      outletName: string;
+      mobile: string;
+      area: string;
+      outletPhoto: ExternalBlob;
+      city: City;
+      gst: string | null;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateOutletProfile(name, outletName, mobile, area, outletPhoto, city, gst);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['callerVendor'] });
+    },
   });
 }
 
@@ -445,6 +484,25 @@ export function useGetVendors() {
   });
 }
 
+export function useGetAdminAnalytics() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<AnalyticsData>({
+    queryKey: ['adminAnalytics'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      try {
+        return await actor.getAnalyticsData();
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error);
+        throw error;
+      }
+    },
+    enabled: !!actor && !isFetching,
+    retry: false,
+  });
+}
+
 export function useApproveVendor() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -454,7 +512,33 @@ export function useApproveVendor() {
       if (!actor) throw new Error('Actor not available');
       return actor.approveVendor(vendorPrincipal);
     },
-    onSuccess: () => {
+    onMutate: async (vendorPrincipal) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['vendors'] });
+
+      // Snapshot previous value
+      const previousVendors = queryClient.getQueryData<Vendor[]>(['vendors']);
+
+      // Optimistically update to the new value
+      if (previousVendors) {
+        queryClient.setQueryData<Vendor[]>(['vendors'], (old) =>
+          old?.map((v) =>
+            v.principal.toString() === vendorPrincipal.toString()
+              ? { ...v, verified: true }
+              : v
+          ) || []
+        );
+      }
+
+      return { previousVendors };
+    },
+    onError: (err, vendorPrincipal, context) => {
+      // Rollback on error
+      if (context?.previousVendors) {
+        queryClient.setQueryData(['vendors'], context.previousVendors);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
     },
   });
@@ -469,7 +553,29 @@ export function useRejectVendor() {
       if (!actor) throw new Error('Actor not available');
       return actor.rejectVendor(vendorPrincipal);
     },
-    onSuccess: () => {
+    onMutate: async (vendorPrincipal) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['vendors'] });
+
+      // Snapshot previous value
+      const previousVendors = queryClient.getQueryData<Vendor[]>(['vendors']);
+
+      // Optimistically remove vendor from list
+      if (previousVendors) {
+        queryClient.setQueryData<Vendor[]>(['vendors'], (old) =>
+          old?.filter((v) => v.principal.toString() !== vendorPrincipal.toString()) || []
+        );
+      }
+
+      return { previousVendors };
+    },
+    onError: (err, vendorPrincipal, context) => {
+      // Rollback on error
+      if (context?.previousVendors) {
+        queryClient.setQueryData(['vendors'], context.previousVendors);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
     },
   });
@@ -484,7 +590,33 @@ export function useSetVendorOutletStatus() {
       if (!actor) throw new Error('Actor not available');
       return actor.setVendorOutletStatus(vendorPrincipal, status);
     },
-    onSuccess: () => {
+    onMutate: async ({ vendorPrincipal, status }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['vendors'] });
+
+      // Snapshot previous value
+      const previousVendors = queryClient.getQueryData<Vendor[]>(['vendors']);
+
+      // Optimistically update outlet status
+      if (previousVendors) {
+        queryClient.setQueryData<Vendor[]>(['vendors'], (old) =>
+          old?.map((v) =>
+            v.principal.toString() === vendorPrincipal.toString()
+              ? { ...v, outletStatus: status }
+              : v
+          ) || []
+        );
+      }
+
+      return { previousVendors };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousVendors) {
+        queryClient.setQueryData(['vendors'], context.previousVendors);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
     },
   });
@@ -499,8 +631,35 @@ export function useMarkVendorAsPaid() {
       if (!actor) throw new Error('Actor not available');
       return actor.markVendorAsPaid(vendorPrincipal);
     },
-    onSuccess: () => {
+    onMutate: async (vendorPrincipal) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['vendors'] });
+
+      // Snapshot previous value
+      const previousVendors = queryClient.getQueryData<Vendor[]>(['vendors']);
+
+      // Optimistically update wallet and outlet status
+      if (previousVendors) {
+        queryClient.setQueryData<Vendor[]>(['vendors'], (old) =>
+          old?.map((v) =>
+            v.principal.toString() === vendorPrincipal.toString()
+              ? { ...v, walletDue: BigInt(0), outletStatus: OutletStatus.enabled }
+              : v
+          ) || []
+        );
+      }
+
+      return { previousVendors };
+    },
+    onError: (err, vendorPrincipal, context) => {
+      // Rollback on error
+      if (context?.previousVendors) {
+        queryClient.setQueryData(['vendors'], context.previousVendors);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
+      queryClient.invalidateQueries({ queryKey: ['callerVendor'] });
     },
   });
 }
@@ -533,6 +692,7 @@ export function useUpdateVendor() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
+      queryClient.invalidateQueries({ queryKey: ['callerVendor'] });
     },
   });
 }
@@ -547,7 +707,6 @@ export function useAddReview() {
       return actor.addReview(productId, review);
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['product', variables.productId] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
@@ -567,6 +726,8 @@ export function useUpdateOrderStatus() {
       queryClient.invalidateQueries({ queryKey: ['ordersByCity'] });
       queryClient.invalidateQueries({ queryKey: ['vendorOrders'] });
       queryClient.invalidateQueries({ queryKey: ['customerOrders'] });
+      queryClient.invalidateQueries({ queryKey: ['callerVendor'] });
+      queryClient.invalidateQueries({ queryKey: ['vendors'] });
     },
   });
 }

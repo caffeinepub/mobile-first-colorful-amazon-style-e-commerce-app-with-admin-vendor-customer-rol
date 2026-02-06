@@ -1,38 +1,83 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
+  "summary": "Build vendor-side wallet and commission system with outlet disabling rules and an outlet profile management section.",
+  "architectural_notes": [
+    "Commission accrues automatically at a fixed 10% rate per delivered order.",
+    "Outlet availability to customers depends on wallet_due threshold (>= 1000 disables outlet and hides products).",
+    "Store and display Aadhaar only in masked form; GST field is optional."
+  ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-restore-the-missing-frontend-build-configuration-required-for-production-builds-by-adding-frontend-vite-config-ts-and-frontend-tsconfig-json-and-any-other-required-root-frontend-config-files-so-the-frontend-can-compile-successfully-in-the-deployment-environment",
-      "title": "Restore the missing frontend build configuration required for production builds by adding `frontend/vite.config.ts` and `frontend/tsconfig.json` (and any other required root frontend config files) so the frontend can compile successfully in the deployment environment.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-production-build-time-incompatibility-caused-by-process-env-ii-url-being-referenced-in-the-browser-bundle-in-the-read-only-frontend-src-hooks-useinternetidentity-ts-by-updating-the-vite-build-configuration-to-shim-define-process-env-ii-url-at-build-time-using-a-safe-default-e-g-https-identity-ic0-app-and-or-import-meta-env-vite-ii-url-without-editing-any-immutable-hook-files",
-      "title": "Fix the production build-time incompatibility caused by `process.env.II_URL` being referenced in the browser bundle (in the read-only `frontend/src/hooks/useInternetIdentity.ts`) by updating the Vite build configuration to shim/define `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, without editing any immutable hook files.",
+      "id": "feature-enforce-the-wallet-limit-rule-when-vendor-walletdue-becomes-1000-due-to-commission-accrual-automatically-set-the-vendor-s-outletstatus-to-disabled-in-the-backend-when-the-outlet-is-disabled-customer-facing-product-listings-must-not-include-products-belonging-to-that-vendor-i-e-hide-disabled-outlet-products-from-customers",
+      "title": "Enforce the wallet limit rule: when vendor.walletDue becomes >= 1000 due to commission accrual, automatically set the vendor’s outletStatus to \"disabled\" in the backend. When the outlet is disabled, customer-facing product listings must not include products belonging to that vendor (i.e., hide disabled-outlet products from customers).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-run-through-the-full-build-deploy-verification-steps-and-ensure-the-deployed-app-loads-successfully-documenting-any-required-environment-variables-e-g-vite-ii-url-in-frontend-deployment-md-if-additional-adjustments-were-needed",
-      "title": "Run through the full build/deploy verification steps and ensure the deployed app loads successfully, documenting any required environment variables (e.g., `VITE_II_URL`) in `frontend/DEPLOYMENT.md` if additional adjustments were needed.",
+      "id": "feature-update-vendor-facing-ui-to-show-a-wallet-panel-that-includes-wallet-due-commission-rate-fixed-at-10-and-limit-fixed-at-1000-when-walletdue-1000-and-or-outletstatus-is-disabled-show-a-prominent-red-warning-banner-on-vendor-dashboard-and-vendor-wallet-pages",
+      "title": "Update vendor-facing UI to show a wallet panel that includes: Wallet Due, Commission Rate (fixed at 10%), and Limit (fixed at 1000). When walletDue >= 1000 and/or outletStatus is disabled, show a prominent red warning banner on vendor dashboard and vendor wallet pages.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-an-outlet-profile-section-for-vendors-that-displays-outlet-name-photo-mobile-city-area-aadhaar-masked-and-gst-optional-aadhaar-must-be-displayed-in-a-masked-form-do-not-show-the-full-aadhaar-value-in-the-ui",
+      "title": "Add an \"Outlet Profile\" section for vendors that displays: Outlet Name, Photo, Mobile, City, Area, Aadhaar (masked), and GST (optional). Aadhaar must be displayed in a masked form (do not show the full Aadhaar value in the UI).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-edit-outlet-button-in-the-vendor-profile-area-that-allows-the-vendor-to-update-outlet-profile-fields-including-changing-the-outlet-photo-persist-the-changes-to-the-backend-and-refresh-relevant-vendor-queries-so-the-updated-profile-appears-immediately-after-saving",
+      "title": "Add an \"Edit Outlet\" button in the vendor profile area that allows the vendor to update Outlet Profile fields (including changing the outlet photo). Persist the changes to the backend and refresh relevant vendor queries so the updated profile appears immediately after saving.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix frontend production build/deployment and retry build",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Vendor Wallet & Commission system: auto-add 10% commission per delivered order; show wallet panel (wallet due, 10% rate, limit 1000).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Enforcement when wallet_due >= 1000: auto-disable vendor outlet, hide products from customers, and show red warning banner.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Outlet Profile section: outlet name, photo, mobile, city, area, masked Aadhaar, optional GST.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add 'Edit Outlet' button for outlet profile details.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Update the commission logic so that a 10% commission is added to a vendor’s wallet due only when an order transitions to status \"delivered\" (not when the order is created). Ensure the commission is applied exactly once per order (i.e., changing status to \"delivered\" multiple times must not keep increasing wallet due).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Add vendor wallet commission enforcement and outlet profile management",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

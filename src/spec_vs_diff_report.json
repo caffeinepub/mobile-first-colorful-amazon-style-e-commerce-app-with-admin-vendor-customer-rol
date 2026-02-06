@@ -1,50 +1,91 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T06:17:06.912Z",
-  "summary": "Diff adds `frontend/vite.config.ts` with a `define` shim for `process.env.II_URL` and adds `frontend/tsconfig.node.json`. It also updates `frontend/DEPLOYMENT.md` with environment variable guidance and verification steps. However, `frontend/tsconfig.json` (explicitly required) is not present in the diff, and there are unrelated frontend utility/documentation-summary changes not requested by the BuildRequest.",
+  "generatedAt": "2026-02-06T09:55:59.103Z",
+  "summary": "The diff adds vendor outlet profile fields (including optional GST) and order-level commission tracking via a new `commissionApplied` flag, plus frontend UI for editing outlet profile and masking Aadhaar. Vendor dashboard/wallet UI now shows limit warnings. However, the diff summary does not provide clear evidence that backend commission accrual on delivered-transition, outlet auto-disable at walletDue>=1000, disabled-vendor filtering in customer product feeds, or backend persistence APIs for outlet edits are implemented.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Add `frontend/tsconfig.json` (valid for a Vite + React + TypeScript project) as part of restoring missing frontend build configuration.",
-      "reason": "The diff shows `frontend/vite.config.ts` and `frontend/tsconfig.node.json` added, but no `frontend/tsconfig.json` added or modified, despite being explicitly required.",
+      "requirement": "Update commission logic: add 10% commission to vendor.walletDue only when an order transitions to status \"delivered\", and apply it exactly once per order.",
+      "reason": "While `commissionApplied : Bool` is added to `Order` and migration sets it to false, the diff summary does not show any backend logic that updates `walletDue` on a non-delivered→delivered transition, floors total*0.10, or prevents double-application when status is set to delivered multiple times.",
       "evidence": [
-        "ADDED FILES list: frontend/tsconfig.node.json, frontend/vite.config.ts (no frontend/tsconfig.json shown)",
-        "frontend/DEPLOYMENT.md references `frontend/tsconfig.json` as created, but the diff does not include that file"
+        "backend/main.mo",
+        "backend/migration.mo"
       ]
     },
     {
-      "id": "REQ-3",
-      "requirement": "Ensure the deployed app loads successfully and that a production build succeeds end-to-end (verification, not just documentation).",
-      "reason": "While `frontend/DEPLOYMENT.md` documents steps, the diff summary provides no concrete evidence (logs/artifacts/config changes beyond docs) that an end-to-end production build and deployed-load verification actually occurred.",
+      "id": "REQ-2",
+      "requirement": "Enforce wallet limit: when walletDue becomes >= 1000 from commission accrual, automatically set vendor.outletStatus to \"disabled\"; hide disabled-outlet products from customer product feeds while still showing vendor’s own products in vendor feeds.",
+      "reason": "Frontend warning UI exists, and vendor records include `outletStatus`, but the diff summary does not show backend logic that automatically disables outlets when walletDue crosses 1000, nor evidence that customer-facing product listing queries (e.g., getAllProducts/getProducts) filter out products whose vendor outletStatus is disabled.",
       "evidence": [
-        "frontend/DEPLOYMENT.md (adds procedural steps but no build/deploy results)"
+        "backend/main.mo",
+        "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+        "frontend/src/pages/vendor/VendorWalletPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Outlet Profile section displays Outlet Name, Photo, Mobile, City, Area, Aadhaar (masked), and GST (optional).",
+      "reason": "Although vendor profile UI and masking utility are added, the backend migration initializes `aadhaar` to an empty string and does not indicate any constraints to avoid storing/displaying unmasked Aadhaar. Also, the vendor profile page content is truncated, so it is not fully evidenced that all fields (photo, mobile, city, area, masked Aadhaar, GST) are displayed.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo",
+        "frontend/src/pages/vendor/VendorProfilePage.tsx",
+        "frontend/src/utils/maskAadhaar.ts"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Add an \"Edit Outlet\" button allowing vendors to update outlet profile fields (including photo), persist to backend, and refresh relevant vendor queries immediately after saving; GST optional/clearable; Aadhaar not stored/displayed unmasked via vendor profile UI.",
+      "reason": "The UI dialog and button are present and `useUpdateOutletProfile` is called, but the diff summary does not show corresponding backend update method(s) in `backend/main.mo` to persist the changes, nor does it show the react-query mutation implementation/invalidation behavior for immediate refresh. Also, Aadhaar editing/storage rules are not evidenced in the dialog (Aadhaar is not present in the shown inputs) and backend storage constraints are not shown.",
+      "evidence": [
+        "frontend/src/components/vendor/EditOutletDialog.tsx",
+        "frontend/src/pages/vendor/VendorProfilePage.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Expanded URL parameter utilities (sessionStorage persistence, hash parameter handling, and hash cleanup) unrelated to build/deploy stability fixes.",
-      "reason": "Not requested by REQ-1/2/3 and appears to introduce additional behavior beyond fixing production build configuration/environment shimming.",
+      "description": "Added URL parameter/sessionStorage utilities unrelated to vendor commission enforcement or outlet profile management.",
+      "reason": "BuildRequest does not request URL param parsing/persistence helpers.",
       "evidence": [
         "frontend/src/utils/urlParams.ts"
       ]
     },
     {
-      "description": "Large set of UI/feature-oriented changes described in `frontend-file-summaries.txt` (admin dashboards, styling system, product grid, cart/checkout behavior, etc.).",
-      "reason": "BuildRequest non-goals explicitly exclude adding unrelated product features; these summaries describe substantial feature/UI work not tied to build/deploy stability.",
+      "description": "Admin UI/navigation enhancements (Admin dashboard/nav integration, vendor/order/admin product pages changes) beyond the requested vendor wallet/outlet profile work.",
+      "reason": "BuildRequest focuses on commission enforcement, outlet disabling/product hiding, and vendor outlet profile management; it does not request admin dashboard redesign/navigation additions.",
       "evidence": [
         "frontend-file-summaries.txt"
       ]
+    },
+    {
+      "description": "Significant visual/style refactors (global index.css overhaul, product grid styling, product page carousel enhancements) not requested.",
+      "reason": "BuildRequest does not ask for UI restyling or product page/carousel improvements.",
+      "evidence": [
+        "frontend-file-summaries.txt",
+        "frontend/src/pages/ProductPage.tsx",
+        "frontend/src/components/ProductGrid.tsx",
+        "frontend/src/index.css"
+      ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/DEPLOYMENT.md",
+    "frontend/src/components/vendor/EditOutletDialog.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/CheckoutPage.tsx",
+    "frontend/src/pages/ProductPage.tsx",
+    "frontend/src/pages/vendor/VendorDashboardPage.tsx",
+    "frontend/src/pages/vendor/VendorProfilePage.tsx",
+    "frontend/src/pages/vendor/VendorWalletPage.tsx",
+    "frontend/src/utils/maskAadhaar.ts",
     "frontend/src/utils/urlParams.ts",
-    "frontend/tsconfig.node.json",
-    "frontend/vite.config.ts",
     "project_state.json"
   ]
 }

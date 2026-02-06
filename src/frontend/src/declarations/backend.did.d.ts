@@ -10,6 +10,12 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AnalyticsData {
+  'totalOrders' : bigint,
+  'totalCommission' : bigint,
+  'totalSales' : bigint,
+  'totalVendors' : bigint,
+}
 export interface CartItem { 'productId' : string, 'quantity' : bigint }
 export interface Category {
   'id' : string,
@@ -31,6 +37,7 @@ export interface Order {
   'total' : bigint,
   'customer' : Principal,
   'city' : City,
+  'commissionApplied' : boolean,
   'vendor' : Principal,
   'timestamp' : Time,
   'items' : Array<OrderItem>,
@@ -79,12 +86,18 @@ export type UserRole__1 = { 'admin' : null } |
   { 'customer' : null } |
   { 'vendor' : null };
 export interface Vendor {
+  'gst' : [] | [string],
   'principal' : Principal,
   'verified' : boolean,
   'documents' : Array<ExternalBlob>,
   'outletStatus' : OutletStatus,
+  'area' : string,
+  'city' : City,
   'name' : string,
+  'aadhaar' : string,
+  'outletPhoto' : ExternalBlob,
   'outletName' : string,
+  'mobile' : string,
   'walletDue' : bigint,
 }
 export interface _CaffeineStorageCreateCertificateResult {
@@ -129,17 +142,21 @@ export interface _SERVICE {
   'deleteProduct' : ActorMethod<[string], undefined>,
   'getAllCategories' : ActorMethod<[], Array<Category>>,
   'getAllOrders' : ActorMethod<[], Array<Order>>,
-  'getAllProducts' : ActorMethod<[], Array<Product>>,
   'getAllVendors' : ActorMethod<[], Array<Vendor>>,
+  'getAnalyticsData' : ActorMethod<[], AnalyticsData>,
   'getCallerRole' : ActorMethod<[], UserRole__1>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getCallerVendor' : ActorMethod<[], [] | [Vendor]>,
   'getCart' : ActorMethod<[], Array<CartItem>>,
   'getCustomerOrders' : ActorMethod<[], Array<Order>>,
+  'getCustomerProducts' : ActorMethod<[], Array<Product>>,
   'getDiscounts' : ActorMethod<[], Array<Discount>>,
   'getOrdersByCity' : ActorMethod<[City], Array<Order>>,
   'getOrdersByStatus' : ActorMethod<[OrderStatus], Array<Order>>,
-  'getProduct' : ActorMethod<[string], [] | [Product]>,
+  'getOutletProfile' : ActorMethod<[], Vendor>,
+  'getOutletsByCity' : ActorMethod<[City], Array<Vendor>>,
+  'getOutletsByName' : ActorMethod<[string], Array<Vendor>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getVendorDocuments' : ActorMethod<[Principal], Array<ExternalBlob>>,
   'getVendorOrders' : ActorMethod<[], Array<Order>>,
@@ -152,6 +169,10 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setVendorOutletStatus' : ActorMethod<[Principal, OutletStatus], undefined>,
   'updateOrderStatus' : ActorMethod<[string, OrderStatus], undefined>,
+  'updateOutletProfile' : ActorMethod<
+    [string, string, string, string, ExternalBlob, City, [] | [string]],
+    undefined
+  >,
   'updateProduct' : ActorMethod<[string, Product], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

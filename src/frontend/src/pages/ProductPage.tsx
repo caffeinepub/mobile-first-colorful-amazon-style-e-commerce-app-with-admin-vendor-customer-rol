@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useGetProduct, useAddToCart, useAddReview } from '../hooks/useQueries';
+import { useGetProducts, useAddToCart, useAddReview } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { toast } from 'sonner';
 import PrimaryCtaButton from '../components/buttons/PrimaryCtaButton';
@@ -16,7 +16,8 @@ import { getAvailabilityStatus } from '../utils/statusStyles';
 
 export default function ProductPage() {
   const { productId } = useParams({ from: '/product/$productId' });
-  const { data: product, isLoading } = useGetProduct(productId);
+  const { data: products = [], isLoading } = useGetProducts('name');
+  const product = products.find((p) => p.id === productId);
   const { identity } = useInternetIdentity();
   const addToCart = useAddToCart();
   const addReview = useAddReview();

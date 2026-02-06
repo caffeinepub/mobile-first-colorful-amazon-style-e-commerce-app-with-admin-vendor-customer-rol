@@ -1,29 +1,23 @@
-import { Link } from '@tanstack/react-router';
-import { Package, ShoppingBag, TrendingUp, Store, AlertCircle } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, Wallet as WalletIcon, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useGetVendorProducts, useGetVendorOrders, useGetVendors } from '../../hooks/useQueries';
-import { useInternetIdentity } from '../../hooks/useInternetIdentity';
-import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useGetVendorProducts, useGetVendorOrders, useGetCallerVendor } from '../../hooks/useQueries';
 import { formatInr } from '../../utils/formatInr';
 import { OutletStatus } from '../../backend';
+import VendorTabs from '../../components/vendor/VendorTabs';
 
 export default function VendorDashboardPage() {
-  const { identity } = useInternetIdentity();
-  const { data: products = [] } = useGetVendorProducts();
-  const { data: orders = [] } = useGetVendorOrders();
-  const { data: vendors = [] } = useGetVendors();
+  const { data: products = [], isLoading: productsLoading } = useGetVendorProducts();
+  const { data: orders = [], isLoading: ordersLoading } = useGetVendorOrders();
+  const { data: vendor, isLoading: vendorLoading } = useGetCallerVendor();
 
-  // Find current vendor's data
-  const currentVendor = identity 
-    ? vendors.find(v => v.principal.toString() === identity.getPrincipal().toString())
-    : null;
+  const isLoading = productsLoading || ordersLoading || vendorLoading;
 
-  const isOutletDisabled = currentVendor?.outletStatus === OutletStatus.disabled;
-  const walletDue = currentVendor?.walletDue ? Number(currentVendor.walletDue) : 0;
-  const outletName = currentVendor?.outletName || 'Not Set';
+  const isOutletDisabled = vendor?.outletStatus === OutletStatus.disabled;
+  const walletDue = vendor?.walletDue ? Number(vendor.walletDue) : 0;
+  const isNearLimit = walletDue >= 800;
+  const isAtLimit = walletDue >= 1000;
 
   // Calculate total sales from orders
   const totalSales = orders.reduce((sum, order) => sum + Number(order.total), 0);
@@ -34,134 +28,127 @@ export default function VendorDashboardPage() {
         Vendor Dashboard
       </h1>
 
-      {isOutletDisabled && (
+      <VendorTabs />
+
+      {isAtLimit && (
         <Alert variant="destructive" className="mb-6 rounded-xl">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Your outlet is currently disabled due to outstanding balance. Please contact admin to resolve this issue.
+            Your outlet has been disabled. Wallet Due: {formatInr(walletDue)} has reached the limit of {formatInr(1000)}. Please contact admin to settle payment and reactivate your outlet.
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Wallet Card - Green Gradient */}
-        <Card className="gradient-wallet-card shadow-soft-lg rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-accent">Wallet Due</CardTitle>
-            <div className="p-2 rounded-lg bg-accent/20 border border-accent/30">
-              <Package className="h-4 w-4 text-accent" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold highlight-due-amount">{formatInr(walletDue)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Limit: {formatInr(1000)}</p>
-          </CardContent>
-        </Card>
+      {isOutletDisabled && !isAtLimit && (
+        <Alert variant="destructive" className="mb-6 rounded-xl">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Your outlet is currently disabled. Please contact admin to resolve this issue.
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Sales Card - Blue Gradient */}
-        <Card className="gradient-sales-card shadow-soft-lg rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-secondary">Total Sales</CardTitle>
-            <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-              <TrendingUp className="h-4 w-4 text-secondary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-secondary">{formatInr(totalSales)}</div>
-          </CardContent>
-        </Card>
+      {isNearLimit && !isAtLimit && (
+        <Alert className="mb-6 rounded-xl border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+          <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+            Warning: Your commission balance is {formatInr(walletDue)}. Your outlet will be automatically disabled when it reaches {formatInr(1000)}.
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Outlet Name */}
-        <Card className="border-2 border-primary/20 hover:shadow-soft-lg transition-all rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 surface-primary-tint rounded-t-2xl">
-            <CardTitle className="text-sm font-medium">Outlet Name</CardTitle>
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-              <Store className="h-4 w-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-primary truncate">{outletName}</div>
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {/* Total Products */}
+          <Card className="shadow-soft-lg rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-primary">Total Products</CardTitle>
+              <div className="p-2 rounded-lg bg-primary/20 border border-primary/30">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{products.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Active listings</p>
+            </CardContent>
+          </Card>
 
-        {/* Outlet Status */}
-        <Card className="border-2 border-secondary/20 hover:shadow-soft-lg transition-all rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 surface-secondary-tint rounded-t-2xl">
-            <CardTitle className="text-sm font-medium">Outlet Status</CardTitle>
-            <div className="p-2 rounded-lg bg-secondary/10 border border-secondary/20">
-              <AlertCircle className="h-4 w-4 text-secondary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Badge
-              className={`text-sm font-semibold ${
-                isOutletDisabled 
-                  ? 'bg-destructive text-destructive-foreground' 
-                  : 'bg-accent text-accent-foreground'
-              }`}
-            >
-              {isOutletDisabled ? 'Disabled' : 'Enabled'}
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Total Orders */}
+          <Card className="shadow-soft-lg rounded-2xl border-2 border-secondary/20 bg-gradient-to-br from-secondary/10 to-secondary/5">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-secondary">Total Orders</CardTitle>
+              <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
+                <ShoppingBag className="h-5 w-5 text-secondary" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-secondary">{orders.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">All time</p>
+            </CardContent>
+          </Card>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <Card className="border-2 border-primary/20 hover:shadow-soft-lg transition-all rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 surface-primary-tint rounded-t-2xl">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-              <Package className="h-4 w-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{products.length}</div>
-          </CardContent>
-        </Card>
+          {/* Total Sales */}
+          <Card className="shadow-soft-lg rounded-2xl border-2 border-accent/20 bg-gradient-to-br from-accent/10 to-accent/5">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-accent">Total Sales</CardTitle>
+              <div className="p-2 rounded-lg bg-accent/20 border border-accent/30">
+                <TrendingUp className="h-5 w-5 text-accent" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-accent">{formatInr(totalSales)}</div>
+              <p className="text-xs text-muted-foreground mt-1">Revenue earned</p>
+            </CardContent>
+          </Card>
 
-        <Card className="border-2 border-secondary/20 hover:shadow-soft-lg transition-all rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 surface-secondary-tint rounded-t-2xl">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <div className="p-2 rounded-lg bg-secondary/10 border border-secondary/20">
-              <ShoppingBag className="h-4 w-4 text-secondary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-secondary">{orders.length}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="border-2 border-primary/20 shadow-soft-lg rounded-2xl">
-          <CardHeader className="surface-primary-tint rounded-t-2xl">
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Link to="/vendor/products">
-              <PrimaryCtaButton className="w-full shadow-md hover:shadow-lg rounded-xl">Manage Products</PrimaryCtaButton>
-            </Link>
-            <Link to="/vendor/orders">
-              <Button variant="outline" className="w-full hover:bg-secondary/10 hover:text-secondary hover:border-secondary focus-ring-secondary rounded-xl">
-                View Orders
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-secondary/20 shadow-soft-lg rounded-2xl">
-          <CardHeader className="surface-secondary-tint rounded-t-2xl">
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {orders.length > 0
-                ? `Latest order: ${orders[0].id}`
-                : 'No recent orders'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Wallet Due */}
+          <Card className={`shadow-soft-lg rounded-2xl border-2 ${
+            isAtLimit 
+              ? 'border-destructive bg-gradient-to-br from-destructive/10 to-destructive/5' 
+              : isNearLimit 
+              ? 'border-yellow-500 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5'
+              : 'border-highlight/20 bg-gradient-to-br from-highlight/10 to-highlight/5'
+          }`}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className={`text-sm font-medium ${
+                isAtLimit ? 'text-destructive' : isNearLimit ? 'text-yellow-600 dark:text-yellow-500' : 'text-highlight'
+              }`}>
+                Wallet Due
+              </CardTitle>
+              <div className={`p-2 rounded-lg ${
+                isAtLimit ? 'bg-destructive/20 border border-destructive/30' :
+                isNearLimit ? 'bg-yellow-500/20 border border-yellow-500/30' :
+                'bg-highlight/20 border border-highlight/30'
+              }`}>
+                <WalletIcon className={`h-5 w-5 ${
+                  isAtLimit ? 'text-destructive' :
+                  isNearLimit ? 'text-yellow-600 dark:text-yellow-500' :
+                  'text-highlight'
+                }`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-3xl font-bold ${
+                isAtLimit ? 'text-destructive' :
+                isNearLimit ? 'text-yellow-600 dark:text-yellow-500' :
+                'text-highlight'
+              }`}>
+                {formatInr(walletDue)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Commission Rate: 10% • Limit: {formatInr(1000)}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

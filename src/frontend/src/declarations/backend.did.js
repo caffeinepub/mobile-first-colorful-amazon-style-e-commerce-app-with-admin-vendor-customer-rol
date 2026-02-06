@@ -34,13 +34,24 @@ export const OutletStatus = IDL.Variant({
   'disabled' : IDL.Null,
   'enabled' : IDL.Null,
 });
+export const City = IDL.Variant({
+  'other' : IDL.Null,
+  'unnao' : IDL.Null,
+  'kanpur' : IDL.Null,
+});
 export const Vendor = IDL.Record({
+  'gst' : IDL.Opt(IDL.Text),
   'principal' : IDL.Principal,
   'verified' : IDL.Bool,
   'documents' : IDL.Vec(ExternalBlob),
   'outletStatus' : OutletStatus,
+  'area' : IDL.Text,
+  'city' : City,
   'name' : IDL.Text,
+  'aadhaar' : IDL.Text,
+  'outletPhoto' : ExternalBlob,
   'outletName' : IDL.Text,
+  'mobile' : IDL.Text,
   'walletDue' : IDL.Nat,
 });
 export const Review = IDL.Record({
@@ -77,11 +88,6 @@ export const OrderStatus = IDL.Variant({
   'delivered' : IDL.Null,
   'processing' : IDL.Null,
 });
-export const City = IDL.Variant({
-  'other' : IDL.Null,
-  'unnao' : IDL.Null,
-  'kanpur' : IDL.Null,
-});
 export const Time = IDL.Int;
 export const OrderItem = IDL.Record({
   'productId' : IDL.Text,
@@ -94,9 +100,16 @@ export const Order = IDL.Record({
   'total' : IDL.Nat,
   'customer' : IDL.Principal,
   'city' : City,
+  'commissionApplied' : IDL.Bool,
   'vendor' : IDL.Principal,
   'timestamp' : Time,
   'items' : IDL.Vec(OrderItem),
+});
+export const AnalyticsData = IDL.Record({
+  'totalOrders' : IDL.Nat,
+  'totalCommission' : IDL.Nat,
+  'totalSales' : IDL.Nat,
+  'totalVendors' : IDL.Nat,
 });
 export const UserRole__1 = IDL.Variant({
   'admin' : IDL.Null,
@@ -152,17 +165,21 @@ export const idlService = IDL.Service({
   'deleteProduct' : IDL.Func([IDL.Text], [], []),
   'getAllCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
   'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
-  'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getAllVendors' : IDL.Func([], [IDL.Vec(Vendor)], ['query']),
+  'getAnalyticsData' : IDL.Func([], [AnalyticsData], ['query']),
   'getCallerRole' : IDL.Func([], [UserRole__1], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getCallerVendor' : IDL.Func([], [IDL.Opt(Vendor)], ['query']),
   'getCart' : IDL.Func([], [IDL.Vec(CartItem)], ['query']),
   'getCustomerOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+  'getCustomerProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getDiscounts' : IDL.Func([], [IDL.Vec(Discount)], ['query']),
   'getOrdersByCity' : IDL.Func([City], [IDL.Vec(Order)], ['query']),
   'getOrdersByStatus' : IDL.Func([OrderStatus], [IDL.Vec(Order)], ['query']),
-  'getProduct' : IDL.Func([IDL.Text], [IDL.Opt(Product)], ['query']),
+  'getOutletProfile' : IDL.Func([], [Vendor], []),
+  'getOutletsByCity' : IDL.Func([City], [IDL.Vec(Vendor)], ['query']),
+  'getOutletsByName' : IDL.Func([IDL.Text], [IDL.Vec(Vendor)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -183,6 +200,19 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setVendorOutletStatus' : IDL.Func([IDL.Principal, OutletStatus], [], []),
   'updateOrderStatus' : IDL.Func([IDL.Text, OrderStatus], [], []),
+  'updateOutletProfile' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        ExternalBlob,
+        City,
+        IDL.Opt(IDL.Text),
+      ],
+      [],
+      [],
+    ),
   'updateProduct' : IDL.Func([IDL.Text, Product], [], []),
 });
 
@@ -215,13 +245,24 @@ export const idlFactory = ({ IDL }) => {
     'disabled' : IDL.Null,
     'enabled' : IDL.Null,
   });
+  const City = IDL.Variant({
+    'other' : IDL.Null,
+    'unnao' : IDL.Null,
+    'kanpur' : IDL.Null,
+  });
   const Vendor = IDL.Record({
+    'gst' : IDL.Opt(IDL.Text),
     'principal' : IDL.Principal,
     'verified' : IDL.Bool,
     'documents' : IDL.Vec(ExternalBlob),
     'outletStatus' : OutletStatus,
+    'area' : IDL.Text,
+    'city' : City,
     'name' : IDL.Text,
+    'aadhaar' : IDL.Text,
+    'outletPhoto' : ExternalBlob,
     'outletName' : IDL.Text,
+    'mobile' : IDL.Text,
     'walletDue' : IDL.Nat,
   });
   const Review = IDL.Record({
@@ -255,11 +296,6 @@ export const idlFactory = ({ IDL }) => {
     'delivered' : IDL.Null,
     'processing' : IDL.Null,
   });
-  const City = IDL.Variant({
-    'other' : IDL.Null,
-    'unnao' : IDL.Null,
-    'kanpur' : IDL.Null,
-  });
   const Time = IDL.Int;
   const OrderItem = IDL.Record({
     'productId' : IDL.Text,
@@ -272,9 +308,16 @@ export const idlFactory = ({ IDL }) => {
     'total' : IDL.Nat,
     'customer' : IDL.Principal,
     'city' : City,
+    'commissionApplied' : IDL.Bool,
     'vendor' : IDL.Principal,
     'timestamp' : Time,
     'items' : IDL.Vec(OrderItem),
+  });
+  const AnalyticsData = IDL.Record({
+    'totalOrders' : IDL.Nat,
+    'totalCommission' : IDL.Nat,
+    'totalSales' : IDL.Nat,
+    'totalVendors' : IDL.Nat,
   });
   const UserRole__1 = IDL.Variant({
     'admin' : IDL.Null,
@@ -330,17 +373,21 @@ export const idlFactory = ({ IDL }) => {
     'deleteProduct' : IDL.Func([IDL.Text], [], []),
     'getAllCategories' : IDL.Func([], [IDL.Vec(Category)], ['query']),
     'getAllOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
-    'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getAllVendors' : IDL.Func([], [IDL.Vec(Vendor)], ['query']),
+    'getAnalyticsData' : IDL.Func([], [AnalyticsData], ['query']),
     'getCallerRole' : IDL.Func([], [UserRole__1], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getCallerVendor' : IDL.Func([], [IDL.Opt(Vendor)], ['query']),
     'getCart' : IDL.Func([], [IDL.Vec(CartItem)], ['query']),
     'getCustomerOrders' : IDL.Func([], [IDL.Vec(Order)], ['query']),
+    'getCustomerProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getDiscounts' : IDL.Func([], [IDL.Vec(Discount)], ['query']),
     'getOrdersByCity' : IDL.Func([City], [IDL.Vec(Order)], ['query']),
     'getOrdersByStatus' : IDL.Func([OrderStatus], [IDL.Vec(Order)], ['query']),
-    'getProduct' : IDL.Func([IDL.Text], [IDL.Opt(Product)], ['query']),
+    'getOutletProfile' : IDL.Func([], [Vendor], []),
+    'getOutletsByCity' : IDL.Func([City], [IDL.Vec(Vendor)], ['query']),
+    'getOutletsByName' : IDL.Func([IDL.Text], [IDL.Vec(Vendor)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -361,6 +408,19 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setVendorOutletStatus' : IDL.Func([IDL.Principal, OutletStatus], [], []),
     'updateOrderStatus' : IDL.Func([IDL.Text, OrderStatus], [], []),
+    'updateOutletProfile' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          ExternalBlob,
+          City,
+          IDL.Opt(IDL.Text),
+        ],
+        [],
+        [],
+      ),
     'updateProduct' : IDL.Func([IDL.Text, Product], [], []),
   });
 };

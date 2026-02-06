@@ -2,6 +2,7 @@ import { Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGetVendorOrders } from '../../hooks/useQueries';
 import OrderStatusBadge from '../../components/status/OrderStatusBadge';
+import VendorTabs from '../../components/vendor/VendorTabs';
 
 export default function VendorOrdersPage() {
   const { data: orders = [], isLoading } = useGetVendorOrders();
@@ -24,6 +25,8 @@ export default function VendorOrdersPage() {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">My Orders</h1>
       </div>
 
+      <VendorTabs />
+
       {orders.length === 0 ? (
         <div className="empty-state-container">
           <Package className="h-16 w-16 mx-auto mb-4 text-primary" />
@@ -32,8 +35,8 @@ export default function VendorOrdersPage() {
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <Card key={order.id} className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all">
-              <CardHeader className="surface-primary-tint rounded-t-xl">
+            <Card key={order.id} className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all rounded-2xl">
+              <CardHeader className="surface-primary-tint rounded-t-2xl">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Order #{order.id}</CardTitle>
                   <OrderStatusBadge status={order.status} />

@@ -36,12 +36,19 @@ export interface Category {
     name: string;
     image: ExternalBlob;
 }
+export interface AnalyticsData {
+    totalOrders: bigint;
+    totalCommission: bigint;
+    totalSales: bigint;
+    totalVendors: bigint;
+}
 export interface Order {
     id: string;
     status: OrderStatus;
     total: bigint;
     customer: Principal;
     city: City;
+    commissionApplied: boolean;
     vendor: Principal;
     timestamp: Time;
     items: Array<OrderItem>;
@@ -51,12 +58,18 @@ export interface CartItem {
     quantity: bigint;
 }
 export interface Vendor {
+    gst?: string;
     principal: Principal;
     verified: boolean;
     documents: Array<ExternalBlob>;
     outletStatus: OutletStatus;
+    area: string;
+    city: City;
     name: string;
+    aadhaar: string;
+    outletPhoto: ExternalBlob;
     outletName: string;
+    mobile: string;
     walletDue: bigint;
 }
 export interface Review {
@@ -118,17 +131,21 @@ export interface backendInterface {
     deleteProduct(productId: string): Promise<void>;
     getAllCategories(): Promise<Array<Category>>;
     getAllOrders(): Promise<Array<Order>>;
-    getAllProducts(): Promise<Array<Product>>;
     getAllVendors(): Promise<Array<Vendor>>;
+    getAnalyticsData(): Promise<AnalyticsData>;
     getCallerRole(): Promise<UserRole__1>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
+    getCallerVendor(): Promise<Vendor | null>;
     getCart(): Promise<Array<CartItem>>;
     getCustomerOrders(): Promise<Array<Order>>;
+    getCustomerProducts(): Promise<Array<Product>>;
     getDiscounts(): Promise<Array<Discount>>;
     getOrdersByCity(city: City): Promise<Array<Order>>;
     getOrdersByStatus(status: OrderStatus): Promise<Array<Order>>;
-    getProduct(productId: string): Promise<Product | null>;
+    getOutletProfile(): Promise<Vendor>;
+    getOutletsByCity(city: City): Promise<Array<Vendor>>;
+    getOutletsByName(name: string): Promise<Array<Vendor>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVendorDocuments(vendorPrincipal: Principal): Promise<Array<ExternalBlob>>;
     getVendorOrders(): Promise<Array<Order>>;
@@ -141,5 +158,6 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setVendorOutletStatus(vendorPrincipal: Principal, status: OutletStatus): Promise<void>;
     updateOrderStatus(orderId: string, status: OrderStatus): Promise<void>;
+    updateOutletProfile(name: string, outletName: string, mobile: string, area: string, outletPhoto: ExternalBlob, city: City, gst: string | null): Promise<void>;
     updateProduct(productId: string, product: Product): Promise<void>;
 }

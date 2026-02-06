@@ -1,68 +1,89 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Restore Vite/TS config and shim Internet Identity env for successful production builds",
+  "title": "Vendor wallet limit UX, customer product filtering, and vendor outlet profile editing",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Restore missing Vite + React + TypeScript production build configuration files so the frontend compiles in deployment.",
-      "acceptanceCriteria": [
-        "`frontend/vite.config.ts` exists and is valid for a Vite + React + TypeScript project.",
-        "`frontend/tsconfig.json` exists and is valid for a Vite + React + TypeScript project.",
-        "A production build completes without configuration-file-not-found errors (e.g., missing Vite/TS config)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/vite.config.ts",
-          "operation": "create",
-          "description": "Create a Vite configuration for React + TypeScript builds, including React plugin setup and any required build defaults for deployment stability."
-        },
-        {
-          "path": "frontend/tsconfig.json",
-          "operation": "create",
-          "description": "Create the root TypeScript config for the frontend with appropriate compilerOptions for a Vite + React app (including JSX, module resolution, and any needed path aliasing used by the codebase such as `@/*`)."
-        },
-        {
-          "path": "frontend/tsconfig.node.json",
-          "operation": "create",
-          "description": "Add a Node-oriented TS config used by Vite tooling/config typing (to prevent deployment/build environments from failing when type-checking `vite.config.ts`)."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Prevent `process.env.II_URL` browser-bundle failures by shimming/defining it at Vite build time (without editing immutable hook files).",
+      "summary": "Ensure customer-facing product feeds in the UI rely on the backend’s customer product feed so disabled-outlet products are hidden from customers.",
       "acceptanceCriteria": [
-        "The production build does not fail with errors like `process is not defined` or missing `process.env` references.",
-        "Internet Identity login still works in production builds using the configured identity provider URL.",
-        "No changes are made to immutable paths (including `frontend/src/hooks/useInternetIdentity.ts`)."
+        "Customer-facing product lists in the UI (home, categories, wishlist, etc.) use the backend customer product feed so products from disabled outlets are not shown.",
+        "Vendor-facing product pages continue to use vendor product feeds and remain unaffected."
       ],
       "file_operations": [
         {
-          "path": "frontend/vite.config.ts",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update Vite config to define/shim `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, ensuring the bundle does not rely on a runtime `process` object."
-        },
-        {
-          "path": "frontend/src/vite-env.d.ts",
-          "operation": "modify",
-          "description": "Ensure TypeScript environment variable typings include `VITE_II_URL` (and remain compatible with the Vite-based solution for selecting the Internet Identity provider URL)."
+          "description": "Update the customer-facing product query hook to call the backend capability that returns customer-filtered products (e.g., getCustomerProducts()) instead of the unfiltered feed, keeping vendor/admin product queries unchanged."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Document build/deploy verification steps and required environment variables for a successful deployed frontend.",
+      "summary": "Update vendor dashboard and wallet UI to show a wallet panel (Wallet Due, 10% commission rate, ₹1,000 limit) and show a prominent red warning banner when walletDue >= 1000 and/or outlet is disabled.",
       "acceptanceCriteria": [
-        "A production build succeeds end-to-end.",
-        "The deployed frontend loads in the browser without a blank screen or immediate runtime crash.",
-        "`frontend/DEPLOYMENT.md` reflects the final, correct deployment prerequisites (including environment variables) if changes were required."
+        "Vendor wallet page displays Wallet Due, Commission Rate: 10%, and Limit: ₹1,000.",
+        "Vendor dashboard page shows a destructive (red) warning banner when walletDue >= 1000 or outletStatus is disabled.",
+        "All user-facing warning/banner text is in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/DEPLOYMENT.md",
+          "path": "frontend/src/pages/vendor/VendorDashboardPage.tsx",
           "operation": "modify",
-          "description": "Update deployment documentation to reflect the final fix approach (Vite-time shim for `process.env.II_URL` without changing immutable hooks), list required/optional environment variables (e.g., `VITE_II_URL`), and provide concise build + deploy verification steps to confirm the app loads successfully."
+          "description": "Adjust vendor dashboard wallet UI to explicitly communicate Wallet Due (not just styling) and add a destructive warning banner when walletDue >= 1000 even if outletStatus has not yet refreshed to disabled; keep all banner text in English."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorWalletPage.tsx",
+          "operation": "modify",
+          "description": "Add a destructive warning banner when walletDue >= 1000 (in addition to outletStatus disabled) and ensure the wallet panel clearly presents Wallet Due, Commission Rate = 10%, and Limit = ₹1,000 with English text."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Display an Outlet Profile section on the vendor profile page including outlet fields, outlet photo, and masked Aadhaar (GST optional).",
+      "acceptanceCriteria": [
+        "Backend vendor record includes fields necessary to persist Outlet Profile information (including an optional GST field).",
+        "Vendor profile page displays all requested outlet profile fields when present.",
+        "Aadhaar is shown masked in the vendor profile UI (e.g., only last digits visible; exact masking format is consistent)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/maskAadhaar.ts",
+          "operation": "create",
+          "description": "Add a small utility to consistently mask Aadhaar for display (e.g., show only last 4 digits) and ensure no UI code ever renders the full Aadhaar value."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorProfilePage.tsx",
+          "operation": "modify",
+          "description": "Extend the vendor profile UI to include an 'Outlet Profile' section showing Outlet Name, Photo (render via ExternalBlob direct URL), Mobile, City, Area, masked Aadhaar (using the new utility), and GST when present; keep all labels in English."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add an Edit Outlet flow on the vendor profile page to update outlet profile fields (including outlet photo), persist changes to the backend, and refresh vendor data immediately after saving.",
+      "acceptanceCriteria": [
+        "An \"Edit Outlet\" button is visible on the vendor profile page.",
+        "Saving edits persists the updated outlet profile to the backend and the vendor profile UI reflects changes without a full page reload.",
+        "GST can be left empty/cleared and remains optional.",
+        "Aadhaar is not stored/displayed as an unmasked full number via the vendor profile UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a mutation hook for updating the outlet profile via the existing backend capability (updateOutletProfile), ensuring successful saves invalidate/refetch relevant vendor queries (at minimum: callerVendor; optionally any views that depend on outlet profile)."
+        },
+        {
+          "path": "frontend/src/components/vendor/EditOutletDialog.tsx",
+          "operation": "create",
+          "description": "Create an Edit Outlet dialog/form component (using existing shadcn-ui components) for editing Outlet Name, Mobile, City, Area, optional GST, and outlet photo upload; for the photo use the blob-storage ExternalBlob type to upload/represent the new image. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/vendor/VendorProfilePage.tsx",
+          "operation": "modify",
+          "description": "Wire the new Edit Outlet dialog into the vendor profile page with an \"Edit Outlet\" button, prefill current values from callerVendor, allow clearing GST (send null), and ensure Aadhaar is never editable or displayed unmasked; refresh UI via react-query invalidation after save (no full page reload)."
         }
       ]
     }

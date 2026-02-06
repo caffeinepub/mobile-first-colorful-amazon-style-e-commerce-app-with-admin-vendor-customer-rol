@@ -1,11 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the frontend production build/deployment by restoring missing Vite/TypeScript configuration and addressing a browser-bundle `process.env.II_URL` incompatibility, then verify the deployed app loads successfully.
+**Goal:** Enforce vendor commission accrual and wallet-limit outlet disabling, and add vendor outlet profile viewing/editing.
 
 **Planned changes:**
-- Add missing frontend production build configuration files (including `frontend/vite.config.ts` and `frontend/tsconfig.json`) so the app compiles in the deployment environment.
-- Update Vite configuration to safely define/shim `process.env.II_URL` at build time (using a safe default and/or `import.meta.env.VITE_II_URL`) without modifying immutable hook files.
-- Verify end-to-end production build and deployment, and document any required environment variables (e.g., `VITE_II_URL`) in `frontend/DEPLOYMENT.md` if needed.
+- Update backend commission logic to add 10% commission to vendor wallet due only when an order transitions to "delivered", and ensure it applies exactly once per order.
+- Enforce wallet limit rule in backend: when vendor.walletDue reaches/exceeds 1000 due to delivered-order commission, automatically set vendor outletStatus to "disabled".
+- Update backend product listing behavior to hide products from customer-facing feeds when the product’s vendor outletStatus is disabled, while still returning the vendor’s own products in vendor-facing feeds.
+- Add vendor UI wallet panel showing Wallet Due, Commission Rate (10%), and Limit (₹1,000), plus a prominent red warning banner when walletDue >= 1000 and/or outletStatus is disabled (English text).
+- Add an "Outlet Profile" section (backend fields + UI) showing Outlet Name, Photo, Mobile, City, Area, masked Aadhaar display, and optional GST.
+- Add "Edit Outlet" functionality for vendors to update outlet profile fields (including outlet photo), persist changes to backend, and refresh vendor profile data immediately after saving.
 
-**User-visible outcome:** The app can be built and deployed successfully for production, and it loads in the browser without build-time `process` errors or immediate runtime failures; deployment prerequisites are documented if required.
+**User-visible outcome:** Vendors see their wallet due, commission rate, and limit; receive a red warning when the wallet limit is reached/disabled; can view and edit their outlet profile (with Aadhaar masked). Customers no longer see products from disabled vendor outlets.

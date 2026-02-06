@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Package, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { useGetAllOrders, useGetOrdersByCity, useUpdateOrderStatus } from '../../hooks/useQueries';
 import { toast } from 'sonner';
-import OrderStatusBadge from '../../components/status/OrderStatusBadge';
-import { getOrderStatusText } from '../../utils/statusStyles';
-import { City } from '../../backend';
+import { City, OrderStatus } from '../../backend';
 import AdminNav from '../../components/admin/AdminNav';
+import { formatInr } from '../../utils/formatInr';
 
 export default function AdminOrdersPage() {
   const [selectedCity, setSelectedCity] = useState<'all' | City>('all');
@@ -31,18 +32,10 @@ export default function AdminOrdersPage() {
     ? kanpurLoading 
     : unnaoLoading;
 
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     try {
-      const statusMap: Record<string, any> = {
-        pending: { pending: null },
-        processing: { processing: null },
-        shipped: { shipped: null },
-        delivered: { delivered: null },
-        cancelled: { cancelled: null },
-      };
-
-      await updateStatus.mutateAsync({ orderId, status: statusMap[newStatus] });
-      toast.success('Order status updated!');
+      await updateStatus.mutateAsync({ orderId, status: { [newStatus]: null } });
+      toast.success('Order status updated successfully!');
     } catch (error: any) {
       toast.error(error.message || 'Failed to update status');
     }
@@ -52,6 +45,30 @@ export default function AdminOrdersPage() {
     if (!city) return 'Unknown';
     const cityValue = typeof city === 'string' ? city : (city as any).__kind__;
     return cityValue === 'kanpur' ? 'Kanpur' : cityValue === 'unnao' ? 'Unnao' : 'Other';
+  };
+
+  const getCurrentStatus = (status: any): OrderStatus => {
+    if ('delivered' in status) return OrderStatus.delivered;
+    if ('shipped' in status) return OrderStatus.shipped;
+    if ('processing' in status) return OrderStatus.processing;
+    if ('cancelled' in status) return OrderStatus.cancelled;
+    return OrderStatus.pending;
+  };
+
+  const getStatusLabel = (status: OrderStatus): string => {
+    switch (status) {
+      case OrderStatus.pending: return 'Pending';
+      case OrderStatus.processing: return 'Processing';
+      case OrderStatus.shipped: return 'Shipped';
+      case OrderStatus.delivered: return 'Delivered';
+      case OrderStatus.cancelled: return 'Cancelled';
+      default: return 'Unknown';
+    }
+  };
+
+  const getStatusButtonVariant = (orderStatus: any, buttonStatus: OrderStatus): "default" | "outline" => {
+    const current = getCurrentStatus(orderStatus);
+    return current === buttonStatus ? "default" : "outline";
   };
 
   if (isLoading) {
@@ -114,66 +131,91 @@ export default function AdminOrdersPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {orders.map((order) => {
-            const currentStatus = getOrderStatusText(order.status).toLowerCase();
-            return (
-              <Card key={order.id} className="border-2 hover:border-primary/30 hover:shadow-soft-lg transition-all">
-                <CardHeader className="surface-primary-tint rounded-t-xl">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                      <CardTitle className="text-lg">Order #{order.id}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(Number(order.timestamp) / 1000000).toLocaleDateString()} • {getCityLabel(order.city)}
-                      </p>
-                    </div>
-                    <OrderStatusBadge status={order.status} />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <p className="text-sm">
-                        <span className="font-semibold">Customer:</span>{' '}
-                        {order.customer.toString().slice(0, 10)}...
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-semibold">Vendor:</span> {order.vendor.toString().slice(0, 10)}...
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-semibold">Items:</span> {order.items.length}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-semibold">City:</span> {getCityLabel(order.city)}
-                      </p>
-                      <p className="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mt-2">
-                        Total: ${Number(order.total).toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="space-y-2 surface-secondary-tint rounded-lg p-4">
-                      <label className="text-sm font-semibold">Update Status:</label>
-                      <Select
-                        value={currentStatus}
-                        onValueChange={(value) => handleStatusChange(order.id, value)}
-                      >
-                        <SelectTrigger className="focus:ring-2 focus:ring-secondary/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="processing">Processing</SelectItem>
-                          <SelectItem value="shipped">Shipped</SelectItem>
-                          <SelectItem value="delivered">Delivered</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <Card className="border-2">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>City</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Items</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Status Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders.map((order) => {
+                const currentStatus = getCurrentStatus(order.status);
+                return (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">#{order.id}</TableCell>
+                    <TableCell>
+                      {new Date(Number(order.timestamp) / 1000000).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{getCityLabel(order.city)}</TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {order.customer.toString().slice(0, 10)}...
+                    </TableCell>
+                    <TableCell>{order.items.length}</TableCell>
+                    <TableCell className="font-semibold text-primary">
+                      {formatInr(order.total)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        <Button
+                          size="sm"
+                          variant={getStatusButtonVariant(order.status, OrderStatus.pending)}
+                          disabled={currentStatus === OrderStatus.pending || updateStatus.isPending}
+                          onClick={() => handleStatusChange(order.id, OrderStatus.pending)}
+                          className="text-xs"
+                        >
+                          Pending
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={getStatusButtonVariant(order.status, OrderStatus.processing)}
+                          disabled={currentStatus === OrderStatus.processing || updateStatus.isPending}
+                          onClick={() => handleStatusChange(order.id, OrderStatus.processing)}
+                          className="text-xs"
+                        >
+                          Processing
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={getStatusButtonVariant(order.status, OrderStatus.shipped)}
+                          disabled={currentStatus === OrderStatus.shipped || updateStatus.isPending}
+                          onClick={() => handleStatusChange(order.id, OrderStatus.shipped)}
+                          className="text-xs"
+                        >
+                          Shipped
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={getStatusButtonVariant(order.status, OrderStatus.delivered)}
+                          disabled={currentStatus === OrderStatus.delivered || updateStatus.isPending}
+                          onClick={() => handleStatusChange(order.id, OrderStatus.delivered)}
+                          className="text-xs"
+                        >
+                          Delivered
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={getStatusButtonVariant(order.status, OrderStatus.cancelled)}
+                          disabled={currentStatus === OrderStatus.cancelled || updateStatus.isPending}
+                          onClick={() => handleStatusChange(order.id, OrderStatus.cancelled)}
+                          className="text-xs"
+                        >
+                          Cancelled
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );

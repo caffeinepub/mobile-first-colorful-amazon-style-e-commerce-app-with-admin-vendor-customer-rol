@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Home, Grid3x3, ShoppingCart, User, LayoutDashboard, Package } from 'lucide-react';
+import { Home, Grid3x3, ShoppingCart, User, LayoutDashboard, Package, ShoppingBag, Wallet } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useGetCart, useGetCallerRole, useIsVendor, useIsAdmin } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
@@ -37,11 +37,13 @@ export default function BottomNav() {
     { to: '/profile', icon: User, label: 'Profile' },
   ];
 
-  // Vendor navigation
+  // Vendor navigation - expanded to 5 items
   const vendorNavItems: NavItem[] = [
     { to: '/vendor', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/vendor/products', icon: Package, label: 'Products' },
-    { to: '/vendor/orders', icon: ShoppingCart, label: 'Orders' },
+    { to: '/vendor/orders', icon: ShoppingBag, label: 'Orders' },
+    { to: '/vendor/wallet', icon: Wallet, label: 'Wallet' },
+    { to: '/vendor/profile', icon: User, label: 'Profile' },
   ];
 
   // Admin navigation
@@ -71,7 +73,7 @@ export default function BottomNav() {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/98 backdrop-blur-sm border-t shadow-soft-xl">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
-          const isActive = currentPath === item.to;
+          const isActive = currentPath === item.to || (item.to !== '/' && currentPath.startsWith(item.to));
           const Icon = item.icon;
           return (
             <Link
@@ -88,7 +90,7 @@ export default function BottomNav() {
               )}
               <div className={`relative transition-all ${isActive ? 'scale-110' : ''}`}>
                 <div className={`${isActive ? 'bg-primary/10 p-2 rounded-xl' : ''}`}>
-                  <Icon className="h-6 w-6" />
+                  <Icon className="h-5 w-5" />
                 </div>
                 {item.badge !== undefined && item.badge > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-destructive text-destructive-foreground border-2 border-card font-bold">

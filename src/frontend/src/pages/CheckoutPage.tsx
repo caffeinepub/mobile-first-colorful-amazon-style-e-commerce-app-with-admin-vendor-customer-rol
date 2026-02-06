@@ -59,7 +59,8 @@ export default function CheckoutPage() {
         total: BigInt(Math.round(total)),
         status: { pending: null } as any,
         timestamp: BigInt(Date.now() * 1000000),
-        city: City.other, // Default city - could be enhanced with user selection
+        city: City.other,
+        commissionApplied: false,
       });
 
       await clearCart.mutateAsync();

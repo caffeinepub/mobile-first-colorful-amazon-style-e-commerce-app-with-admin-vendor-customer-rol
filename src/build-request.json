@@ -1,81 +1,123 @@
 {
   "kind": "build_request",
-  "title": "Fix frontend production build/deployment and retry build",
+  "title": "Add vendor wallet commission enforcement and outlet profile management",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Restore the missing frontend build configuration required for production builds by adding `frontend/vite.config.ts` and `frontend/tsconfig.json` (and any other required root frontend config files) so the frontend can compile successfully in the deployment environment.",
-      "target": "frontend",
+      "text": "Update the commission logic so that a 10% commission is added to a vendor’s wallet due only when an order transitions to status \"delivered\" (not when the order is created). Ensure the commission is applied exactly once per order (i.e., changing status to \"delivered\" multiple times must not keep increasing wallet due).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2",
-          "msg-3"
+          "recent-messages-4"
         ],
         "quotes": [
-          "try again"
+          "Auto add 10% commission per delivered order."
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/vite.config.ts` exists and is valid for a Vite + React + TypeScript project.",
-        "`frontend/tsconfig.json` exists and is valid for a Vite + React + TypeScript project.",
-        "A production build completes without configuration-file-not-found errors (e.g., missing Vite/TS config)."
+        "Creating an order does not change vendor.walletDue.",
+        "Updating an order from any non-delivered status to delivered increases vendor.walletDue by floor(order.total * 0.10).",
+        "Updating an already-delivered order to delivered again does not change vendor.walletDue.",
+        "If an order is updated to delivered by an admin or the vendor, the same delivered-transition behavior applies."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the production build-time incompatibility caused by `process.env.II_URL` being referenced in the browser bundle (in the read-only `frontend/src/hooks/useInternetIdentity.ts`) by updating the Vite build configuration to shim/define `process.env.II_URL` at build time using a safe default (e.g., `https://identity.ic0.app`) and/or `import.meta.env.VITE_II_URL`, without editing any immutable hook files.",
-      "target": "frontend",
+      "text": "Enforce the wallet limit rule: when vendor.walletDue becomes >= 1000 due to commission accrual, automatically set the vendor’s outletStatus to \"disabled\" in the backend. When the outlet is disabled, customer-facing product listings must not include products belonging to that vendor (i.e., hide disabled-outlet products from customers).",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2",
-          "msg-3"
+          "recent-messages-4"
         ],
         "quotes": [
-          "try again"
+          "If wallet_due >= 1000:\n- Auto disable vendor outlet\n- Hide products from customers\n- Show red warning banner"
         ]
       },
       "acceptanceCriteria": [
-        "The production build does not fail with errors like `process is not defined` or missing `process.env` references.",
-        "Internet Identity login still works in production builds using the configured identity provider URL.",
-        "No changes are made to immutable paths (including `frontend/src/hooks/useInternetIdentity.ts`)."
+        "After a delivered order causes walletDue to reach or exceed 1000, getCallerVendor() returns outletStatus = disabled for that vendor.",
+        "Customer-facing product feeds returned by the backend (e.g., getAllProducts()) do not include products whose vendor outletStatus is disabled.",
+        "Vendor-facing product feeds (e.g., getVendorProducts()) still return the vendor’s own products regardless of outletStatus."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Run through the full build/deploy verification steps and ensure the deployed app loads successfully, documenting any required environment variables (e.g., `VITE_II_URL`) in `frontend/DEPLOYMENT.md` if additional adjustments were needed.",
+      "text": "Update vendor-facing UI to show a wallet panel that includes: Wallet Due, Commission Rate (fixed at 10%), and Limit (fixed at 1000). When walletDue >= 1000 and/or outletStatus is disabled, show a prominent red warning banner on vendor dashboard and vendor wallet pages.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1",
-          "msg-2",
-          "msg-3"
+          "recent-messages-4"
         ],
         "quotes": [
-          "try again"
+          "Show wallet panel:\n- Wallet due\n- Commission rate = 10%\n- Limit = 1000\n\nIf wallet_due >= 1000:\n- Auto disable vendor outlet\n- Hide products from customers\n- Show red warning banner"
         ]
       },
       "acceptanceCriteria": [
-        "A production build succeeds end-to-end.",
-        "The deployed frontend loads in the browser without a blank screen or immediate runtime crash.",
-        "`frontend/DEPLOYMENT.md` reflects the final, correct deployment prerequisites (including environment variables) if changes were required."
+        "Vendor wallet page displays Wallet Due, Commission Rate: 10%, and Limit: ₹1,000.",
+        "Vendor dashboard page shows a destructive (red) warning banner when walletDue >= 1000 or outletStatus is disabled.",
+        "All user-facing warning/banner text is in English."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add an \"Outlet Profile\" section for vendors that displays: Outlet Name, Photo, Mobile, City, Area, Aadhaar (masked), and GST (optional). Aadhaar must be displayed in a masked form (do not show the full Aadhaar value in the UI).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "recent-messages-4"
+        ],
+        "quotes": [
+          "Add Outlet Profile section:\n- Outlet name\n- Photo\n- Mobile\n- City\n- Area\n- Aadhaar masked\n- GST optional"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend vendor record includes fields necessary to persist Outlet Profile information (including an optional GST field).",
+        "Vendor profile page displays all requested outlet profile fields when present.",
+        "Aadhaar is shown masked in the vendor profile UI (e.g., only last digits visible; exact masking format is consistent)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add an \"Edit Outlet\" button in the vendor profile area that allows the vendor to update Outlet Profile fields (including changing the outlet photo). Persist the changes to the backend and refresh relevant vendor queries so the updated profile appears immediately after saving.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "recent-messages-4"
+        ],
+        "quotes": [
+          "Add Edit Outlet button."
+        ]
+      },
+      "acceptanceCriteria": [
+        "An \"Edit Outlet\" button is visible on the vendor profile page.",
+        "Saving edits persists the updated outlet profile to the backend and the vendor profile UI reflects changes without a full page reload.",
+        "GST can be left empty/cleared and remains optional.",
+        "Aadhaar is not stored/displayed as an unmasked full number via the vendor profile UI."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo`; do not introduce additional backend services.",
-    "Do not edit files in `frontend/immutablePaths` (including `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`, and `frontend/src/main.tsx`).",
-    "Use English for all user-facing text."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/*.",
+    "Use English for all user-facing UI text."
   ],
   "nonGoals": [
-    "Adding new product features unrelated to build/deploy stability.",
-    "Refactoring authentication flows beyond what is required to fix the build/deployment.",
-    "Changing backend schemas or adding migrations (not requested)."
+    "Adding external payment gateways or automated commission settlement.",
+    "Adding third-party authentication providers (only Internet Identity is supported).",
+    "Implementing real-time updates via WebSockets."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

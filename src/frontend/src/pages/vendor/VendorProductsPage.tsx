@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import type { Product } from '../../backend';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PrimaryCtaButton from '../../components/buttons/PrimaryCtaButton';
+import VendorTabs from '../../components/vendor/VendorTabs';
 
 export default function VendorProductsPage() {
   const { identity } = useInternetIdentity();
@@ -95,7 +96,7 @@ export default function VendorProductsPage() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">My Products</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">My Products</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <PrimaryCtaButton onClick={() => handleOpenDialog()} className="gap-2">
@@ -181,6 +182,8 @@ export default function VendorProductsPage() {
         </Dialog>
       </div>
 
+      <VendorTabs />
+
       {products.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-muted-foreground text-lg">No products yet. Add your first product!</p>
@@ -188,7 +191,7 @@ export default function VendorProductsPage() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
-            <Card key={product.id}>
+            <Card key={product.id} className="shadow-soft hover:shadow-soft-lg transition-all rounded-2xl">
               <CardContent className="p-4">
                 <h3 className="font-bold mb-2">{product.name}</h3>
                 <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</p>

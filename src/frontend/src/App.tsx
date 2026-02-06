@@ -17,10 +17,13 @@ import OrdersPage from './pages/customer/OrdersPage';
 import VendorDashboardPage from './pages/vendor/VendorDashboardPage';
 import VendorProductsPage from './pages/vendor/VendorProductsPage';
 import VendorOrdersPage from './pages/vendor/VendorOrdersPage';
+import VendorWalletPage from './pages/vendor/VendorWalletPage';
+import VendorProfilePage from './pages/vendor/VendorProfilePage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminVendorsPage from './pages/admin/AdminVendorsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
+import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import RequireRole from './components/auth/RequireRole';
 import AdminBypass from './components/auth/AdminBypass';
 import AdminErrorBoundary from './components/admin/AdminErrorBoundary';
@@ -147,6 +150,26 @@ const vendorOrdersRoute = createRoute({
   ),
 });
 
+const vendorWalletRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor/wallet',
+  component: () => (
+    <RequireRole requiredRole="vendor">
+      <VendorWalletPage />
+    </RequireRole>
+  ),
+});
+
+const vendorProfileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/vendor/profile',
+  component: () => (
+    <RequireRole requiredRole="vendor">
+      <VendorProfilePage />
+    </RequireRole>
+  ),
+});
+
 const adminDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
@@ -190,6 +213,18 @@ const adminOrdersRoute = createRoute({
     <AdminErrorBoundary>
       <AdminBypass>
         <AdminOrdersPage />
+      </AdminBypass>
+    </AdminErrorBoundary>
+  ),
+});
+
+const adminAnalyticsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/analytics',
+  component: () => (
+    <AdminErrorBoundary>
+      <AdminBypass>
+        <AdminAnalyticsPage />
       </AdminBypass>
     </AdminErrorBoundary>
   ),
@@ -246,10 +281,13 @@ const routeTree = rootRoute.addChildren([
   vendorDashboardRoute,
   vendorProductsRoute,
   vendorOrdersRoute,
+  vendorWalletRoute,
+  vendorProfileRoute,
   adminDashboardRoute,
   adminProductsRoute,
   adminVendorsRoute,
   adminOrdersRoute,
+  adminAnalyticsRoute,
   customerLoginRoute,
   vendorLoginRoute,
   vendorListRoute,
